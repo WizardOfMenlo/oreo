@@ -1,0 +1,38 @@
+---
+source: src/scanner.rs
+expression: res
+---
+[
+    Scanned {
+        inner: "(x",
+        line: 0,
+    },
+    Scanned {
+        inner: "<=",
+        line: 0,
+    },
+    Scanned {
+        inner: ">",
+        line: 0,
+    },
+    Scanned {
+        inner: ">=",
+        line: 0,
+    },
+    Scanned {
+        inner: "<",
+        line: 0,
+    },
+    Scanned {
+        inner: "y",
+        line: 0,
+    },
+    Scanned {
+        inner: "99.88l8",
+        line: 0,
+    },
+    Scanned {
+        inner: ")",
+        line: 0,
+    },
+]

@@ -1,0 +1,48 @@
+---
+source: src/lexical.rs
+expression: res
+---
+[
+    Punctuation(
+        BracketOpen,
+    ),
+    Identifier(
+        "x",
+    ),
+    Operator(
+        LesserOrEquals,
+    ),
+    Operator(
+        GreaterThan,
+    ),
+    Operator(
+        GreaterOrEquals,
+    ),
+    Operator(
+        LesserThan,
+    ),
+    Identifier(
+        "y",
+    ),
+    Literal(
+        Integer(
+            99,
+        ),
+    ),
+    Error(
+        UnknownChar(
+            '.',
+        ),
+    ),
+    Literal(
+        Integer(
+            88,
+        ),
+    ),
+    Identifier(
+        "l8",
+    ),
+    Punctuation(
+        BracketClose,
+    ),
+]

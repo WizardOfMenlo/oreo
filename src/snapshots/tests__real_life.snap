@@ -1,0 +1,258 @@
+---
+source: src/scanner.rs
+expression: res
+---
+[
+    Scanned {
+        inner: "program",
+        line: 0,
+    },
+    Scanned {
+        inner: "fib;",
+        line: 0,
+    },
+    Scanned {
+        inner: "begin",
+        line: 1,
+    },
+    Scanned {
+        inner: "var",
+        line: 2,
+    },
+    Scanned {
+        inner: "n;",
+        line: 2,
+    },
+    Scanned {
+        inner: "var",
+        line: 3,
+    },
+    Scanned {
+        inner: "first",
+        line: 3,
+    },
+    Scanned {
+        inner: ":=",
+        line: 3,
+    },
+    Scanned {
+        inner: "0;",
+        line: 3,
+    },
+    Scanned {
+        inner: "var",
+        line: 4,
+    },
+    Scanned {
+        inner: "second",
+        line: 4,
+    },
+    Scanned {
+        inner: ":=1;",
+        line: 4,
+    },
+    Scanned {
+        inner: "var",
+        line: 5,
+    },
+    Scanned {
+        inner: "next;",
+        line: 5,
+    },
+    Scanned {
+        inner: "var",
+        line: 6,
+    },
+    Scanned {
+        inner: "c",
+        line: 6,
+    },
+    Scanned {
+        inner: ":=0",
+        line: 6,
+    },
+    Scanned {
+        inner: ";",
+        line: 6,
+    },
+    Scanned {
+        inner: "print",
+        line: 7,
+    },
+    Scanned {
+        inner: "\"enter",
+        line: 7,
+    },
+    Scanned {
+        inner: "the",
+        line: 7,
+    },
+    Scanned {
+        inner: "number",
+        line: 7,
+    },
+    Scanned {
+        inner: "of",
+        line: 7,
+    },
+    Scanned {
+        inner: "terms\";",
+        line: 7,
+    },
+    Scanned {
+        inner: "get",
+        line: 8,
+    },
+    Scanned {
+        inner: "n;",
+        line: 8,
+    },
+    Scanned {
+        inner: "while",
+        line: 9,
+    },
+    Scanned {
+        inner: "(",
+        line: 9,
+    },
+    Scanned {
+        inner: "c",
+        line: 9,
+    },
+    Scanned {
+        inner: "<",
+        line: 9,
+    },
+    Scanned {
+        inner: "n)",
+        line: 9,
+    },
+    Scanned {
+        inner: "begin",
+        line: 10,
+    },
+    Scanned {
+        inner: "if",
+        line: 11,
+    },
+    Scanned {
+        inner: "(",
+        line: 11,
+    },
+    Scanned {
+        inner: "c",
+        line: 11,
+    },
+    Scanned {
+        inner: "<=",
+        line: 11,
+    },
+    Scanned {
+        inner: "1)",
+        line: 11,
+    },
+    Scanned {
+        inner: "then",
+        line: 12,
+    },
+    Scanned {
+        inner: "begin",
+        line: 12,
+    },
+    Scanned {
+        inner: "next",
+        line: 12,
+    },
+    Scanned {
+        inner: ":=",
+        line: 12,
+    },
+    Scanned {
+        inner: "c;",
+        line: 12,
+    },
+    Scanned {
+        inner: "end",
+        line: 12,
+    },
+    Scanned {
+        inner: "else",
+        line: 13,
+    },
+    Scanned {
+        inner: "begin",
+        line: 13,
+    },
+    Scanned {
+        inner: "next",
+        line: 14,
+    },
+    Scanned {
+        inner: ":=",
+        line: 14,
+    },
+    Scanned {
+        inner: "first",
+        line: 14,
+    },
+    Scanned {
+        inner: "+",
+        line: 14,
+    },
+    Scanned {
+        inner: "second;",
+        line: 14,
+    },
+    Scanned {
+        inner: "second",
+        line: 15,
+    },
+    Scanned {
+        inner: ":=",
+        line: 15,
+    },
+    Scanned {
+        inner: "next;",
+        line: 15,
+    },
+    Scanned {
+        inner: "end",
+        line: 16,
+    },
+    Scanned {
+        inner: "print",
+        line: 17,
+    },
+    Scanned {
+        inner: "next;",
+        line: 17,
+    },
+    Scanned {
+        inner: "c",
+        line: 18,
+    },
+    Scanned {
+        inner: ":=",
+        line: 18,
+    },
+    Scanned {
+        inner: "c",
+        line: 18,
+    },
+    Scanned {
+        inner: "+",
+        line: 18,
+    },
+    Scanned {
+        inner: "1;",
+        line: 18,
+    },
+    Scanned {
+        inner: "end",
+        line: 19,
+    },
+    Scanned {
+        inner: "end",
+        line: 20,
+    },
+]
