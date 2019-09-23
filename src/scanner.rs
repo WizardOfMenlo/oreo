@@ -1,6 +1,6 @@
 #[derive(Debug, PartialEq)]
 pub struct Scanned<'a> {
-    pub(crate) inner: &'a str,
+    pub(crate) inner: ScannedItem<'a>,
     pub(crate) line: usize,
 }
 
@@ -16,12 +16,86 @@ pub fn scan(input: &str) -> impl Iterator<Item = Scanned> {
         .lines()
         .enumerate()
         .map(|(i, line)| {
-            line.split_whitespace().map(move |scan| Scanned {
+            scan_line(line).map(move |scan| Scanned {
                 inner: scan,
                 line: i,
             })
         })
         .flatten()
+}
+
+fn scan_line(line: &str) -> impl Iterator<Item = ScannedItem> {
+    LineScannerIt { line, pos: 0 }
+}
+
+pub struct LineScannerIt<'a> {
+    line: &'a str,
+    pos: usize,
+}
+
+impl<'a> Iterator for LineScannerIt<'a> {
+    type Item = ScannedItem<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let remaining = &self.line[self.pos..];
+        if remaining.len() == 0 {
+            return None;
+        }
+
+        let first_non_whitespace_index = remaining.find(|c: char| !c.is_whitespace());
+        if first_non_whitespace_index.is_none() {
+            return None;
+        }
+
+        let remaining = &remaining[first_non_whitespace_index.unwrap()..];
+        self.pos += first_non_whitespace_index.unwrap();
+
+        let mut chars = remaining.chars();
+        let first_char = chars.next().unwrap();
+
+        if first_char == '"' {
+            let (result, read) = parse_string(remaining);
+            self.pos += read;
+            Some(result)
+        } else {
+            let (result, read) = parse_block(remaining);
+            self.pos += read;
+            result
+        }
+    }
+}
+
+fn parse_string(input: &str) -> (ScannedItem, usize) {
+    let mut next_is_escape = false;
+    let mut index = None;
+    for (i, ch) in input.chars().enumerate().skip(1) {
+        if !next_is_escape && ch == '\\' {
+            next_is_escape = true;
+        }
+
+        if next_is_escape {
+            next_is_escape = false;
+        }
+
+        if !next_is_escape && ch == '"' {
+            index = Some(i);
+        }
+    }
+
+    match index {
+        Some(i) => (ScannedItem::Str(&input[1..i]), i + 1),
+        None => (ScannedItem::UnclosedStr(&input[1..]), input.len()),
+    }
+}
+
+fn parse_block(input: &str) -> (Option<ScannedItem>, usize) {
+    let first_whitespace_index = input
+        .find(|c: char| c.is_whitespace())
+        .unwrap_or_else(|| input.len());
+    (
+        Some(ScannedItem::Rest(&input[0..first_whitespace_index])),
+        first_whitespace_index,
+    )
 }
 
 #[cfg(test)]
@@ -48,8 +122,8 @@ mod tests {
     }
 
     #[test]
-    fn test_real_life() {
-        let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
+    fn scan_real_life() {
+        let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nprint \"enter the number of terms\";\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
         let res: Vec<_> = scan(input).collect();
         assert_debug_snapshot!(res);
     }

@@ -85,6 +85,17 @@ expression: res
         Semicolon,
     ),
     Keyword(
+        Print,
+    ),
+    Literal(
+        String(
+            "enter the number of terms",
+        ),
+    ),
+    Punctuation(
+        Semicolon,
+    ),
+    Keyword(
         Get,
     ),
     Identifier(

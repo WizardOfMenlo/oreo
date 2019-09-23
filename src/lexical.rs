@@ -1,4 +1,4 @@
-use crate::scanner::Scanned;
+use crate::scanner::{Scanned, ScannedItem};
 use crate::tokens::{Keyword, LexicalError, Literal, Operator, Punctuation, Token};
 
 use lazy_static::lazy_static;
@@ -50,6 +50,7 @@ fn lexicalize_one<'a>(scan: Scanned<'a>) -> impl Iterator<Item = Token<'a>> {
 struct LexicalIt<'a> {
     s: Scanned<'a>,
     curr_position: usize,
+    terminate: bool,
 }
 
 impl<'a> LexicalIt<'a> {
@@ -57,6 +58,7 @@ impl<'a> LexicalIt<'a> {
         LexicalIt {
             s,
             curr_position: 0,
+            terminate: false,
         }
     }
 }
@@ -65,7 +67,22 @@ impl<'a> Iterator for LexicalIt<'a> {
     type Item = Token<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let remaining = &self.s.inner[self.curr_position..self.s.inner.len()];
+        if self.terminate {
+            return None;
+        }
+
+        let remaining = match self.s.inner {
+            ScannedItem::Rest(s) => &s[self.curr_position..],
+            ScannedItem::Str(s) => {
+                self.terminate = true;
+                return Some(Token::Literal(Literal::String(s)));
+            }
+            ScannedItem::UnclosedStr(s) => {
+                self.terminate = true;
+                return Some(Token::Error(LexicalError::UnclosedString(s)));
+            }
+        };
+
         if remaining.len() == 0 {
             return None;
         }
@@ -119,12 +136,6 @@ impl<'a> Iterator for LexicalIt<'a> {
             return Some(token);
         }
 
-        if start_char == '"' {
-            let (token, read) = parse_string(remaining);
-            self.curr_position += read;
-            return Some(token);
-        }
-
         self.curr_position += 1;
         Some(Token::Error(LexicalError::UnknownChar(start_char)))
     }
@@ -158,32 +169,6 @@ fn parse_identifier(input: &str) -> (Token, usize) {
     (Token::Identifier(id), first_non_id)
 }
 
-fn parse_string(input: &str) -> (Token, usize) {
-    let mut next_is_escape = false;
-    let mut index = None;
-    for (i, ch) in input.chars().enumerate().skip(1) {
-        if !next_is_escape && ch == '\\' {
-            next_is_escape = true;
-        }
-
-        if next_is_escape {
-            next_is_escape = false;
-        }
-
-        if !next_is_escape && ch == '"' {
-            index = Some(i);
-        }
-    }
-
-    match index {
-        Some(i) => (Token::Literal(Literal::String(&input[1..i])), i),
-        None => (
-            Token::Error(LexicalError::UnclosedString(&input[1..input.len()])),
-            input.len(),
-        ),
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -191,20 +176,20 @@ mod tests {
     use insta::assert_debug_snapshot;
 
     #[test]
-    fn test_empty() {
+    fn lex_empty() {
         let mut res = lexicalize(scan(""));
         assert_eq!(res.next(), None);
     }
 
     #[test]
-    fn test_example() {
+    fn lex_example() {
         let res: Vec<_> = lexicalize(scan("(x <= > >= < y 99.88l8 )")).collect();
         assert_debug_snapshot!(res);
     }
 
     #[test]
-    fn test_real_life() {
-        let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0;\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
+    fn lex_real_life() {
+        let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nprint \"enter the number of terms\";\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
         let res: Vec<_> = lexicalize(scan(input)).collect();
         assert_debug_snapshot!(res);
     }
