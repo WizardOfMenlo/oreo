@@ -3,46 +3,82 @@ source: src/lexical.rs
 expression: res
 ---
 [
-    Punctuation(
-        BracketOpen,
-    ),
-    Identifier(
-        "x",
-    ),
-    Operator(
-        LesserOrEquals,
-    ),
-    Operator(
-        GreaterThan,
-    ),
-    Operator(
-        GreaterOrEquals,
-    ),
-    Operator(
-        LesserThan,
-    ),
-    Identifier(
-        "y",
-    ),
-    Literal(
-        Integer(
-            99,
+    EnrichedToken {
+        inner: Punctuation(
+            BracketOpen,
         ),
-    ),
-    Error(
-        UnknownChar(
-            '.',
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "x",
         ),
-    ),
-    Literal(
-        Integer(
-            88,
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Operator(
+            LesserOrEquals,
         ),
-    ),
-    Identifier(
-        "l8",
-    ),
-    Punctuation(
-        BracketClose,
-    ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Operator(
+            GreaterThan,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Operator(
+            GreaterOrEquals,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Operator(
+            LesserThan,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "y",
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Literal(
+            Integer(
+                99,
+            ),
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Error(
+            UnknownChar(
+                '.',
+            ),
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Literal(
+            Integer(
+                88,
+            ),
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "l8",
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            BracketClose,
+        ),
+        line_no: 0,
+    },
 ]

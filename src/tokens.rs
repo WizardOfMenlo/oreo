@@ -8,6 +8,15 @@ pub enum Token<'a> {
     Error(LexicalError<'a>),
 }
 
+impl<'a> Token<'a> {
+    pub fn is_error(&self) -> bool {
+        match self {
+            Token::Error(_) => true,
+            _ => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Keyword {
     Program,

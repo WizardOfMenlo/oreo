@@ -3,241 +3,466 @@ source: src/lexical.rs
 expression: res
 ---
 [
-    Keyword(
-        Program,
-    ),
-    Identifier(
-        "fib",
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        Begin,
-    ),
-    Keyword(
-        Var,
-    ),
-    Identifier(
-        "n",
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        Var,
-    ),
-    Identifier(
-        "first",
-    ),
-    Operator(
-        Assignement,
-    ),
-    Literal(
-        Integer(
-            0,
+    EnrichedToken {
+        inner: Keyword(
+            Program,
         ),
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        Var,
-    ),
-    Identifier(
-        "second",
-    ),
-    Operator(
-        Assignement,
-    ),
-    Literal(
-        Integer(
-            1,
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "fib",
         ),
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        Var,
-    ),
-    Identifier(
-        "next",
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        Var,
-    ),
-    Identifier(
-        "c",
-    ),
-    Operator(
-        Assignement,
-    ),
-    Literal(
-        Integer(
-            0,
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
         ),
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        Print,
-    ),
-    Literal(
-        String(
-            "enter the number of terms",
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Begin,
         ),
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        Get,
-    ),
-    Identifier(
-        "n",
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        While,
-    ),
-    Punctuation(
-        BracketOpen,
-    ),
-    Identifier(
-        "c",
-    ),
-    Operator(
-        LesserThan,
-    ),
-    Identifier(
-        "n",
-    ),
-    Punctuation(
-        BracketClose,
-    ),
-    Keyword(
-        Begin,
-    ),
-    Keyword(
-        If,
-    ),
-    Punctuation(
-        BracketOpen,
-    ),
-    Identifier(
-        "c",
-    ),
-    Operator(
-        LesserOrEquals,
-    ),
-    Literal(
-        Integer(
-            1,
+        line_no: 1,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Var,
         ),
-    ),
-    Punctuation(
-        BracketClose,
-    ),
-    Keyword(
-        Then,
-    ),
-    Keyword(
-        Begin,
-    ),
-    Identifier(
-        "next",
-    ),
-    Operator(
-        Assignement,
-    ),
-    Identifier(
-        "c",
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        End,
-    ),
-    Keyword(
-        Else,
-    ),
-    Keyword(
-        Begin,
-    ),
-    Identifier(
-        "next",
-    ),
-    Operator(
-        Assignement,
-    ),
-    Identifier(
-        "first",
-    ),
-    Operator(
-        Plus,
-    ),
-    Identifier(
-        "second",
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Identifier(
-        "second",
-    ),
-    Operator(
-        Assignement,
-    ),
-    Identifier(
-        "next",
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        End,
-    ),
-    Keyword(
-        Print,
-    ),
-    Identifier(
-        "next",
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Identifier(
-        "c",
-    ),
-    Operator(
-        Assignement,
-    ),
-    Identifier(
-        "c",
-    ),
-    Operator(
-        Plus,
-    ),
-    Literal(
-        Integer(
-            1,
+        line_no: 2,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "n",
         ),
-    ),
-    Punctuation(
-        Semicolon,
-    ),
-    Keyword(
-        End,
-    ),
-    Keyword(
-        End,
-    ),
+        line_no: 2,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 2,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Var,
+        ),
+        line_no: 3,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "first",
+        ),
+        line_no: 3,
+    },
+    EnrichedToken {
+        inner: Operator(
+            Assignement,
+        ),
+        line_no: 3,
+    },
+    EnrichedToken {
+        inner: Literal(
+            Integer(
+                0,
+            ),
+        ),
+        line_no: 3,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 3,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Var,
+        ),
+        line_no: 4,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "second",
+        ),
+        line_no: 4,
+    },
+    EnrichedToken {
+        inner: Operator(
+            Assignement,
+        ),
+        line_no: 4,
+    },
+    EnrichedToken {
+        inner: Literal(
+            Integer(
+                1,
+            ),
+        ),
+        line_no: 4,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 4,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Var,
+        ),
+        line_no: 5,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "next",
+        ),
+        line_no: 5,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 5,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Var,
+        ),
+        line_no: 6,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "c",
+        ),
+        line_no: 6,
+    },
+    EnrichedToken {
+        inner: Operator(
+            Assignement,
+        ),
+        line_no: 6,
+    },
+    EnrichedToken {
+        inner: Literal(
+            Integer(
+                0,
+            ),
+        ),
+        line_no: 6,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 6,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Print,
+        ),
+        line_no: 7,
+    },
+    EnrichedToken {
+        inner: Literal(
+            String(
+                "enter the number of terms",
+            ),
+        ),
+        line_no: 7,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 7,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Get,
+        ),
+        line_no: 8,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "n",
+        ),
+        line_no: 8,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 8,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            While,
+        ),
+        line_no: 9,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            BracketOpen,
+        ),
+        line_no: 9,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "c",
+        ),
+        line_no: 9,
+    },
+    EnrichedToken {
+        inner: Operator(
+            LesserThan,
+        ),
+        line_no: 9,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "n",
+        ),
+        line_no: 9,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            BracketClose,
+        ),
+        line_no: 9,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Begin,
+        ),
+        line_no: 10,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            If,
+        ),
+        line_no: 11,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            BracketOpen,
+        ),
+        line_no: 11,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "c",
+        ),
+        line_no: 11,
+    },
+    EnrichedToken {
+        inner: Operator(
+            LesserOrEquals,
+        ),
+        line_no: 11,
+    },
+    EnrichedToken {
+        inner: Literal(
+            Integer(
+                1,
+            ),
+        ),
+        line_no: 11,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            BracketClose,
+        ),
+        line_no: 11,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Then,
+        ),
+        line_no: 12,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Begin,
+        ),
+        line_no: 12,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "next",
+        ),
+        line_no: 12,
+    },
+    EnrichedToken {
+        inner: Operator(
+            Assignement,
+        ),
+        line_no: 12,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "c",
+        ),
+        line_no: 12,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 12,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            End,
+        ),
+        line_no: 12,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Else,
+        ),
+        line_no: 13,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Begin,
+        ),
+        line_no: 13,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "next",
+        ),
+        line_no: 14,
+    },
+    EnrichedToken {
+        inner: Operator(
+            Assignement,
+        ),
+        line_no: 14,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "first",
+        ),
+        line_no: 14,
+    },
+    EnrichedToken {
+        inner: Operator(
+            Plus,
+        ),
+        line_no: 14,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "second",
+        ),
+        line_no: 14,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 14,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "second",
+        ),
+        line_no: 15,
+    },
+    EnrichedToken {
+        inner: Operator(
+            Assignement,
+        ),
+        line_no: 15,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "next",
+        ),
+        line_no: 15,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 15,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            End,
+        ),
+        line_no: 16,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Print,
+        ),
+        line_no: 17,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "next",
+        ),
+        line_no: 17,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 17,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "c",
+        ),
+        line_no: 18,
+    },
+    EnrichedToken {
+        inner: Operator(
+            Assignement,
+        ),
+        line_no: 18,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "c",
+        ),
+        line_no: 18,
+    },
+    EnrichedToken {
+        inner: Operator(
+            Plus,
+        ),
+        line_no: 18,
+    },
+    EnrichedToken {
+        inner: Literal(
+            Integer(
+                1,
+            ),
+        ),
+        line_no: 18,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 18,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            End,
+        ),
+        line_no: 19,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            End,
+        ),
+        line_no: 20,
+    },
 ]

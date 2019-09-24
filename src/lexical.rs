@@ -39,22 +39,37 @@ lazy_static! {
     };
 }
 
-pub fn lexicalize<'a>(it: impl Iterator<Item = Scanned<'a>>) -> impl Iterator<Item = Token<'a>> {
-    it.map(lexicalize_one).flatten()
+#[derive(Debug, PartialEq)]
+pub struct EnrichedToken<'a> {
+    inner: Token<'a>,
+    line_no: usize,
 }
 
-fn lexicalize_one<'a>(scan: Scanned<'a>) -> impl Iterator<Item = Token<'a>> {
+pub fn lexicalize<'a>(
+    it: impl Iterator<Item = Scanned<'a>>,
+) -> impl Iterator<Item = EnrichedToken<'a>> {
+    it.map(|s| {
+        let line = s.line;
+        lexicalize_one(s.inner).map(move |token| EnrichedToken {
+            inner: token,
+            line_no: line,
+        })
+    })
+    .flatten()
+}
+
+fn lexicalize_one<'a>(scan: ScannedItem<'a>) -> impl Iterator<Item = Token<'a>> {
     LexicalIt::new(scan)
 }
 
 struct LexicalIt<'a> {
-    s: Scanned<'a>,
+    s: ScannedItem<'a>,
     curr_position: usize,
     terminate: bool,
 }
 
 impl<'a> LexicalIt<'a> {
-    fn new(s: Scanned<'a>) -> Self {
+    fn new(s: ScannedItem<'a>) -> Self {
         LexicalIt {
             s,
             curr_position: 0,
@@ -71,8 +86,10 @@ impl<'a> Iterator for LexicalIt<'a> {
             return None;
         }
 
-        let remaining = match self.s.inner {
+        let remaining = match self.s {
             ScannedItem::Rest(s) => &s[self.curr_position..],
+
+            // Equivalent of std::iter::once
             ScannedItem::Str(s) => {
                 self.terminate = true;
                 return Some(Token::Literal(Literal::String(s)));
@@ -96,7 +113,7 @@ impl<'a> Iterator for LexicalIt<'a> {
             return SINGLE_CHAR_TOKEN.get(&start_char).cloned();
         }
 
-        // Handle the single unambiguos chars
+        // Handle the single ambiguos chars
         if start_char == '<' || start_char == '>' || start_char == ':' || start_char == '=' {
             let next = chars.next();
             let (token, move_forward) = match (start_char, next) {
