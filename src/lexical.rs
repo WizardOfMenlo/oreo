@@ -45,6 +45,16 @@ pub struct EnrichedToken<'a> {
     line_no: usize,
 }
 
+impl<'a> EnrichedToken<'a> {
+    pub fn token(&self) -> &Token {
+        &self.inner
+    }
+
+    pub fn line_no(&self) -> usize {
+        self.line_no
+    }
+}
+
 pub fn lexicalize<'a>(
     it: impl Iterator<Item = Scanned<'a>>,
 ) -> impl Iterator<Item = EnrichedToken<'a>> {
