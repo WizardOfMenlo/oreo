@@ -44,45 +44,76 @@ pub struct Assign<'a> {
     expr: Expr<'a>,
 }
 
-pub enum Expr<'a> {
-    Addition(Box<BinaryOperator<'a>>),
-    Subtraction(Box<BinaryOperator<'a>>),
-    Multiplication(Box<BinaryOperator<'a>>),
-    Division(Box<BinaryOperator<'a>>),
-    Bool(Box<Bool<'a>>),
-    Expr(Box<Expr<'a>>),
-    Literal(Literal<'a>),
+pub struct Expr<'a> {
+    head: ExprHead<'a>,
+    tail: Option<Box<ExprPrime<'a>>>
+}
+
+pub enum ExprHead<'a> {
+    Boolean(Box<Bool<'a>>),
+    BracketedExpr(Box<Expr<'a>>),
+    Unit(Unit<'a>)
+}
+
+pub struct ExprPrime<'a> {
+    operation: BinaryExprOp,
+    operand: Expr<'a>,
+    tail: Option<Box<ExprPrime<'a>>>
+}
+
+pub enum BinaryExprOp {
+    Plus,
+    Minus,
+    Times,
+    Divide
+}
+
+pub enum Unit<'a> {
+    Int(isize),
+    String(&'a str),
     Identifier(Identifier<'a>)
 }
 
-pub enum Literal<'a> {
-    Str(&'a str),
-    Int(isize)
+pub struct Bool<'a> {
+    head: BoolHead<'a>,
+    tail: Option<Box<BoolPrime<'a>>>
 }
 
-pub struct BinaryOperator<'a> {
-    left: Expr<'a>,
-    right: Expr<'a>,
-}
-
-pub enum Bool<'a> {
-    LessThan(BooleanRelOperator<'a>),
-    GreaterThan(BooleanRelOperator<'a>),
-    LesserOrEquals(BooleanRelOperator<'a>),
-    GreaterOrEquals(BooleanRelOperator<'a>),
-    Equals(BooleanRelOperator<'a>),
-    And(Box<BooleanBinaryOperator<'a>>),
-    Or(Box<BooleanBinaryOperator<'a>>),
+pub enum BoolHead<'a> {
+    RelationalOperation(RelationalOperation<'a>),
     Not(Box<Bool<'a>>),
     BooleanLiteral(bool),
 }
 
-pub struct BooleanRelOperator<'a> {
-    first: Expr<'a>,
-    second: Expr<'a>,
+pub struct RelationalOperation<'a> {
+    head: RelationalExprHead<'a>,
+    exprtail: ExprPrime<'a>,
+    operation: RelationalExprOp,
+    right: Expr<'a>
 }
 
-pub struct BooleanBinaryOperator<'a> {
-    first: Bool<'a>,
-    second: Bool<'a>,
+pub enum RelationalExprHead<'a> {
+    BracketedExpr(Box<Expr<'a>>),
+    Unit(Unit<'a>)
+}
+
+pub enum RelationalExprOp {
+    GreaterThan,
+    LesserThan,
+    GreaterEquals,
+    LesserEquals,
+    Equals,
+}
+
+pub enum RelationalOp {
+    ExprRelation(RelationalExprOp),
+    Or,
+    And
+}
+
+pub struct BoolPrime<'a>
+{
+    head: ExprPrime<'a>,
+    operation: RelationalOp,
+    tail: Option<Box<BoolPrime<'a>>>
 }
