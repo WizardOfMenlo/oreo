@@ -159,8 +159,52 @@ fn assign<'a>(
 fn expr<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
 ) -> Result<Expr<'a>, SyntaxError<'a>> {
-    Err(SyntaxError::LogicalError)
+    let head = expr_head(it)?;
+    let mut it = it.peekable();
+    let next = it.peek(); 
+    let tail = match next.map(|t| t.token()) {
+        Some(Token::Operator(Operator::Plus)) |
+        Some(Token::Operator(Operator::Minus)) |
+        Some(Token::Operator(Operator::Times)) |
+        Some(Token::Operator(Operator::Divide)) => {
+            Some(Box::new(expr_prime(&mut it)?))
+        },
+        _ => None
+    };
+
+    Ok(Expr {
+        head,
+        tail
+    })
 }
+
+fn expr_head<'a>(
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>
+) -> Result<ExprHead<'a>, SyntaxError<'a>> {
+    let mut it = it.peekable();
+    let next = it.peek();
+    match next.map(|t| t.token()) {
+        Some(Token::Punctuation(Punctuation::BracketOpen)) => {
+            advance_expecting(&mut it, Token::Punctuation(Punctuation::BracketOpen))?;
+            let expr = expr(&mut it)?;
+            advance_expecting(&mut it, Token::Punctuation(Punctuation::BracketClose))?;
+            Ok(ExprHead::BracketedExpr(Box::new(expr)))
+        },
+
+
+
+
+        _ => Err(SyntaxError::LogicalError)
+    }
+}
+
+fn expr_prime<'a>(
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
+) -> Result<ExprPrime<'a>, SyntaxError<'a>> {
+    let next = advance_expecting_one_of(it, &[Token::Operator(Operator::Plus), Token::Operator(Operator::Minus), Token::Operator(Operator::Times), Token::Operator(Operator::Divide)]);
+    
+}
+ 
 
 fn p_bool<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
