@@ -64,12 +64,12 @@ fn statement<'a>(
     let matched = advance_expecting_one_of(it, POSSIBLE_STATEMENT_STARTS)?;
     let token = matched.take_token();
     match token {
-        Token::Keyword(Keyword::Var) => Ok(Statement::Decl(decl(it))),
-        Token::Keyword(Keyword::If) => Ok(Statement::If(p_if(it))),
-        Token::Keyword(Keyword::Print) => Ok(Statement::Print(print(it, token))),
-        Token::Keyword(Keyword::Println) => Ok(Statement::Print(print(it, token))),
-        Token::Keyword(Keyword::Get) => Ok(Statement::Print(print(it, token))),
-        Token::Identifier(s) => Ok(Statement::Assign(assign(it, Identifier(s))))
+        Token::Keyword(Keyword::Var) => Ok(Statement::Decl(decl(it)?)),
+        Token::Keyword(Keyword::If) => Ok(Statement::If(p_if(it)?)),
+        Token::Keyword(Keyword::Print) => Ok(Statement::Print(print(it, token)?)),
+        Token::Keyword(Keyword::Println) => Ok(Statement::Print(print(it, token)?)),
+        Token::Keyword(Keyword::Get) => Ok(Statement::Print(print(it, token)?)),
+        Token::Identifier(s) => Ok(Statement::Assign(assign(it, Identifier(s))?))
         _ => Err(SyntaxError::LogicalError),
     }
 }
@@ -77,6 +77,38 @@ fn statement<'a>(
 fn decl<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
 ) -> Result<Decl<'a>, SyntaxError<'a>> {
-    Err(SyntaxError::LogicalError)
+    let id = advance_expecting_identifier(it)?;
+    let it = it.peekable();
+    let next = it.peek();
+
+    match next.map(|s| s.token()) {
+        Some(Token::Punctuation(Punctuation::Semicolon)) => Ok(Decl { id, expr: None }),
+        _ => Ok(Decl { id, expr: Some(expr(&mut it))})
+    }
 }
  
+fn p_if<'a>(
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
+) -> Result<If<'a>, SyntaxError<'a>> {
+    advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
+    let condition = p_bool(it)?;
+    advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
+    advance_expecting(it, Token::Keyword(Keyword::Then))?;
+    let if_branch = compound(it)?;
+    let next = advance_expecting_one_of(it, &[Token::Keyword(Keyword::Else), Token::Punctuation(Punctuation::Semicolon)])?;
+
+    let else_branch = match next.token() {
+        Token::Keyword(Keyword::Else) => {
+            let tmp = compound(it)?;
+            advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+            Some(tmp)
+        },
+        _ => None
+    };
+
+    Ok(If {
+        condition,
+        if_branch,
+        else_branch
+    })
+}
