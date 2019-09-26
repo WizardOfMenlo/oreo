@@ -39,7 +39,7 @@ lazy_static! {
     };
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct EnrichedToken<'a> {
     inner: Token<'a>,
     line_no: usize,
@@ -48,6 +48,11 @@ pub struct EnrichedToken<'a> {
 impl<'a> EnrichedToken<'a> {
     pub fn token(&self) -> &Token {
         &self.inner
+    }
+
+
+    pub fn take_token(self) -> Token<'a> {
+        self.inner
     }
 
     pub fn line_no(&self) -> usize {

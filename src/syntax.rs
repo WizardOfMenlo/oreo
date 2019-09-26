@@ -1,12 +1,12 @@
-pub struct Identifier<'a>(&'a str);
+pub struct Identifier<'a>(pub(crate) &'a str);
 
 pub struct Program<'a> {
-    id: Identifier<'a>,
-    compund: Compound<'a>,
+    pub id: Identifier<'a>,
+    pub compound: Compound<'a>,
 }
 
 pub struct Compound<'a> {
-    statements: Vec<Statement<'a>>,
+    pub statements: Vec<Statement<'a>>,
 }
 
 pub enum Statement<'a> {
@@ -46,37 +46,37 @@ pub struct Assign<'a> {
 
 pub struct Expr<'a> {
     head: ExprHead<'a>,
-    tail: Option<Box<ExprPrime<'a>>>
+    tail: Option<Box<ExprPrime<'a>>>,
 }
 
 pub enum ExprHead<'a> {
     Boolean(Box<Bool<'a>>),
     BracketedExpr(Box<Expr<'a>>),
-    Unit(Unit<'a>)
+    Unit(Unit<'a>),
 }
 
 pub struct ExprPrime<'a> {
     operation: BinaryExprOp,
     operand: Expr<'a>,
-    tail: Option<Box<ExprPrime<'a>>>
+    tail: Option<Box<ExprPrime<'a>>>,
 }
 
 pub enum BinaryExprOp {
     Plus,
     Minus,
     Times,
-    Divide
+    Divide,
 }
 
 pub enum Unit<'a> {
     Int(isize),
     String(&'a str),
-    Identifier(Identifier<'a>)
+    Identifier(Identifier<'a>),
 }
 
 pub struct Bool<'a> {
     head: BoolHead<'a>,
-    tail: Option<Box<BoolPrime<'a>>>
+    tail: Option<Box<BoolPrime<'a>>>,
 }
 
 pub enum BoolHead<'a> {
@@ -89,12 +89,12 @@ pub struct RelationalOperation<'a> {
     head: RelationalExprHead<'a>,
     exprtail: ExprPrime<'a>,
     operation: RelationalExprOp,
-    right: Expr<'a>
+    right: Expr<'a>,
 }
 
 pub enum RelationalExprHead<'a> {
     BracketedExpr(Box<Expr<'a>>),
-    Unit(Unit<'a>)
+    Unit(Unit<'a>),
 }
 
 pub enum RelationalExprOp {
@@ -108,12 +108,11 @@ pub enum RelationalExprOp {
 pub enum RelationalOp {
     ExprRelation(RelationalExprOp),
     Or,
-    And
+    And,
 }
 
-pub struct BoolPrime<'a>
-{
+pub struct BoolPrime<'a> {
     head: ExprPrime<'a>,
     operation: RelationalOp,
-    tail: Option<Box<BoolPrime<'a>>>
+    tail: Option<Box<BoolPrime<'a>>>,
 }
