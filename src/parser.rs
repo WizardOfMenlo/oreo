@@ -83,10 +83,10 @@ fn decl<'a>(
     let mut it = it.peekable();
     let next = it.peek();
 
-    match next.map(|s| s.token()) {
-        Some(Token::Punctuation(Punctuation::Semicolon)) => Ok(Decl { id, expr: None }),
-        _ => Ok(Decl { id, expr: Some(expr(&mut it)?)})
-    }
+    Ok(match next.map(|s| s.token()) {
+        Some(Token::Punctuation(Punctuation::Semicolon)) => Decl { id, expr: None },
+        _ => Decl { id, expr: Some(expr(&mut it)?)}
+    })
 }
  
 fn p_if<'a>(
@@ -181,16 +181,21 @@ fn expr<'a>(
 fn expr_head<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>
 ) -> Result<ExprHead<'a>, SyntaxError<'a>> {
-    let mut it = it.peekable();
+    let it = it.peekable();
+    let it = &mut it;
     let next = it.peek();
     match next.map(|t| t.token()) {
         Some(Token::Punctuation(Punctuation::BracketOpen)) => {
-            advance_expecting(&mut it, Token::Punctuation(Punctuation::BracketOpen))?;
-            let expr = expr(&mut it)?;
-            advance_expecting(&mut it, Token::Punctuation(Punctuation::BracketClose))?;
+            advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
+            let expr = expr(it)?;
+            advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
             Ok(ExprHead::BracketedExpr(Box::new(expr)))
         },
+        Some(Token::Literal(Literal::Integer(_))) | Some(Token::Literal(Literal::String(_))) | Some(Token::Identifier(_)) => {
+            Ok(ExprHead::Unit(unit(it)?))
+        },
 
+        // TODO: Add bool here
 
 
 
@@ -198,11 +203,29 @@ fn expr_head<'a>(
     }
 }
 
+const INT: Token<'static> = Token::Literal(Literal::Integer(0));
+const STRING: Token<'static> = Token::Literal(Literal::String(""));
+
+fn unit<'a>(
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>
+) -> Result<Unit<'a>, SyntaxError<'a>> {
+    let next = advance_expecting_one_of(it, &[INT, STRING, ID])?;
+    Ok(match next.take_token() {
+        Token::Literal(Literal::Integer(i)) => Unit::Int(i),
+        Token::Literal(Literal::String(s)) => Unit::String(s),
+        Token::Identifier(s) => Unit::Identifier(get_id(next)?)
+        _ => return Err(SyntaxError::LogicalError)
+    })
+}
+ 
+
+
 fn expr_prime<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
 ) -> Result<ExprPrime<'a>, SyntaxError<'a>> {
     let next = advance_expecting_one_of(it, &[Token::Operator(Operator::Plus), Token::Operator(Operator::Minus), Token::Operator(Operator::Times), Token::Operator(Operator::Divide)]);
     
+    Err(SyntaxError::LogicalError)
 }
  
 
