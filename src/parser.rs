@@ -58,6 +58,7 @@ fn statement<'a>(
         Token::Keyword(Keyword::Print),
         Token::Keyword(Keyword::Println),
         Token::Keyword(Keyword::Get),
+        Token::Keyword(Keyword::While),
         ID,
     ];
 
@@ -69,7 +70,8 @@ fn statement<'a>(
         Token::Keyword(Keyword::Print) => Ok(Statement::Print(print(it, token)?)),
         Token::Keyword(Keyword::Println) => Ok(Statement::Print(print(it, token)?)),
         Token::Keyword(Keyword::Get) => Ok(Statement::Print(print(it, token)?)),
-        Token::Identifier(s) => Ok(Statement::Assign(assign(it, Identifier(s))?))
+        Token::Keyword(Keyword::While) => Ok(Statement::While(p_while(it)?)),
+        Token::Identifier(s) => Ok(Statement::Assign(assign(it, Identifier(s))?)),
         _ => Err(SyntaxError::LogicalError),
     }
 }
@@ -78,12 +80,12 @@ fn decl<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
 ) -> Result<Decl<'a>, SyntaxError<'a>> {
     let id = advance_expecting_identifier(it)?;
-    let it = it.peekable();
+    let mut it = it.peekable();
     let next = it.peek();
 
     match next.map(|s| s.token()) {
         Some(Token::Punctuation(Punctuation::Semicolon)) => Ok(Decl { id, expr: None }),
-        _ => Ok(Decl { id, expr: Some(expr(&mut it))})
+        _ => Ok(Decl { id, expr: Some(expr(&mut it)?)})
     }
 }
  
@@ -111,4 +113,57 @@ fn p_if<'a>(
         if_branch,
         else_branch
     })
+}
+
+fn print<'a>(
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
+    token: Token<'a>
+) -> Result<Print<'a>, SyntaxError<'a>> {
+    match token {
+        Token::Keyword(Keyword::Print) => Ok(Print::Print(expr(it)?)),
+        Token::Keyword(Keyword::Println) => Ok(Print::Println(expr(it)?)),
+        Token::Keyword(Keyword::Get) => Ok(Print::Get(advance_expecting_identifier(it)?)),
+        // Should only be called with normal stuff
+        _ => Err(SyntaxError::LogicalError)
+    }
+}
+
+fn p_while<'a>(
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
+) -> Result<While<'a>, SyntaxError<'a>> {
+    advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
+    let condition = p_bool(it)?;
+    advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
+    let compound = compound(it)?;
+    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+
+    Ok(While {
+        condition, 
+        compound
+    })
+}
+ 
+fn assign<'a>(
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
+    id: Identifier<'a>
+) -> Result<Assign<'a>, SyntaxError<'a>> {
+    advance_expecting(it, Token::Operator(Operator::Assignement))?;
+    let expr = expr(it)?;
+
+    Ok(Assign {
+        id,
+        expr
+    })
+}
+ 
+fn expr<'a>(
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
+) -> Result<Expr<'a>, SyntaxError<'a>> {
+    Err(SyntaxError::LogicalError)
+}
+
+fn p_bool<'a>(
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
+) -> Result<Bool<'a>, SyntaxError<'a>> {
+    Err(SyntaxError::LogicalError)
 }

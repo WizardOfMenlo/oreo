@@ -18,8 +18,8 @@ pub enum Statement<'a> {
 }
 
 pub struct Decl<'a> {
-    id: Identifier<'a>,
-    expr: Option<Expr<'a>>,
+    pub id: Identifier<'a>,
+    pub expr: Option<Expr<'a>>,
 }
 
 pub enum Print<'a> {
@@ -29,19 +29,19 @@ pub enum Print<'a> {
 }
 
 pub struct While<'a> {
-    condition: Bool<'a>,
-    compound: Compound<'a>,
+    pub condition: Bool<'a>,
+    pub compound: Compound<'a>,
 }
 
 pub struct If<'a> {
-    condition: Bool<'a>,
-    if_branch: Compound<'a>,
-    else_branch: Option<Compound<'a>>,
+    pub condition: Bool<'a>,
+    pub if_branch: Compound<'a>,
+    pub else_branch: Option<Compound<'a>>,
 }
 
 pub struct Assign<'a> {
-    id: Identifier<'a>,
-    expr: Expr<'a>,
+    pub id: Identifier<'a>,
+    pub expr: Expr<'a>,
 }
 
 pub struct Expr<'a> {

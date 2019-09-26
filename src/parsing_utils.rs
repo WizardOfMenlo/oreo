@@ -3,6 +3,7 @@ use crate::parser::{ExpToken, SyntaxError, TokenList, ID};
 use crate::syntax::*;
 use crate::tokens::*;
 
+#[must_use]
 pub fn advance_expecting<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
     exp: ExpToken,
@@ -21,6 +22,7 @@ pub fn advance_expecting<'a>(
     }
 }
 
+#[must_use]
 pub fn advance_expecting_one_of<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
     exp: TokenList,
@@ -39,6 +41,7 @@ pub fn advance_expecting_one_of<'a>(
     }
 }
 
+#[must_use]
 pub fn get_id<'a>(id: EnrichedToken<'a>) -> Result<Identifier<'a>, SyntaxError<'a>> {
     let backup = id.clone();
     match id.take_token() {
@@ -47,6 +50,7 @@ pub fn get_id<'a>(id: EnrichedToken<'a>) -> Result<Identifier<'a>, SyntaxError<'
     }
 }
 
+#[must_use]
 pub fn advance_expecting_identifier<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
 ) -> Result<Identifier<'a>, SyntaxError<'a>> {
