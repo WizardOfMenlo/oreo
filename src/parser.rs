@@ -306,6 +306,20 @@ mod tests {
     }
 
     #[test]
+    fn parse_minimal_no_bool_no_expr() {
+        let input = "program fib; begin var n; end";
+        let parsed = program(&mut make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_minimal_string_assign() {
+        let input = "program fib; begin var n := \"Hello\"; end";
+        let parsed = program(&mut make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
     fn parse_full() {
         let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nprint \"enter the number of terms\";\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
         let parsed = program(&mut make_tokens_from_str(input));
