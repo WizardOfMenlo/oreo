@@ -45,8 +45,8 @@ pub struct Assign<'a> {
 }
 
 pub struct Expr<'a> {
-    head: ExprHead<'a>,
-    tail: Option<Box<ExprPrime<'a>>>,
+    pub head: ExprHead<'a>,
+    pub tail: Option<Box<ExprPrime<'a>>>,
 }
 
 pub enum ExprHead<'a> {
@@ -56,9 +56,9 @@ pub enum ExprHead<'a> {
 }
 
 pub struct ExprPrime<'a> {
-    operation: BinaryExprOp,
-    operand: Expr<'a>,
-    tail: Option<Box<ExprPrime<'a>>>,
+    pub operator: BinaryExprOp,
+    pub operand: Expr<'a>,
+    pub tail: Option<Box<ExprPrime<'a>>>,
 }
 
 pub enum BinaryExprOp {

@@ -76,55 +76,60 @@ fn statement<'a>(
     }
 }
 
-fn decl<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<Decl<'a>, SyntaxError<'a>> {
+fn decl<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<Decl<'a>, SyntaxError<'a>> {
     let id = advance_expecting_identifier(it)?;
     let mut it = it.peekable();
     let next = it.peek();
 
     Ok(match next.map(|s| s.token()) {
         Some(Token::Punctuation(Punctuation::Semicolon)) => Decl { id, expr: None },
-        _ => Decl { id, expr: Some(expr(&mut it)?)}
+        _ => Decl {
+            id,
+            expr: Some(expr(&mut it)?),
+        },
     })
 }
- 
-fn p_if<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<If<'a>, SyntaxError<'a>> {
+
+fn p_if<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<If<'a>, SyntaxError<'a>> {
     advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
     let condition = p_bool(it)?;
     advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
     advance_expecting(it, Token::Keyword(Keyword::Then))?;
     let if_branch = compound(it)?;
-    let next = advance_expecting_one_of(it, &[Token::Keyword(Keyword::Else), Token::Punctuation(Punctuation::Semicolon)])?;
+    let next = advance_expecting_one_of(
+        it,
+        &[
+            Token::Keyword(Keyword::Else),
+            Token::Punctuation(Punctuation::Semicolon),
+        ],
+    )?;
 
     let else_branch = match next.token() {
         Token::Keyword(Keyword::Else) => {
             let tmp = compound(it)?;
             advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
             Some(tmp)
-        },
-        _ => None
+        }
+        _ => None,
     };
 
     Ok(If {
         condition,
         if_branch,
-        else_branch
+        else_branch,
     })
 }
 
 fn print<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-    token: Token<'a>
+    token: Token<'a>,
 ) -> Result<Print<'a>, SyntaxError<'a>> {
     match token {
         Token::Keyword(Keyword::Print) => Ok(Print::Print(expr(it)?)),
         Token::Keyword(Keyword::Println) => Ok(Print::Println(expr(it)?)),
         Token::Keyword(Keyword::Get) => Ok(Print::Get(advance_expecting_identifier(it)?)),
         // Should only be called with normal stuff
-        _ => Err(SyntaxError::LogicalError)
+        _ => Err(SyntaxError::LogicalError),
     }
 }
 
@@ -138,50 +143,39 @@ fn p_while<'a>(
     advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
 
     Ok(While {
-        condition, 
-        compound
+        condition,
+        compound,
     })
 }
- 
 fn assign<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-    id: Identifier<'a>
+    id: Identifier<'a>,
 ) -> Result<Assign<'a>, SyntaxError<'a>> {
     advance_expecting(it, Token::Operator(Operator::Assignement))?;
     let expr = expr(it)?;
 
-    Ok(Assign {
-        id,
-        expr
-    })
+    Ok(Assign { id, expr })
 }
- 
-fn expr<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<Expr<'a>, SyntaxError<'a>> {
+
+fn expr<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<Expr<'a>, SyntaxError<'a>> {
     let head = expr_head(it)?;
     let mut it = it.peekable();
-    let next = it.peek(); 
+    let next = it.peek();
     let tail = match next.map(|t| t.token()) {
-        Some(Token::Operator(Operator::Plus)) |
-        Some(Token::Operator(Operator::Minus)) |
-        Some(Token::Operator(Operator::Times)) |
-        Some(Token::Operator(Operator::Divide)) => {
-            Some(Box::new(expr_prime(&mut it)?))
-        },
-        _ => None
+        Some(Token::Operator(Operator::Plus))
+        | Some(Token::Operator(Operator::Minus))
+        | Some(Token::Operator(Operator::Times))
+        | Some(Token::Operator(Operator::Divide)) => Some(Box::new(expr_prime(&mut it)?)),
+        _ => None,
     };
 
-    Ok(Expr {
-        head,
-        tail
-    })
+    Ok(Expr { head, tail })
 }
 
 fn expr_head<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>
+    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
 ) -> Result<ExprHead<'a>, SyntaxError<'a>> {
-    let it = it.peekable();
+    let mut it = it.peekable();
     let it = &mut it;
     let next = it.peek();
     match next.map(|t| t.token()) {
@@ -190,44 +184,69 @@ fn expr_head<'a>(
             let expr = expr(it)?;
             advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
             Ok(ExprHead::BracketedExpr(Box::new(expr)))
-        },
-        Some(Token::Literal(Literal::Integer(_))) | Some(Token::Literal(Literal::String(_))) | Some(Token::Identifier(_)) => {
-            Ok(ExprHead::Unit(unit(it)?))
-        },
+        }
+        Some(Token::Literal(Literal::Integer(_)))
+        | Some(Token::Literal(Literal::String(_)))
+        | Some(Token::Identifier(_)) => Ok(ExprHead::Unit(unit(it)?)),
 
-        // TODO: Add bool here
+        Some(_) => Ok(ExprHead::Boolean(Box::new(p_bool(it)?))),
 
-
-
-        _ => Err(SyntaxError::LogicalError)
+        // TODO: This should be a EOF error
+        _ => Err(SyntaxError::LogicalError),
     }
 }
 
 const INT: Token<'static> = Token::Literal(Literal::Integer(0));
 const STRING: Token<'static> = Token::Literal(Literal::String(""));
 
-fn unit<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>
-) -> Result<Unit<'a>, SyntaxError<'a>> {
+fn unit<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<Unit<'a>, SyntaxError<'a>> {
     let next = advance_expecting_one_of(it, &[INT, STRING, ID])?;
     Ok(match next.take_token() {
         Token::Literal(Literal::Integer(i)) => Unit::Int(i),
         Token::Literal(Literal::String(s)) => Unit::String(s),
-        Token::Identifier(s) => Unit::Identifier(get_id(next)?)
-        _ => return Err(SyntaxError::LogicalError)
+        Token::Identifier(s) => Unit::Identifier(Identifier(s)),
+        _ => return Err(SyntaxError::LogicalError),
     })
 }
- 
-
 
 fn expr_prime<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
 ) -> Result<ExprPrime<'a>, SyntaxError<'a>> {
-    let next = advance_expecting_one_of(it, &[Token::Operator(Operator::Plus), Token::Operator(Operator::Minus), Token::Operator(Operator::Times), Token::Operator(Operator::Divide)]);
+    let operator = advance_expecting_one_of(
+        it,
+        &[
+            Token::Operator(Operator::Plus),
+            Token::Operator(Operator::Minus),
+            Token::Operator(Operator::Times),
+            Token::Operator(Operator::Divide),
+        ],
+    )?;
+
+    let operand = expr(it)?;
+
+    let mut it = it.peekable();
     
-    Err(SyntaxError::LogicalError)
+    let tail = match it.peek().map(|t| t.token()) {
+        Some(Token::Operator(Operator::Plus))
+        | Some(Token::Operator(Operator::Minus))
+        | Some(Token::Operator(Operator::Times))
+        | Some(Token::Operator(Operator::Divide)) => Some(Box::new(expr_prime(&mut it)?)),
+        _ => None,
+    };
+
+    Ok(ExprPrime {
+        operator: match operator.token() {
+            Token::Operator(Operator::Plus) => BinaryExprOp::Plus,
+            Token::Operator(Operator::Minus) => BinaryExprOp::Minus,
+            Token::Operator(Operator::Times) => BinaryExprOp::Times,
+            Token::Operator(Operator::Divide) => BinaryExprOp::Divide,
+            _ => return Err(SyntaxError::LogicalError)
+        },
+        operand,
+        tail
+    })
+
 }
- 
 
 fn p_bool<'a>(
     it: &mut impl Iterator<Item = EnrichedToken<'a>>,
