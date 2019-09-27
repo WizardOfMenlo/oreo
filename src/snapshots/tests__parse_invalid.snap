@@ -1,0 +1,17 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Err(
+    ExpectedFound(
+        Keyword(
+            Program,
+        ),
+        EnrichedToken {
+            inner: Punctuation(
+                BracketOpen,
+            ),
+            line_no: 0,
+        },
+    ),
+)

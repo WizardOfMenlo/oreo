@@ -1,0 +1,7 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Err(
+    LogicalError,
+)

@@ -24,6 +24,7 @@ where
 {
     advance_expecting(it, Token::Keyword(Keyword::Program))?;
     let id = advance_expecting_identifier(it)?;
+    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
     let compound = compound(it)?;
 
     Ok(Program { id, compound })
@@ -85,14 +86,22 @@ where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
     let id = advance_expecting_identifier(it)?;
-    let next = it.peek();
+    let next = advance_expecting_one_of(
+        it,
+        &[
+            Token::Punctuation(Punctuation::Semicolon),
+            Token::Operator(Operator::Assignement),
+        ],
+    )?;
 
-    Ok(match next.map(|s| s.token()) {
-        Some(Token::Punctuation(Punctuation::Semicolon)) => Decl { id, expr: None },
-        _ => Decl {
-            id,
-            expr: Some(expr(it)?),
-        },
+    Ok(match next.token() {
+        Token::Punctuation(Punctuation::Semicolon) => Decl { id, expr: None },
+        Token::Operator(Operator::Assignement) => {
+            let expr = Some(expr(it)?);
+            advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+            Decl { id, expr }
+        }
+        _ => return Err(SyntaxError::LogicalError),
     })
 }
 
@@ -133,13 +142,17 @@ fn print<'a, T>(it: &mut Peekable<T>, token: Token<'a>) -> Result<Print<'a>, Syn
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
-    match token {
-        Token::Keyword(Keyword::Print) => Ok(Print::Print(expr(it)?)),
-        Token::Keyword(Keyword::Println) => Ok(Print::Println(expr(it)?)),
-        Token::Keyword(Keyword::Get) => Ok(Print::Get(advance_expecting_identifier(it)?)),
+    let print_stat = match token {
+        Token::Keyword(Keyword::Print) => Print::Print(expr(it)?),
+        Token::Keyword(Keyword::Println) => Print::Println(expr(it)?),
+        Token::Keyword(Keyword::Get) => Print::Get(advance_expecting_identifier(it)?),
         // Should only be called with normal stuff
-        _ => Err(SyntaxError::LogicalError),
-    }
+        _ => return Err(SyntaxError::LogicalError),
+    };
+
+    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+
+    Ok(print_stat)
 }
 
 fn p_while<'a, T>(it: &mut Peekable<T>) -> Result<While<'a>, SyntaxError<'a>>
@@ -283,6 +296,19 @@ mod tests {
     #[test]
     fn parse_empty() {
         let parsed = program(&mut make_tokens_from_str(""));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_invalid() {
+        let parsed = program(&mut make_tokens_from_str("(x <= > >= < y 99.88l8 )"));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_full() {
+        let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nprint \"enter the number of terms\";\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
+        let parsed = program(&mut make_tokens_from_str(input));
         assert_debug_snapshot!(parsed)
     }
 }
