@@ -50,7 +50,6 @@ impl<'a> EnrichedToken<'a> {
         &self.inner
     }
 
-
     pub fn take_token(self) -> Token<'a> {
         self.inner
     }
@@ -73,7 +72,7 @@ pub fn lexicalize<'a>(
     .flatten()
 }
 
-fn lexicalize_one<'a>(scan: ScannedItem<'a>) -> impl Iterator<Item = Token<'a>> {
+fn lexicalize_one(scan: ScannedItem) -> impl Iterator<Item = Token> {
     LexicalIt::new(scan)
 }
 
@@ -115,7 +114,7 @@ impl<'a> Iterator for LexicalIt<'a> {
             }
         };
 
-        if remaining.len() == 0 {
+        if remaining.is_empty() {
             return None;
         }
 

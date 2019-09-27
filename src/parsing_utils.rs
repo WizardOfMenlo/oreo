@@ -42,7 +42,7 @@ pub fn advance_expecting_one_of<'a>(
 }
 
 #[must_use]
-pub fn get_id<'a>(id: EnrichedToken<'a>) -> Result<Identifier<'a>, SyntaxError<'a>> {
+pub fn get_id(id: EnrichedToken) -> Result<Identifier, SyntaxError> {
     let backup = id.clone();
     match id.take_token() {
         Token::Identifier(s) => Ok(Identifier(s)),

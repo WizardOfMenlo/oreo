@@ -16,7 +16,10 @@ impl<'a> Token<'a> {
         }
     }
 
-    pub fn same_kind<'b>(&self, other: &Token<'b>) -> bool where 'b : 'a {
+    pub fn same_kind<'b>(&self, other: &Token<'b>) -> bool
+    where
+        'b: 'a,
+    {
         // This should match every singleton
         if self == other {
             true
@@ -26,7 +29,7 @@ impl<'a> Token<'a> {
                 (Self::Literal(Literal::Integer(_)), Self::Literal(Literal::Integer(_))) => true,
                 (Self::Literal(Literal::Boolean(_)), Self::Literal(Literal::Boolean(_))) => true,
                 (Self::Literal(Literal::String(_)), Self::Literal(Literal::String(_))) => true,
-                _ => false
+                _ => false,
             }
         }
     }

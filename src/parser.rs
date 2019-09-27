@@ -2,10 +2,12 @@ use crate::lexical::EnrichedToken;
 use crate::parsing_utils::*;
 use crate::syntax::*;
 use crate::tokens::*;
+use std::iter::Peekable;
 
 pub(crate) type ExpToken = Token<'static>;
 pub(crate) type TokenList = &'static [ExpToken];
 
+#[derive(Debug)]
 pub enum SyntaxError<'a> {
     ExpectedOneOfButFoundEOF(TokenList),
     ExpectedButFoundEOF(ExpToken),
@@ -16,9 +18,10 @@ pub enum SyntaxError<'a> {
 
 pub(crate) const ID: ExpToken = Token::Identifier("");
 
-pub fn program<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<Program<'a>, SyntaxError<'a>> {
+pub fn program<'a, T>(it: &mut Peekable<T>) -> Result<Program<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     advance_expecting(it, Token::Keyword(Keyword::Program))?;
     let id = advance_expecting_identifier(it)?;
     let compound = compound(it)?;
@@ -26,13 +29,13 @@ pub fn program<'a>(
     Ok(Program { id, compound })
 }
 
-fn compound<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<Compound<'a>, SyntaxError<'a>> {
+pub fn compound<'a, T>(it: &mut Peekable<T>) -> Result<Compound<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     advance_expecting(it, Token::Keyword(Keyword::Begin))?;
     const END: ExpToken = Token::Keyword(Keyword::End);
     let mut statements = Vec::new();
-    let mut it = it.peekable();
     loop {
         if let Some(tok) = it.peek() {
             let token = tok.token();
@@ -40,7 +43,7 @@ fn compound<'a>(
                 break;
             }
 
-            statements.push(statement(&mut it)?);
+            statements.push(statement(it)?);
         } else {
             return Err(SyntaxError::ExpectedButFoundEOF(END));
         }
@@ -49,9 +52,10 @@ fn compound<'a>(
     Ok(Compound { statements })
 }
 
-fn statement<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<Statement<'a>, SyntaxError<'a>> {
+pub fn statement<'a, T>(it: &mut Peekable<T>) -> Result<Statement<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     const POSSIBLE_STATEMENT_STARTS: TokenList = &[
         Token::Keyword(Keyword::Var),
         Token::Keyword(Keyword::If),
@@ -76,21 +80,26 @@ fn statement<'a>(
     }
 }
 
-fn decl<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<Decl<'a>, SyntaxError<'a>> {
+pub fn decl<'a, T>(it: &mut Peekable<T>) -> Result<Decl<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     let id = advance_expecting_identifier(it)?;
-    let mut it = it.peekable();
     let next = it.peek();
 
     Ok(match next.map(|s| s.token()) {
         Some(Token::Punctuation(Punctuation::Semicolon)) => Decl { id, expr: None },
         _ => Decl {
             id,
-            expr: Some(expr(&mut it)?),
+            expr: Some(expr(it)?),
         },
     })
 }
 
-fn p_if<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<If<'a>, SyntaxError<'a>> {
+pub fn p_if<'a, T>(it: &mut Peekable<T>) -> Result<If<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
     let condition = p_bool(it)?;
     advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
@@ -120,10 +129,10 @@ fn p_if<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<If<'a>, 
     })
 }
 
-fn print<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-    token: Token<'a>,
-) -> Result<Print<'a>, SyntaxError<'a>> {
+fn print<'a, T>(it: &mut Peekable<T>, token: Token<'a>) -> Result<Print<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     match token {
         Token::Keyword(Keyword::Print) => Ok(Print::Print(expr(it)?)),
         Token::Keyword(Keyword::Println) => Ok(Print::Println(expr(it)?)),
@@ -133,9 +142,10 @@ fn print<'a>(
     }
 }
 
-fn p_while<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<While<'a>, SyntaxError<'a>> {
+fn p_while<'a, T>(it: &mut Peekable<T>) -> Result<While<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
     let condition = p_bool(it)?;
     advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
@@ -147,36 +157,37 @@ fn p_while<'a>(
         compound,
     })
 }
-fn assign<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-    id: Identifier<'a>,
-) -> Result<Assign<'a>, SyntaxError<'a>> {
+fn assign<'a, T>(it: &mut Peekable<T>, id: Identifier<'a>) -> Result<Assign<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     advance_expecting(it, Token::Operator(Operator::Assignement))?;
     let expr = expr(it)?;
 
     Ok(Assign { id, expr })
 }
 
-fn expr<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<Expr<'a>, SyntaxError<'a>> {
+fn expr<'a, T>(it: &mut Peekable<T>) -> Result<Expr<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     let head = expr_head(it)?;
-    let mut it = it.peekable();
     let next = it.peek();
     let tail = match next.map(|t| t.token()) {
         Some(Token::Operator(Operator::Plus))
         | Some(Token::Operator(Operator::Minus))
         | Some(Token::Operator(Operator::Times))
-        | Some(Token::Operator(Operator::Divide)) => Some(Box::new(expr_prime(&mut it)?)),
+        | Some(Token::Operator(Operator::Divide)) => Some(Box::new(expr_prime(it)?)),
         _ => None,
     };
 
     Ok(Expr { head, tail })
 }
 
-fn expr_head<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<ExprHead<'a>, SyntaxError<'a>> {
-    let mut it = it.peekable();
-    let it = &mut it;
+fn expr_head<'a, T>(it: &mut Peekable<T>) -> Result<ExprHead<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     let next = it.peek();
     match next.map(|t| t.token()) {
         Some(Token::Punctuation(Punctuation::BracketOpen)) => {
@@ -199,7 +210,10 @@ fn expr_head<'a>(
 const INT: Token<'static> = Token::Literal(Literal::Integer(0));
 const STRING: Token<'static> = Token::Literal(Literal::String(""));
 
-fn unit<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<Unit<'a>, SyntaxError<'a>> {
+fn unit<'a, T>(it: &mut Peekable<T>) -> Result<Unit<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     let next = advance_expecting_one_of(it, &[INT, STRING, ID])?;
     Ok(match next.take_token() {
         Token::Literal(Literal::Integer(i)) => Unit::Int(i),
@@ -209,9 +223,10 @@ fn unit<'a>(it: &mut impl Iterator<Item = EnrichedToken<'a>>) -> Result<Unit<'a>
     })
 }
 
-fn expr_prime<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<ExprPrime<'a>, SyntaxError<'a>> {
+fn expr_prime<'a, T>(it: &mut Peekable<T>) -> Result<ExprPrime<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     let operator = advance_expecting_one_of(
         it,
         &[
@@ -224,13 +239,11 @@ fn expr_prime<'a>(
 
     let operand = expr(it)?;
 
-    let mut it = it.peekable();
-    
     let tail = match it.peek().map(|t| t.token()) {
         Some(Token::Operator(Operator::Plus))
         | Some(Token::Operator(Operator::Minus))
         | Some(Token::Operator(Operator::Times))
-        | Some(Token::Operator(Operator::Divide)) => Some(Box::new(expr_prime(&mut it)?)),
+        | Some(Token::Operator(Operator::Divide)) => Some(Box::new(expr_prime(it)?)),
         _ => None,
     };
 
@@ -240,16 +253,36 @@ fn expr_prime<'a>(
             Token::Operator(Operator::Minus) => BinaryExprOp::Minus,
             Token::Operator(Operator::Times) => BinaryExprOp::Times,
             Token::Operator(Operator::Divide) => BinaryExprOp::Divide,
-            _ => return Err(SyntaxError::LogicalError)
+            _ => return Err(SyntaxError::LogicalError),
         },
         operand,
-        tail
+        tail,
     })
-
 }
 
-fn p_bool<'a>(
-    it: &mut impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<Bool<'a>, SyntaxError<'a>> {
+fn p_bool<'a, T>(it: &mut Peekable<T>) -> Result<Bool<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
     Err(SyntaxError::LogicalError)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use insta::assert_debug_snapshot;
+    use std::iter::Peekable;
+
+    fn make_tokens_from_str(s: &str) -> Peekable<impl Iterator<Item = EnrichedToken>> {
+        use crate::lexical::lexicalize;
+        use crate::scanner::scan;
+
+        lexicalize(scan(s)).peekable()
+    }
+
+    #[test]
+    fn parse_empty() {
+        let parsed = program(&mut make_tokens_from_str(""));
+        assert_debug_snapshot!(parsed)
+    }
 }

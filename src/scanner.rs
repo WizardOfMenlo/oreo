@@ -39,7 +39,7 @@ impl<'a> Iterator for LineScannerIt<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let remaining = &self.line[self.pos..];
         let first_non_whitespace_index = remaining.find(|c: char| !c.is_whitespace());
-        if remaining.len() == 0 || first_non_whitespace_index.is_none() {
+        if remaining.is_empty() || first_non_whitespace_index.is_none() {
             return None;
         }
 

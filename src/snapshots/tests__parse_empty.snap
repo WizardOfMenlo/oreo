@@ -1,0 +1,11 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Err(
+    ExpectedButFoundEOF(
+        Keyword(
+            Program,
+        ),
+    ),
+)
