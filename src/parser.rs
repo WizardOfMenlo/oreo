@@ -71,21 +71,25 @@ where
         Token::Keyword(Keyword::Println),
         Token::Keyword(Keyword::Get),
         Token::Keyword(Keyword::While),
+        Token::Keyword(Keyword::Procedure),
+        Token::Keyword(Keyword::Return),
         ID,
     ];
 
     let matched = advance_expecting_one_of(it, POSSIBLE_STATEMENT_STARTS)?;
     let token = matched.take_token();
-    match token {
-        Token::Keyword(Keyword::Var) => Ok(Statement::Decl(decl(it)?)),
-        Token::Keyword(Keyword::If) => Ok(Statement::If(p_if(it)?)),
-        Token::Keyword(Keyword::Print) => Ok(Statement::Print(print(it, token)?)),
-        Token::Keyword(Keyword::Println) => Ok(Statement::Print(print(it, token)?)),
-        Token::Keyword(Keyword::Get) => Ok(Statement::Print(print(it, token)?)),
-        Token::Keyword(Keyword::While) => Ok(Statement::While(p_while(it)?)),
-        Token::Identifier(s) => Ok(Statement::Assign(assign(it, Identifier(s))?)),
-        _ => Err(SyntaxError::LogicalError),
-    }
+    Ok(match token {
+        Token::Keyword(Keyword::Var) => Statement::Decl(decl(it)?),
+        Token::Keyword(Keyword::If) => Statement::If(p_if(it)?),
+        Token::Keyword(Keyword::Print) => Statement::Print(print(it, token)?),
+        Token::Keyword(Keyword::Println) => Statement::Print(print(it, token)?),
+        Token::Keyword(Keyword::Get) => Statement::Print(print(it, token)?),
+        Token::Keyword(Keyword::While) => Statement::While(p_while(it)?),
+        Token::Keyword(Keyword::Procedure) => Statement::FunctionDecl(function(it)?),
+        Token::Keyword(Keyword::Return) => Statement::Return(p_return(it)?),
+        Token::Identifier(s) => Statement::Assign(assign(it, Identifier(s))?),
+        _ => return Err(SyntaxError::LogicalError),
+    })
 }
 
 fn decl<'a, T>(it: &mut Peekable<T>) -> Result<Decl<'a>, SyntaxError<'a>>
@@ -177,6 +181,60 @@ where
         compound,
     })
 }
+
+fn function<'a, T>(it: &mut Peekable<T>) -> Result<FunctionDecl<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let id = advance_expecting_identifier(it)?;
+    advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
+
+    // TODO: Parse the arguments
+    let mut args = Vec::new();
+
+    const BRACK_END: Token<'static> = Token::Punctuation(Punctuation::BracketClose);
+    const VAR_KEY: Token<'static> = Token::Keyword(Keyword::Var);
+
+    loop {
+        if let Some(tok) = it.peek() {
+            if tok.token().same_kind(&BRACK_END) {
+                break;
+            }
+
+            advance_expecting(it, VAR_KEY)?;
+            let arg_name = advance_expecting_identifier(it)?;
+            args.push(arg_name);
+
+            if it
+                .peek()
+                .map(|t| t.token().same_kind(&BRACK_END))
+                .unwrap_or(false)
+            {
+                break;
+            }
+
+            advance_expecting(it, Token::Punctuation(Punctuation::Comma))?;
+        } else {
+            return Err(SyntaxError::ExpectedOneOfButFoundEOF(&[BRACK_END, VAR_KEY]));
+        }
+    }
+
+    advance_expecting(it, BRACK_END)?;
+
+    let inner = compound(it)?;
+
+    Ok(FunctionDecl { id, args, inner })
+}
+
+fn p_return<'a, T>(it: &mut Peekable<T>) -> Result<Return<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let expr = expr(it)?;
+    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+    Ok(Return { expr })
+}
+
 fn assign<'a, T>(it: &mut Peekable<T>, id: Identifier<'a>) -> Result<Assign<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
@@ -328,6 +386,27 @@ mod tests {
     #[test]
     fn parse_print_simple() {
         let input = "program fib; begin print \"Hello\\n\"; println 2; get x; end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_function_no_args() {
+        let input = "program fib; begin procedure main() begin return 1; end end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_function_single_arg() {
+        let input = "program fib; begin procedure id(var x) begin return x; end end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_function_mult_arg() {
+        let input = "program fib; begin procedure sum(var x, var y) begin return y; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }

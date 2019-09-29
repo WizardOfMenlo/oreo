@@ -1,0 +1,45 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Ok(
+    Program {
+        id: Identifier(
+            "fib",
+        ),
+        compound: Compound {
+            statements: [
+                FunctionDecl(
+                    FunctionDecl {
+                        id: Identifier(
+                            "id",
+                        ),
+                        args: [
+                            Identifier(
+                                "x",
+                            ),
+                        ],
+                        inner: Compound {
+                            statements: [
+                                Return(
+                                    Return {
+                                        expr: Expr {
+                                            head: Unit(
+                                                Identifier(
+                                                    Identifier(
+                                                        "x",
+                                                    ),
+                                                ),
+                                            ),
+                                            tail: None,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    },
+                ),
+            ],
+        },
+    },
+)

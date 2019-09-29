@@ -10,6 +10,7 @@ lazy_static! {
         m.insert('(', Token::Punctuation(Punctuation::BracketOpen));
         m.insert(')', Token::Punctuation(Punctuation::BracketClose));
         m.insert(';', Token::Punctuation(Punctuation::Semicolon));
+        m.insert(',', Token::Punctuation(Punctuation::Comma));
 
         m.insert('+', Token::Operator(Operator::Plus));
         m.insert('-', Token::Operator(Operator::Minus));

@@ -64,6 +64,7 @@ pub enum Keyword {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Punctuation {
+    Comma,
     Semicolon,
     BracketOpen,
     BracketClose,
