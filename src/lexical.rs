@@ -31,6 +31,8 @@ lazy_static! {
         m.insert("if", Token::Keyword(Keyword::If));
         m.insert("then", Token::Keyword(Keyword::Then));
         m.insert("else", Token::Keyword(Keyword::Else));
+        m.insert("procedure", Token::Keyword(Keyword::Procedure));
+        m.insert("return", Token::Keyword(Keyword::Return));
 
         m.insert("or", Token::Operator(Operator::Or));
         m.insert("and", Token::Operator(Operator::And));
@@ -215,6 +217,12 @@ mod tests {
     #[test]
     fn lex_example() {
         let res: Vec<_> = lexicalize(scan("(x <= > >= < y 99.88l8 )")).collect();
+        assert_debug_snapshot!(res);
+    }
+
+    #[test]
+    fn lex_functions() {
+        let res: Vec<_> = lexicalize(scan("procedure id(var x) begin return x; end")).collect();
         assert_debug_snapshot!(res);
     }
 

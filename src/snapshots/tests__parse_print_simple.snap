@@ -1,0 +1,46 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Ok(
+    Program {
+        id: Identifier(
+            "fib",
+        ),
+        compound: Compound {
+            statements: [
+                Print(
+                    Print(
+                        Expr {
+                            head: Unit(
+                                String(
+                                    "Hello\\n",
+                                ),
+                            ),
+                            tail: None,
+                        },
+                    ),
+                ),
+                Print(
+                    Println(
+                        Expr {
+                            head: Unit(
+                                Int(
+                                    2,
+                                ),
+                            ),
+                            tail: None,
+                        },
+                    ),
+                ),
+                Print(
+                    Get(
+                        Identifier(
+                            "x",
+                        ),
+                    ),
+                ),
+            ],
+        },
+    },
+)

@@ -18,7 +18,14 @@ pub enum SyntaxError<'a> {
 
 pub(crate) const ID: ExpToken = Token::Identifier("");
 
-pub fn program<'a, T>(it: &mut Peekable<T>) -> Result<Program<'a>, SyntaxError<'a>>
+pub fn parse<'a>(
+    it: impl Iterator<Item = EnrichedToken<'a>>,
+) -> Result<Program<'a>, SyntaxError<'a>> {
+    let mut it = it.filter(|s| !s.token().is_comment()).peekable();
+    program(&mut it)
+}
+
+fn program<'a, T>(it: &mut Peekable<T>) -> Result<Program<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -30,7 +37,7 @@ where
     Ok(Program { id, compound })
 }
 
-pub fn compound<'a, T>(it: &mut Peekable<T>) -> Result<Compound<'a>, SyntaxError<'a>>
+fn compound<'a, T>(it: &mut Peekable<T>) -> Result<Compound<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -53,7 +60,7 @@ where
     Ok(Compound { statements })
 }
 
-pub fn statement<'a, T>(it: &mut Peekable<T>) -> Result<Statement<'a>, SyntaxError<'a>>
+fn statement<'a, T>(it: &mut Peekable<T>) -> Result<Statement<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -81,7 +88,7 @@ where
     }
 }
 
-pub fn decl<'a, T>(it: &mut Peekable<T>) -> Result<Decl<'a>, SyntaxError<'a>>
+fn decl<'a, T>(it: &mut Peekable<T>) -> Result<Decl<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -105,7 +112,7 @@ where
     })
 }
 
-pub fn p_if<'a, T>(it: &mut Peekable<T>) -> Result<If<'a>, SyntaxError<'a>>
+fn p_if<'a, T>(it: &mut Peekable<T>) -> Result<If<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -284,45 +291,51 @@ where
 mod tests {
     use super::*;
     use insta::assert_debug_snapshot;
-    use std::iter::Peekable;
 
-    fn make_tokens_from_str(s: &str) -> Peekable<impl Iterator<Item = EnrichedToken>> {
+    fn make_tokens_from_str(s: &str) -> impl Iterator<Item = EnrichedToken> {
         use crate::lexical::lexicalize;
         use crate::scanner::scan;
 
-        lexicalize(scan(s)).peekable()
+        lexicalize(scan(s))
     }
 
     #[test]
     fn parse_empty() {
-        let parsed = program(&mut make_tokens_from_str(""));
+        let parsed = parse(make_tokens_from_str(""));
         assert_debug_snapshot!(parsed)
     }
 
     #[test]
     fn parse_invalid() {
-        let parsed = program(&mut make_tokens_from_str("(x <= > >= < y 99.88l8 )"));
+        let parsed = parse(make_tokens_from_str("(x <= > >= < y 99.88l8 )"));
         assert_debug_snapshot!(parsed)
     }
 
     #[test]
     fn parse_minimal_no_bool_no_expr() {
         let input = "program fib; begin var n; end";
-        let parsed = program(&mut make_tokens_from_str(input));
+        let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
-    fn parse_minimal_string_assign() {
-        let input = "program fib; begin var n := \"Hello\"; end";
-        let parsed = program(&mut make_tokens_from_str(input));
+    fn parse_minimal_assignments() {
+        let input = "program fib; begin var n := \"Hello\"; var m := 2; var s := (2); end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_print_simple() {
+        let input = "program fib; begin print \"Hello\\n\"; println 2; get x; end";
+        let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_full() {
         let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nprint \"enter the number of terms\";\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
-        let parsed = program(&mut make_tokens_from_str(input));
+        let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed)
     }
 }

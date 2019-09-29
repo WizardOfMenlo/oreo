@@ -1,0 +1,72 @@
+---
+source: src/lexical.rs
+expression: res
+---
+[
+    EnrichedToken {
+        inner: Keyword(
+            Procedure,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "id",
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            BracketOpen,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Var,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "x",
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            BracketClose,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Begin,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Return,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "x",
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            End,
+        ),
+        line_no: 0,
+    },
+]

@@ -1,0 +1,71 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Ok(
+    Program {
+        id: Identifier(
+            "fib",
+        ),
+        compound: Compound {
+            statements: [
+                Decl(
+                    Decl {
+                        id: Identifier(
+                            "n",
+                        ),
+                        expr: Some(
+                            Expr {
+                                head: Unit(
+                                    String(
+                                        "Hello",
+                                    ),
+                                ),
+                                tail: None,
+                            },
+                        ),
+                    },
+                ),
+                Decl(
+                    Decl {
+                        id: Identifier(
+                            "m",
+                        ),
+                        expr: Some(
+                            Expr {
+                                head: Unit(
+                                    Int(
+                                        2,
+                                    ),
+                                ),
+                                tail: None,
+                            },
+                        ),
+                    },
+                ),
+                Decl(
+                    Decl {
+                        id: Identifier(
+                            "s",
+                        ),
+                        expr: Some(
+                            Expr {
+                                head: BracketedExpr(
+                                    Expr {
+                                        head: Unit(
+                                            Int(
+                                                2,
+                                            ),
+                                        ),
+                                        tail: None,
+                                    },
+                                ),
+                                tail: None,
+                            },
+                        ),
+                    },
+                ),
+            ],
+        },
+    },
+)

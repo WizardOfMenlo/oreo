@@ -5,6 +5,7 @@ pub enum Token<'a> {
     Operator(Operator),
     Literal(Literal<'a>),
     Identifier(&'a str),
+    Comment(&'a str),
     Error(LexicalError<'a>),
 }
 
@@ -13,6 +14,13 @@ impl<'a> Token<'a> {
         match self {
             Token::Error(_) => true,
             _ => false,
+        }
+    }
+
+    pub fn is_comment(&self) -> bool {
+        match self {
+            Token::Comment(_) => true,
+            _ => false
         }
     }
 
@@ -29,6 +37,8 @@ impl<'a> Token<'a> {
                 (Self::Literal(Literal::Integer(_)), Self::Literal(Literal::Integer(_))) => true,
                 (Self::Literal(Literal::Boolean(_)), Self::Literal(Literal::Boolean(_))) => true,
                 (Self::Literal(Literal::String(_)), Self::Literal(Literal::String(_))) => true,
+                (Self::Identifier(_), Self::Identifier(_)) => true,
+                (Self::Comment(_), Self::Comment(_)) => true,
                 _ => false,
             }
         }
@@ -48,6 +58,8 @@ pub enum Keyword {
     If,
     Then,
     Else,
+    Procedure,
+    Return,
 }
 
 #[derive(Debug, Clone, PartialEq)]
