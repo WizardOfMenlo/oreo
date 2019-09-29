@@ -56,10 +56,11 @@ impl<'a> Iterator for LineScannerIt<'a> {
         } else {
             let (result, read) = parse_block(remaining);
             self.pos += read;
-            result
+            Some(result)
         }
     }
 }
+
 
 fn parse_string(input: &str) -> (ScannedItem, usize) {
     let mut next_is_escape = false;
@@ -84,17 +85,16 @@ fn parse_string(input: &str) -> (ScannedItem, usize) {
     }
 }
 
-fn parse_block(input: &str) -> (Option<ScannedItem>, usize) {
+fn parse_block(input: &str) -> (ScannedItem, usize) {
     let first_whitespace_index = input
         .find(|c: char| c.is_whitespace())
         .unwrap_or_else(|| input.len());
 
-    let first_problematic = input.find(|c: char| c == '"').unwrap_or_else(|| input.len());
+    let first_problematic = input
+        .find(|c: char| c == '"')
+        .unwrap_or_else(|| input.len());
     let to_read = std::cmp::min(first_whitespace_index, first_problematic);
-    (
-        Some(ScannedItem::Rest(&input[0..to_read])),
-        to_read
-    )
+    (ScannedItem::Rest(&input[0..to_read]), to_read)
 }
 
 #[cfg(test)]
