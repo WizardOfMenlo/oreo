@@ -21,6 +21,7 @@ pub(crate) const ID: ExpToken = Token::Identifier("");
 pub fn parse<'a>(
     it: impl Iterator<Item = EnrichedToken<'a>>,
 ) -> Result<Program<'a>, SyntaxError<'a>> {
+    // Note we skip comments completely
     let mut it = it.filter(|s| !s.token().is_comment()).peekable();
     program(&mut it)
 }
