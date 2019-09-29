@@ -1,0 +1,372 @@
+---
+source: src/scanner.rs
+expression: res
+---
+[
+    Scanned {
+        inner: Rest(
+            "program",
+        ),
+        line: 0,
+    },
+    Scanned {
+        inner: Rest(
+            "fib;",
+        ),
+        line: 0,
+    },
+    Scanned {
+        inner: Rest(
+            "begin",
+        ),
+        line: 1,
+    },
+    Scanned {
+        inner: Rest(
+            "var",
+        ),
+        line: 2,
+    },
+    Scanned {
+        inner: Rest(
+            "n;",
+        ),
+        line: 2,
+    },
+    Scanned {
+        inner: Comment(
+            "a comment here",
+        ),
+        line: 2,
+    },
+    Scanned {
+        inner: Rest(
+            "var",
+        ),
+        line: 3,
+    },
+    Scanned {
+        inner: Rest(
+            "first",
+        ),
+        line: 3,
+    },
+    Scanned {
+        inner: Rest(
+            ":=",
+        ),
+        line: 3,
+    },
+    Scanned {
+        inner: Rest(
+            "0;",
+        ),
+        line: 3,
+    },
+    Scanned {
+        inner: Rest(
+            "var",
+        ),
+        line: 4,
+    },
+    Scanned {
+        inner: Rest(
+            "second",
+        ),
+        line: 4,
+    },
+    Scanned {
+        inner: Rest(
+            ":=1;",
+        ),
+        line: 4,
+    },
+    Scanned {
+        inner: Rest(
+            "var",
+        ),
+        line: 5,
+    },
+    Scanned {
+        inner: Rest(
+            "next;",
+        ),
+        line: 5,
+    },
+    Scanned {
+        inner: Rest(
+            "var",
+        ),
+        line: 6,
+    },
+    Scanned {
+        inner: Rest(
+            "c",
+        ),
+        line: 6,
+    },
+    Scanned {
+        inner: Rest(
+            ":=0",
+        ),
+        line: 6,
+    },
+    Scanned {
+        inner: Rest(
+            ";",
+        ),
+        line: 6,
+    },
+    Scanned {
+        inner: Rest(
+            "print",
+        ),
+        line: 7,
+    },
+    Scanned {
+        inner: Str(
+            "enter the number of terms",
+        ),
+        line: 7,
+    },
+    Scanned {
+        inner: Rest(
+            ";",
+        ),
+        line: 7,
+    },
+    Scanned {
+        inner: Rest(
+            "get",
+        ),
+        line: 8,
+    },
+    Scanned {
+        inner: Rest(
+            "n;",
+        ),
+        line: 8,
+    },
+    Scanned {
+        inner: Rest(
+            "while",
+        ),
+        line: 9,
+    },
+    Scanned {
+        inner: Rest(
+            "(",
+        ),
+        line: 9,
+    },
+    Scanned {
+        inner: Rest(
+            "c",
+        ),
+        line: 9,
+    },
+    Scanned {
+        inner: Rest(
+            "<",
+        ),
+        line: 9,
+    },
+    Scanned {
+        inner: Rest(
+            "n)",
+        ),
+        line: 9,
+    },
+    Scanned {
+        inner: Rest(
+            "begin",
+        ),
+        line: 10,
+    },
+    Scanned {
+        inner: Rest(
+            "if",
+        ),
+        line: 11,
+    },
+    Scanned {
+        inner: Rest(
+            "(",
+        ),
+        line: 11,
+    },
+    Scanned {
+        inner: Rest(
+            "c",
+        ),
+        line: 11,
+    },
+    Scanned {
+        inner: Rest(
+            "<=",
+        ),
+        line: 11,
+    },
+    Scanned {
+        inner: Rest(
+            "1)",
+        ),
+        line: 11,
+    },
+    Scanned {
+        inner: Rest(
+            "then",
+        ),
+        line: 12,
+    },
+    Scanned {
+        inner: Rest(
+            "begin",
+        ),
+        line: 12,
+    },
+    Scanned {
+        inner: Rest(
+            "next",
+        ),
+        line: 12,
+    },
+    Scanned {
+        inner: Rest(
+            ":=",
+        ),
+        line: 12,
+    },
+    Scanned {
+        inner: Rest(
+            "c;",
+        ),
+        line: 12,
+    },
+    Scanned {
+        inner: Rest(
+            "end",
+        ),
+        line: 12,
+    },
+    Scanned {
+        inner: Rest(
+            "else",
+        ),
+        line: 13,
+    },
+    Scanned {
+        inner: Rest(
+            "begin",
+        ),
+        line: 13,
+    },
+    Scanned {
+        inner: Rest(
+            "next",
+        ),
+        line: 14,
+    },
+    Scanned {
+        inner: Rest(
+            ":=",
+        ),
+        line: 14,
+    },
+    Scanned {
+        inner: Rest(
+            "first",
+        ),
+        line: 14,
+    },
+    Scanned {
+        inner: Rest(
+            "+",
+        ),
+        line: 14,
+    },
+    Scanned {
+        inner: Rest(
+            "second;",
+        ),
+        line: 14,
+    },
+    Scanned {
+        inner: Rest(
+            "second",
+        ),
+        line: 15,
+    },
+    Scanned {
+        inner: Rest(
+            ":=",
+        ),
+        line: 15,
+    },
+    Scanned {
+        inner: Rest(
+            "next;",
+        ),
+        line: 15,
+    },
+    Scanned {
+        inner: Rest(
+            "end",
+        ),
+        line: 16,
+    },
+    Scanned {
+        inner: Rest(
+            "print",
+        ),
+        line: 17,
+    },
+    Scanned {
+        inner: Rest(
+            "next;",
+        ),
+        line: 17,
+    },
+    Scanned {
+        inner: Rest(
+            "c",
+        ),
+        line: 18,
+    },
+    Scanned {
+        inner: Rest(
+            ":=",
+        ),
+        line: 18,
+    },
+    Scanned {
+        inner: Rest(
+            "c",
+        ),
+        line: 18,
+    },
+    Scanned {
+        inner: Rest(
+            "+",
+        ),
+        line: 18,
+    },
+    Scanned {
+        inner: Rest(
+            "1;",
+        ),
+        line: 18,
+    },
+    Scanned {
+        inner: Rest(
+            "end",
+        ),
+        line: 19,
+    },
+    Scanned {
+        inner: Rest(
+            "end",
+        ),
+        line: 20,
+    },
+]

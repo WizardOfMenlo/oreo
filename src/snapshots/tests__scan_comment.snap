@@ -1,0 +1,12 @@
+---
+source: src/scanner.rs
+expression: res
+---
+[
+    Scanned {
+        inner: Comment(
+            "some comment",
+        ),
+        line: 0,
+    },
+]

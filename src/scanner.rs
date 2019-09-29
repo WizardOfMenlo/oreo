@@ -8,6 +8,8 @@ pub struct Scanned<'a> {
 pub enum ScannedItem<'a> {
     Str(&'a str),
     UnclosedStr(&'a str),
+    Comment(&'a str),
+    UnclosedComment(&'a str),
     Rest(&'a str),
 }
 
@@ -46,18 +48,41 @@ impl<'a> Iterator for LineScannerIt<'a> {
         let remaining = &remaining[first_non_whitespace_index.unwrap()..];
         self.pos += first_non_whitespace_index.unwrap();
 
-        let mut chars = remaining.chars();
+        let mut chars = remaining.chars().peekable();
         let first_char = chars.next().unwrap();
 
         if first_char == '"' {
             let (result, read) = parse_string(remaining);
             self.pos += read;
-            Some(result)
-        } else {
-            let (result, read) = parse_block(remaining);
-            self.pos += read;
-            Some(result)
+            return Some(result);
+        } else if first_char == '{' {
+            let second = chars.peek();
+            if let Some('-') = second {
+                let (result, read) = parse_comment(remaining);
+                self.pos += read;
+                return Some(result);
+            }
         }
+
+        let (result, read) = parse_block(remaining);
+        self.pos += read;
+        Some(result)
+    }
+}
+
+fn parse_comment(input: &str) -> (ScannedItem, usize) {
+    let chars_pairs = input.chars().zip(input.chars().skip(1));
+    let mut index = None;
+    for (i, (first, second)) in chars_pairs.enumerate() {
+        match (first, second) {
+            ('-', '}') => index = Some(i),
+            _ => continue,
+        }
+    }
+
+    match index {
+        Some(i) => (ScannedItem::Comment(&input[2..i]), i + 2),
+        None => (ScannedItem::UnclosedComment(&input[2..]), input.len()),
     }
 }
 
@@ -88,7 +113,7 @@ fn parse_block(input: &str) -> (ScannedItem, usize) {
         .unwrap_or_else(|| input.len());
 
     let first_problematic = input
-        .find(|c: char| c == '"')
+        .find(|c: char| c == '"' || c == '{')
         .unwrap_or_else(|| input.len());
     let to_read = std::cmp::min(first_whitespace_index, first_problematic);
     (ScannedItem::Rest(&input[0..to_read]), to_read)
@@ -130,8 +155,27 @@ mod tests {
     }
 
     #[test]
+    fn scan_comment() {
+        let res: Vec<_> = scan("{-some comment-}").collect();
+        assert_debug_snapshot!(res);
+    }
+
+    #[test]
+    fn scan_unclosed_comment() {
+        let res: Vec<_> = scan("{-some comment").collect();
+        assert_debug_snapshot!(res);
+    }
+
+    #[test]
     fn scan_real_life() {
         let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nprint \"enter the number of terms\";\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
+        let res: Vec<_> = scan(input).collect();
+        assert_debug_snapshot!(res);
+    }
+
+    #[test]
+    fn scan_real_life_with_comments() {
+        let input = "program fib;\r\nbegin\r\nvar n;{-a comment here-}\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nprint \"enter the number of terms\";\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
         let res: Vec<_> = scan(input).collect();
         assert_debug_snapshot!(res);
     }

@@ -1,0 +1,12 @@
+---
+source: src/scanner.rs
+expression: res
+---
+[
+    Scanned {
+        inner: UnclosedComment(
+            "some comment",
+        ),
+        line: 0,
+    },
+]

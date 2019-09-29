@@ -24,6 +24,10 @@ fn print_error(error: &LexicalError, line: usize) {
             println!("Unclosed string \"{}\" at line {}.", s, line);
             return;
         }
+        LexicalError::UnclosedComment(s) => {
+            println!("Unclosed comment \"{}\" at line {}.", s, line);
+            return;
+        }
     };
 
     println!(

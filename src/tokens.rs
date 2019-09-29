@@ -99,6 +99,7 @@ pub enum LexicalError<'a> {
     ExpectedDoubleEqualsEOF,
     ExpectedAssignementEOF,
     UnclosedString(&'a str),
+    UnclosedComment(&'a str),
     ExpectedDoubleEquals(char),
     ExpectedAssignement(char),
     UnknownChar(char),
