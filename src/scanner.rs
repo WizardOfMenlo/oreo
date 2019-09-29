@@ -125,7 +125,7 @@ mod tests {
 
     #[test]
     fn scan_problematic() {
-        let res: Vec<_> = scan("var x\"something\"").collect();
+        let res: Vec<_> = scan("x\"something\"").collect();
         assert_debug_snapshot!(res);
     }
 
