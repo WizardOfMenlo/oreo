@@ -42,10 +42,11 @@ fn main() {
     tokens
         .iter()
         .filter(|t| t.token().is_error())
-        .for_each(|error| match error.token() {
-            Token::Error(e) => print_error(e, error.line_no()),
-            _ => {}
-        });
+        .for_each(|error| 
+            if let Token::Error(e) = error.token() {
+                print_error(e, error.line_no())
+            }
+        );
 
     tokens
         .iter()
