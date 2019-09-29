@@ -29,6 +29,7 @@ fn program<'a, T>(it: &mut Peekable<T>) -> Result<Program<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // Program -> program id; Compound
     advance_expecting(it, Token::Keyword(Keyword::Program))?;
     let id = advance_expecting_identifier(it)?;
     advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
@@ -41,6 +42,7 @@ fn compound<'a, T>(it: &mut Peekable<T>) -> Result<Compound<'a>, SyntaxError<'a>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // Compound -> Statement+
     advance_expecting(it, Token::Keyword(Keyword::Begin))?;
     const END: ExpToken = Token::Keyword(Keyword::End);
     let mut statements = Vec::new();
@@ -64,6 +66,7 @@ fn statement<'a, T>(it: &mut Peekable<T>) -> Result<Statement<'a>, SyntaxError<'
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // Statement -> Decl | If | Print | While | Procedure | Return | Assign
     const POSSIBLE_STATEMENT_STARTS: TokenList = &[
         Token::Keyword(Keyword::Var),
         Token::Keyword(Keyword::If),
@@ -96,6 +99,7 @@ fn decl<'a, T>(it: &mut Peekable<T>) -> Result<Decl<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // Decl -> var id := Expr; | var id;
     let id = advance_expecting_identifier(it)?;
     let next = advance_expecting_one_of(
         it,
@@ -120,6 +124,7 @@ fn p_if<'a, T>(it: &mut Peekable<T>) -> Result<If<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // If -> if (Bool) then Compound; | if (Bool) then Compound else Compound;
     advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
     let condition = p_bool(it)?;
     advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
@@ -153,6 +158,7 @@ fn print<'a, T>(it: &mut Peekable<T>, token: Token<'a>) -> Result<Print<'a>, Syn
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // Print -> print Expr; | println Expr; | get Expr;
     let print_stat = match token {
         Token::Keyword(Keyword::Print) => Print::Print(expr(it)?),
         Token::Keyword(Keyword::Println) => Print::Println(expr(it)?),
@@ -170,6 +176,7 @@ fn p_while<'a, T>(it: &mut Peekable<T>) -> Result<While<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // While -> while (Bool) Compound;
     advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
     let condition = p_bool(it)?;
     advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
@@ -186,15 +193,14 @@ fn function<'a, T>(it: &mut Peekable<T>) -> Result<FunctionDecl<'a>, SyntaxError
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // Procedure -> procedure id((var i,)*) begin Compound end
     let id = advance_expecting_identifier(it)?;
     advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
-
-    // TODO: Parse the arguments
-    let mut args = Vec::new();
 
     const BRACK_END: Token<'static> = Token::Punctuation(Punctuation::BracketClose);
     const VAR_KEY: Token<'static> = Token::Keyword(Keyword::Var);
 
+    let mut args = Vec::new();
     loop {
         if let Some(tok) = it.peek() {
             if tok.token().same_kind(&BRACK_END) {
@@ -230,6 +236,7 @@ fn p_return<'a, T>(it: &mut Peekable<T>) -> Result<Return<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // Return -> return Expr;
     let expr = expr(it)?;
     advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
     Ok(Return { expr })
@@ -239,8 +246,10 @@ fn assign<'a, T>(it: &mut Peekable<T>, id: Identifier<'a>) -> Result<Assign<'a>,
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    // Assign -> id := Expr;
     advance_expecting(it, Token::Operator(Operator::Assignement))?;
     let expr = expr(it)?;
+    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
 
     Ok(Assign { id, expr })
 }
