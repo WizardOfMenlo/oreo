@@ -61,7 +61,6 @@ impl<'a> Iterator for LineScannerIt<'a> {
     }
 }
 
-
 fn parse_string(input: &str) -> (ScannedItem, usize) {
     let mut next_is_escape = false;
     let mut index = None;
@@ -70,13 +69,11 @@ fn parse_string(input: &str) -> (ScannedItem, usize) {
             next_is_escape = true;
         }
 
-        if next_is_escape {
-            next_is_escape = false;
-        }
-
         if !next_is_escape && ch == '"' {
             index = Some(i);
         }
+
+        next_is_escape = false;
     }
 
     match index {
@@ -117,6 +114,12 @@ mod tests {
     #[test]
     fn scan_example_multiline() {
         let res: Vec<_> = scan("(x <= > >= < y 99.88l8 )\nx ) ( >= y").collect();
+        assert_debug_snapshot!(res);
+    }
+
+    #[test]
+    fn scan_string_escaping() {
+        let res: Vec<_> = scan("\"String \\\"inside\\\" a string\"").collect();
         assert_debug_snapshot!(res);
     }
 

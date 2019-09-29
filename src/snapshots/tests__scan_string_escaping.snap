@@ -1,0 +1,12 @@
+---
+source: src/scanner.rs
+expression: res
+---
+[
+    Scanned {
+        inner: Str(
+            "String \\\"inside\\\" a string",
+        ),
+        line: 0,
+    },
+]
