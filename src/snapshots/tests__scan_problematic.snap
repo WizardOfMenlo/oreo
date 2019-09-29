@@ -11,7 +11,13 @@ expression: res
     },
     Scanned {
         inner: Rest(
-            "x\"something\"",
+            "x",
+        ),
+        line: 0,
+    },
+    Scanned {
+        inner: Str(
+            "something",
         ),
         line: 0,
     },
