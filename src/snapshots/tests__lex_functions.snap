@@ -35,6 +35,24 @@ expression: res
     },
     EnrichedToken {
         inner: Punctuation(
+            Comma,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Keyword(
+            Var,
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Identifier(
+            "y",
+        ),
+        line_no: 0,
+    },
+    EnrichedToken {
+        inner: Punctuation(
             BracketClose,
         ),
         line_no: 0,

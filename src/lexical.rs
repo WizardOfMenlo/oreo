@@ -223,7 +223,8 @@ mod tests {
 
     #[test]
     fn lex_functions() {
-        let res: Vec<_> = lexicalize(scan("procedure id(var x) begin return x; end")).collect();
+        let res: Vec<_> =
+            lexicalize(scan("procedure id(var x, var y) begin return x; end")).collect();
         assert_debug_snapshot!(res);
     }
 
