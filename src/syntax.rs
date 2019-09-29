@@ -64,7 +64,7 @@ pub struct FunctionDecl<'a> {
 
 #[derive(Debug)]
 pub struct Return<'a> {
-    pub expr: Expr<'a>
+    pub expr: Expr<'a>,
 }
 
 #[derive(Debug)]

@@ -20,7 +20,7 @@ impl<'a> Token<'a> {
     pub fn is_comment(&self) -> bool {
         match self {
             Token::Comment(_) => true,
-            _ => false
+            _ => false,
         }
     }
 

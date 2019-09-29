@@ -118,6 +118,12 @@ mod tests {
     }
 
     #[test]
+    fn scan_problematic() {
+        let res: Vec<_> = scan("var x\"something\"").collect();
+        assert_debug_snapshot!(res);
+    }
+
+    #[test]
     fn scan_real_life() {
         let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nprint \"enter the number of terms\";\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
         let res: Vec<_> = scan(input).collect();

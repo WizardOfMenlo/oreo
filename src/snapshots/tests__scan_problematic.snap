@@ -1,0 +1,18 @@
+---
+source: src/scanner.rs
+expression: res
+---
+[
+    Scanned {
+        inner: Rest(
+            "var",
+        ),
+        line: 0,
+    },
+    Scanned {
+        inner: Rest(
+            "x\"something\"",
+        ),
+        line: 0,
+    },
+]
