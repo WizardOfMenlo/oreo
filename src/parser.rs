@@ -271,16 +271,27 @@ where
     Ok(Assign { id, expr })
 }
 
+// Utility for getting the expr tail
+fn get_expr_tail<'a, T>(it: &mut Peekable<T>) -> Result<Option<Box<ExprPrime<'a>>>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    match it
+        .peek()
+        .map(|t| consts::POSSIBLE_EXPR_PRIME_STARTS.contains(t.token()))
+    {
+        Some(true) => Ok(Some(Box::new(expr_prime(it)?))),
+        _ => Ok(None),
+    }
+}
+
 fn expr<'a, T>(it: &mut Peekable<T>) -> Result<Expr<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
     let head = expr_head(it)?;
     let next = it.peek();
-    let tail = match next.map(|t| consts::POSSIBLE_EXPR_PRIME_STARTS.contains(t.token())) {
-        Some(true) => Some(Box::new(expr_prime(it)?)),
-        _ => None,
-    };
+    let tail = get_expr_tail(it)?;
 
     Ok(Expr { head, tail })
 }
@@ -328,14 +339,7 @@ where
     let operator = advance_expecting_one_of(it, consts::POSSIBLE_EXPR_PRIME_STARTS)?;
 
     let operand = expr(it)?;
-
-    let tail = match it
-        .peek()
-        .map(|t| consts::POSSIBLE_EXPR_PRIME_STARTS.contains(t.token()))
-    {
-        Some(true) => Some(Box::new(expr_prime(it)?)),
-        _ => None,
-    };
+    let tail = get_expr_tail(it)?;
 
     Ok(ExprPrime {
         operator: match operator.token() {

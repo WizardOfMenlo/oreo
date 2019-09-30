@@ -104,50 +104,5 @@ pub enum Unit<'a> {
 
 #[derive(Debug)]
 pub struct Bool<'a> {
-    head: BoolHead<'a>,
-    tail: Option<Box<BoolPrime<'a>>>,
-}
-
-#[derive(Debug)]
-pub enum BoolHead<'a> {
-    RelationalOperation(RelationalOperation<'a>),
-    Not(Box<Bool<'a>>),
-    BooleanLiteral(bool),
-}
-
-#[derive(Debug)]
-pub struct RelationalOperation<'a> {
-    head: RelationalExprHead<'a>,
-    exprtail: ExprPrime<'a>,
-    operation: RelationalExprOp,
-    right: Expr<'a>,
-}
-
-#[derive(Debug)]
-pub enum RelationalExprHead<'a> {
-    BracketedExpr(Box<Expr<'a>>),
-    Unit(Unit<'a>),
-}
-
-#[derive(Debug)]
-pub enum RelationalExprOp {
-    GreaterThan,
-    LesserThan,
-    GreaterEquals,
-    LesserEquals,
-    Equals,
-}
-
-#[derive(Debug)]
-pub enum RelationalOp {
-    ExprRelation(RelationalExprOp),
-    Or,
-    And,
-}
-
-#[derive(Debug)]
-pub struct BoolPrime<'a> {
-    head: ExprPrime<'a>,
-    operation: RelationalOp,
-    tail: Option<Box<BoolPrime<'a>>>,
+    s: std::marker::PhantomData<&'a usize>,
 }
