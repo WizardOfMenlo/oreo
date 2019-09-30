@@ -7,6 +7,42 @@ use std::iter::Peekable;
 pub(crate) type ExpToken = Token<'static>;
 pub(crate) type TokenList = &'static [ExpToken];
 
+pub(crate) mod consts {
+    use super::{ExpToken, TokenList};
+    use crate::tokens::*;
+
+    pub(crate) const ID: ExpToken = Token::Identifier("");
+    pub(crate) const INT: Token<'static> = Token::Literal(Literal::Integer(0));
+    pub(crate) const STRING: Token<'static> = Token::Literal(Literal::String(""));
+    pub(crate) const BOOL: ExpToken = Token::Literal(Literal::Boolean(false));
+
+    pub(crate) const END: ExpToken = Token::Keyword(Keyword::End);
+    pub(crate) const VAR: ExpToken = Token::Keyword(Keyword::Var);
+
+    pub(crate) const SEMICOLON: ExpToken = Token::Punctuation(Punctuation::Semicolon);
+    pub(crate) const B_OPEN: ExpToken = Token::Punctuation(Punctuation::BracketOpen);
+    pub(crate) const B_CLOSE: ExpToken = Token::Punctuation(Punctuation::BracketClose);
+
+    pub(crate) const POSSIBLE_STATEMENT_STARTS: TokenList = &[
+        Token::Keyword(Keyword::Var),
+        Token::Keyword(Keyword::If),
+        Token::Keyword(Keyword::Print),
+        Token::Keyword(Keyword::Println),
+        Token::Keyword(Keyword::Get),
+        Token::Keyword(Keyword::While),
+        Token::Keyword(Keyword::Procedure),
+        Token::Keyword(Keyword::Return),
+        ID,
+    ];
+
+    pub(crate) const POSSIBLE_EXPR_PRIME_STARTS: TokenList = &[
+        Token::Operator(Operator::Plus),
+        Token::Operator(Operator::Minus),
+        Token::Operator(Operator::Divide),
+        Token::Operator(Operator::Times),
+    ];
+}
+
 #[derive(Debug)]
 pub enum SyntaxError<'a> {
     ExpectedOneOfButFoundEOF(TokenList),
@@ -15,8 +51,6 @@ pub enum SyntaxError<'a> {
     ExpectedOneOfFound(TokenList, EnrichedToken<'a>),
     LogicalError,
 }
-
-pub(crate) const ID: ExpToken = Token::Identifier("");
 
 pub fn parse<'a>(
     it: impl Iterator<Item = EnrichedToken<'a>>,
@@ -33,7 +67,7 @@ where
     // Program -> program id; Compound
     advance_expecting(it, Token::Keyword(Keyword::Program))?;
     let id = advance_expecting_identifier(it)?;
-    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+    advance_expecting(it, consts::SEMICOLON)?;
     let compound = compound(it)?;
 
     Ok(Program { id, compound })
@@ -43,9 +77,10 @@ fn compound<'a, T>(it: &mut Peekable<T>) -> Result<Compound<'a>, SyntaxError<'a>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
+    use consts::END;
+
     // Compound -> Statement+
     advance_expecting(it, Token::Keyword(Keyword::Begin))?;
-    const END: ExpToken = Token::Keyword(Keyword::End);
     let mut statements = Vec::new();
     loop {
         if let Some(tok) = it.peek() {
@@ -68,19 +103,8 @@ where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
     // Statement -> Decl | If | Print | While | Procedure | Return | Assign
-    const POSSIBLE_STATEMENT_STARTS: TokenList = &[
-        Token::Keyword(Keyword::Var),
-        Token::Keyword(Keyword::If),
-        Token::Keyword(Keyword::Print),
-        Token::Keyword(Keyword::Println),
-        Token::Keyword(Keyword::Get),
-        Token::Keyword(Keyword::While),
-        Token::Keyword(Keyword::Procedure),
-        Token::Keyword(Keyword::Return),
-        ID,
-    ];
 
-    let matched = advance_expecting_one_of(it, POSSIBLE_STATEMENT_STARTS)?;
+    let matched = advance_expecting_one_of(it, consts::POSSIBLE_STATEMENT_STARTS)?;
     let token = matched.take_token();
     Ok(match token {
         Token::Keyword(Keyword::Var) => Statement::Decl(decl(it)?),
@@ -104,17 +128,14 @@ where
     let id = advance_expecting_identifier(it)?;
     let next = advance_expecting_one_of(
         it,
-        &[
-            Token::Punctuation(Punctuation::Semicolon),
-            Token::Operator(Operator::Assignement),
-        ],
+        &[consts::SEMICOLON, Token::Operator(Operator::Assignement)],
     )?;
 
     Ok(match next.token() {
         Token::Punctuation(Punctuation::Semicolon) => Decl { id, expr: None },
         Token::Operator(Operator::Assignement) => {
             let expr = Some(expr(it)?);
-            advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+            advance_expecting(it, consts::SEMICOLON)?;
             Decl { id, expr }
         }
         _ => return Err(SyntaxError::LogicalError),
@@ -126,18 +147,12 @@ where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
     // If -> if (Bool) then Compound; | if (Bool) then Compound else Compound;
-    advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
+    advance_expecting(it, consts::B_OPEN)?;
     let condition = p_bool(it)?;
-    advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
+    advance_expecting(it, consts::B_CLOSE)?;
     advance_expecting(it, Token::Keyword(Keyword::Then))?;
     let if_branch = compound(it)?;
-    let next = advance_expecting_one_of(
-        it,
-        &[
-            Token::Keyword(Keyword::Else),
-            Token::Punctuation(Punctuation::Semicolon),
-        ],
-    )?;
+    let next = advance_expecting_one_of(it, &[Token::Keyword(Keyword::Else), consts::SEMICOLON])?;
 
     let else_branch = match next.token() {
         Token::Keyword(Keyword::Else) => {
@@ -145,7 +160,8 @@ where
             advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
             Some(tmp)
         }
-        _ => None,
+        &consts::SEMICOLON => None,
+        _ => return Err(SyntaxError::LogicalError),
     };
 
     Ok(If {
@@ -168,7 +184,7 @@ where
         _ => return Err(SyntaxError::LogicalError),
     };
 
-    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+    advance_expecting(it, consts::SEMICOLON)?;
 
     Ok(print_stat)
 }
@@ -178,11 +194,11 @@ where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
     // While -> while (Bool) Compound;
-    advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
+    advance_expecting(it, consts::B_OPEN)?;
     let condition = p_bool(it)?;
-    advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
+    advance_expecting(it, consts::B_CLOSE)?;
     let compound = compound(it)?;
-    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+    advance_expecting(it, consts::SEMICOLON)?;
 
     Ok(While {
         condition,
@@ -196,25 +212,22 @@ where
 {
     // Procedure -> procedure id((var i,)*) begin Compound end
     let id = advance_expecting_identifier(it)?;
-    advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
-
-    const BRACK_END: Token<'static> = Token::Punctuation(Punctuation::BracketClose);
-    const VAR_KEY: Token<'static> = Token::Keyword(Keyword::Var);
+    advance_expecting(it, consts::B_OPEN)?;
 
     let mut args = Vec::new();
     loop {
         if let Some(tok) = it.peek() {
-            if tok.token().same_kind(&BRACK_END) {
+            if tok.token().same_kind(&consts::B_CLOSE) {
                 break;
             }
 
-            advance_expecting(it, VAR_KEY)?;
+            advance_expecting(it, consts::VAR)?;
             let arg_name = advance_expecting_identifier(it)?;
             args.push(arg_name);
 
             if it
                 .peek()
-                .map(|t| t.token().same_kind(&BRACK_END))
+                .map(|t| t.token().same_kind(&consts::B_CLOSE))
                 .unwrap_or(false)
             {
                 break;
@@ -222,11 +235,14 @@ where
 
             advance_expecting(it, Token::Punctuation(Punctuation::Comma))?;
         } else {
-            return Err(SyntaxError::ExpectedOneOfButFoundEOF(&[BRACK_END, VAR_KEY]));
+            return Err(SyntaxError::ExpectedOneOfButFoundEOF(&[
+                consts::B_CLOSE,
+                consts::VAR,
+            ]));
         }
     }
 
-    advance_expecting(it, BRACK_END)?;
+    advance_expecting(it, consts::B_CLOSE)?;
 
     let inner = compound(it)?;
 
@@ -239,7 +255,7 @@ where
 {
     // Return -> return Expr;
     let expr = expr(it)?;
-    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+    advance_expecting(it, consts::SEMICOLON)?;
     Ok(Return { expr })
 }
 
@@ -250,7 +266,7 @@ where
     // Assign -> id := Expr;
     advance_expecting(it, Token::Operator(Operator::Assignement))?;
     let expr = expr(it)?;
-    advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
+    advance_expecting(it, consts::SEMICOLON)?;
 
     Ok(Assign { id, expr })
 }
@@ -261,11 +277,8 @@ where
 {
     let head = expr_head(it)?;
     let next = it.peek();
-    let tail = match next.map(|t| t.token()) {
-        Some(Token::Operator(Operator::Plus))
-        | Some(Token::Operator(Operator::Minus))
-        | Some(Token::Operator(Operator::Times))
-        | Some(Token::Operator(Operator::Divide)) => Some(Box::new(expr_prime(it)?)),
+    let tail = match next.map(|t| consts::POSSIBLE_EXPR_PRIME_STARTS.contains(t.token())) {
+        Some(true) => Some(Box::new(expr_prime(it)?)),
         _ => None,
     };
 
@@ -278,10 +291,10 @@ where
 {
     let next = it.peek();
     match next.map(|t| t.token()) {
-        Some(Token::Punctuation(Punctuation::BracketOpen)) => {
-            advance_expecting(it, Token::Punctuation(Punctuation::BracketOpen))?;
+        Some(&consts::B_OPEN) => {
+            advance_expecting(it, consts::B_OPEN)?;
             let expr = expr(it)?;
-            advance_expecting(it, Token::Punctuation(Punctuation::BracketClose))?;
+            advance_expecting(it, consts::B_CLOSE)?;
             Ok(ExprHead::BracketedExpr(Box::new(expr)))
         }
         Some(Token::Literal(Literal::Integer(_)))
@@ -295,14 +308,11 @@ where
     }
 }
 
-const INT: Token<'static> = Token::Literal(Literal::Integer(0));
-const STRING: Token<'static> = Token::Literal(Literal::String(""));
-
 fn unit<'a, T>(it: &mut Peekable<T>) -> Result<Unit<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
-    let next = advance_expecting_one_of(it, &[INT, STRING, ID])?;
+    let next = advance_expecting_one_of(it, &[consts::INT, consts::STRING, consts::ID])?;
     Ok(match next.take_token() {
         Token::Literal(Literal::Integer(i)) => Unit::Int(i),
         Token::Literal(Literal::String(s)) => Unit::String(s),
@@ -315,23 +325,15 @@ fn expr_prime<'a, T>(it: &mut Peekable<T>) -> Result<ExprPrime<'a>, SyntaxError<
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
-    let operator = advance_expecting_one_of(
-        it,
-        &[
-            Token::Operator(Operator::Plus),
-            Token::Operator(Operator::Minus),
-            Token::Operator(Operator::Times),
-            Token::Operator(Operator::Divide),
-        ],
-    )?;
+    let operator = advance_expecting_one_of(it, consts::POSSIBLE_EXPR_PRIME_STARTS)?;
 
     let operand = expr(it)?;
 
-    let tail = match it.peek().map(|t| t.token()) {
-        Some(Token::Operator(Operator::Plus))
-        | Some(Token::Operator(Operator::Minus))
-        | Some(Token::Operator(Operator::Times))
-        | Some(Token::Operator(Operator::Divide)) => Some(Box::new(expr_prime(it)?)),
+    let tail = match it
+        .peek()
+        .map(|t| consts::POSSIBLE_EXPR_PRIME_STARTS.contains(t.token()))
+    {
+        Some(true) => Some(Box::new(expr_prime(it)?)),
         _ => None,
     };
 

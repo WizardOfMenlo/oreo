@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Token<'a> {
     Keyword(Keyword),
     Punctuation(Punctuation),
@@ -45,7 +45,7 @@ impl<'a> Token<'a> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Keyword {
     Program,
     Begin,
@@ -62,7 +62,7 @@ pub enum Keyword {
     Return,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Punctuation {
     Comma,
     Semicolon,
@@ -70,7 +70,7 @@ pub enum Punctuation {
     BracketClose,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Operator {
     Assignement,
     Plus,
@@ -87,14 +87,14 @@ pub enum Operator {
     Not,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Literal<'a> {
     Integer(isize),
     Boolean(bool),
     String(&'a str),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LexicalError<'a> {
     ExpectedDoubleEqualsEOF,
     ExpectedAssignementEOF,

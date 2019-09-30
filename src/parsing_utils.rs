@@ -1,5 +1,5 @@
 use crate::lexical::EnrichedToken;
-use crate::parser::{ExpToken, SyntaxError, TokenList, ID};
+use crate::parser::{consts, ExpToken, SyntaxError, TokenList};
 use crate::syntax::*;
 use crate::tokens::*;
 
@@ -46,7 +46,7 @@ pub fn get_id(id: EnrichedToken) -> Result<Identifier, SyntaxError> {
     let backup = id.clone();
     match id.take_token() {
         Token::Identifier(s) => Ok(Identifier(s)),
-        _ => Err(SyntaxError::ExpectedFound(ID, backup)),
+        _ => Err(SyntaxError::ExpectedFound(consts::ID, backup)),
     }
 }
 
@@ -57,6 +57,6 @@ pub fn advance_expecting_identifier<'a>(
     let next = it.next();
     match next {
         Some(tok) => get_id(tok),
-        None => Err(SyntaxError::ExpectedButFoundEOF(ID)),
+        None => Err(SyntaxError::ExpectedButFoundEOF(consts::ID)),
     }
 }
