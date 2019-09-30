@@ -110,16 +110,16 @@ impl<'a> Iterator for LexicalIt<'a> {
             ScannedItem::Str(s) => {
                 self.terminate = true;
                 return Some(Token::Literal(Literal::String(s)));
-            },
+            }
 
             ScannedItem::Comment(s) => {
                 self.terminate = true;
-                return Some(Token::Comment(s))
+                return Some(Token::Comment(s));
             }
 
             ScannedItem::UnclosedComment(s) => {
                 self.terminate = true;
-                return Some(Token::Error(LexicalError::UnclosedComment(s)))
+                return Some(Token::Error(LexicalError::UnclosedComment(s)));
             }
 
             ScannedItem::UnclosedStr(s) => {
