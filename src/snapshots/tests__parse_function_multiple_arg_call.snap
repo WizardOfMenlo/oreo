@@ -31,7 +31,22 @@ Ok(
                                                             ),
                                                         ),
                                                     ),
-                                                    tail: None,
+                                                    tail: Some(
+                                                        ExprPrime {
+                                                            operator: Plus,
+                                                            operand: Expr {
+                                                                head: Unit(
+                                                                    Identifier(
+                                                                        Identifier(
+                                                                            "y",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                                tail: None,
+                                                            },
+                                                            tail: None,
+                                                        },
+                                                    ),
                                                 },
                                                 Expr {
                                                     head: Unit(
@@ -41,7 +56,22 @@ Ok(
                                                             ),
                                                         ),
                                                     ),
-                                                    tail: None,
+                                                    tail: Some(
+                                                        ExprPrime {
+                                                            operator: Plus,
+                                                            operand: Expr {
+                                                                head: Unit(
+                                                                    Identifier(
+                                                                        Identifier(
+                                                                            "x",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                                tail: None,
+                                                            },
+                                                            tail: None,
+                                                        },
+                                                    ),
                                                 },
                                             ],
                                         },

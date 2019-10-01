@@ -632,15 +632,22 @@ mod tests {
     }
 
     #[test]
+    fn parse_function_no_arg_call() {
+        let input = "program fib; begin var x := f(); end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
     fn parse_function_single_arg_call() {
-        let input = "program fib; begin var x := id(x); end";
+        let input = "program fib; begin var x := id(x*y); end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_function_multiple_arg_call() {
-        let input = "program fib; begin var x := sum(x, y); end";
+        let input = "program fib; begin var x := sum(x+y, y+x); end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }

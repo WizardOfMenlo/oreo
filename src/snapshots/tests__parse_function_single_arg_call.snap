@@ -31,7 +31,22 @@ Ok(
                                                             ),
                                                         ),
                                                     ),
-                                                    tail: None,
+                                                    tail: Some(
+                                                        ExprPrime {
+                                                            operator: Times,
+                                                            operand: Expr {
+                                                                head: Unit(
+                                                                    Identifier(
+                                                                        Identifier(
+                                                                            "y",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                                tail: None,
+                                                            },
+                                                            tail: None,
+                                                        },
+                                                    ),
                                                 },
                                             ],
                                         },
