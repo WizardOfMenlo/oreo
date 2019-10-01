@@ -100,6 +100,13 @@ pub enum Unit<'a> {
     Int(isize),
     String(&'a str),
     Identifier(Identifier<'a>),
+    FunctionCall(FunctionCall<'a>),
+}
+
+#[derive(Debug)]
+pub struct FunctionCall<'a> {
+    pub id: Identifier<'a>,
+    pub args: Vec<Expr<'a>>,
 }
 
 #[derive(Debug)]

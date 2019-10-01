@@ -350,9 +350,53 @@ where
     Ok(match next.take_token() {
         Token::Literal(Literal::Integer(i)) => Unit::Int(i),
         Token::Literal(Literal::String(s)) => Unit::String(s),
-        Token::Identifier(s) => Unit::Identifier(Identifier(s)),
+        Token::Identifier(s) => {
+            let next = it.peek().map(|t| t.token());
+            match next {
+                Some(&consts::B_OPEN) => Unit::FunctionCall(function_call(it, Identifier(s))?),
+                _ => Unit::Identifier(Identifier(s)),
+            }
+        }
         _ => return Err(SyntaxError::LogicalError),
     })
+}
+
+fn function_call<'a, T>(
+    it: &mut Peekable<T>,
+    id: Identifier<'a>,
+) -> Result<FunctionCall<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    advance_expecting(it, consts::B_OPEN)?;
+
+    let mut args = Vec::new();
+    loop {
+        if let Some(tok) = it.peek() {
+            if tok.token().same_kind(&consts::B_CLOSE) {
+                break;
+            }
+
+            let expr = expr(it)?;
+            args.push(expr);
+
+            if it
+                .peek()
+                .map(|t| t.token().same_kind(&consts::B_CLOSE))
+                .unwrap_or(false)
+            {
+                break;
+            }
+
+            advance_expecting(it, Token::Punctuation(Punctuation::Comma))?;
+        } else {
+            return Err(SyntaxError::ExpectedButFoundEOF(consts::B_CLOSE));
+        }
+    }
+
+    advance_expecting(it, consts::B_CLOSE)?;
+
+    Ok(FunctionCall { id, args })
 }
 
 fn expr_prime<'a, T>(it: &mut Peekable<T>) -> Result<ExprPrime<'a>, SyntaxError<'a>>
@@ -583,6 +627,20 @@ mod tests {
     #[test]
     fn parse_function_mult_arg() {
         let input = "program fib; begin procedure sum(var x, var y) begin return y; end end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_function_single_arg_call() {
+        let input = "program fib; begin var x := id(x); end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_function_multiple_arg_call() {
+        let input = "program fib; begin var x := sum(x, y); end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
