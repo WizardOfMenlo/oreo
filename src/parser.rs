@@ -23,6 +23,14 @@ pub(crate) mod consts {
     pub(crate) const B_OPEN: ExpToken = Token::Punctuation(Punctuation::BracketOpen);
     pub(crate) const B_CLOSE: ExpToken = Token::Punctuation(Punctuation::BracketClose);
 
+    pub(crate) const RELATIONAL_OPS: TokenList = &[
+        Token::Operator(Operator::LesserOrEquals),
+        Token::Operator(Operator::GreaterOrEquals),
+        Token::Operator(Operator::GreaterThan),
+        Token::Operator(Operator::LesserThan),
+        Token::Operator(Operator::Equals),
+    ];
+
     pub(crate) const POSSIBLE_STATEMENT_STARTS: TokenList = &[
         Token::Keyword(Keyword::Var),
         Token::Keyword(Keyword::If),
@@ -40,6 +48,20 @@ pub(crate) mod consts {
         Token::Operator(Operator::Minus),
         Token::Operator(Operator::Divide),
         Token::Operator(Operator::Times),
+    ];
+
+    pub(crate) const POSSIBLE_BOOL_PRIME_STARTS: TokenList = &[
+        Token::Operator(Operator::Plus),
+        Token::Operator(Operator::Minus),
+        Token::Operator(Operator::Divide),
+        Token::Operator(Operator::Times),
+        Token::Operator(Operator::And),
+        Token::Operator(Operator::Or),
+        Token::Operator(Operator::LesserOrEquals),
+        Token::Operator(Operator::GreaterOrEquals),
+        Token::Operator(Operator::GreaterThan),
+        Token::Operator(Operator::LesserThan),
+        Token::Operator(Operator::Equals),
     ];
 }
 
@@ -94,6 +116,8 @@ where
             return Err(SyntaxError::ExpectedButFoundEOF(END));
         }
     }
+
+    advance_expecting(it, END)?;
 
     Ok(Compound { statements })
 }
@@ -272,7 +296,7 @@ where
 }
 
 // Utility for getting the expr tail
-fn get_expr_tail<'a, T>(it: &mut Peekable<T>) -> Result<Option<Box<ExprPrime<'a>>>, SyntaxError<'a>>
+fn get_expr_tail<'a, T>(it: &mut Peekable<T>) -> Result<Option<ExprPrime<'a>>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -280,7 +304,7 @@ where
         .peek()
         .map(|t| consts::POSSIBLE_EXPR_PRIME_STARTS.contains(t.token()))
     {
-        Some(true) => Ok(Some(Box::new(expr_prime(it)?))),
+        Some(true) => Ok(Some(expr_prime(it)?)),
         _ => Ok(None),
     }
 }
@@ -290,8 +314,7 @@ where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
     let head = expr_head(it)?;
-    let next = it.peek();
-    let tail = get_expr_tail(it)?;
+    let tail = get_expr_tail(it)?.map(Box::new);
 
     Ok(Expr { head, tail })
 }
@@ -339,7 +362,7 @@ where
     let operator = advance_expecting_one_of(it, consts::POSSIBLE_EXPR_PRIME_STARTS)?;
 
     let operand = expr(it)?;
-    let tail = get_expr_tail(it)?;
+    let tail = get_expr_tail(it)?.map(Box::new);
 
     Ok(ExprPrime {
         operator: match operator.token() {
@@ -354,11 +377,148 @@ where
     })
 }
 
+fn get_bool_tail<'a, T>(it: &mut Peekable<T>) -> Result<Option<Box<BoolTail<'a>>>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    Ok(
+        match it
+            .peek()
+            .map(|t| t.token())
+            .map(|t| consts::POSSIBLE_BOOL_PRIME_STARTS.contains(t))
+        {
+            Some(true) => Some(Box::new(boolean_tail(it)?)),
+            _ => None,
+        },
+    )
+}
+
 fn p_bool<'a, T>(it: &mut Peekable<T>) -> Result<Bool<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
-    Err(SyntaxError::LogicalError)
+    let head = Box::new(boolean_head(it)?);
+
+    let tail = get_bool_tail(it)?;
+
+    Ok(Bool { head, tail })
+}
+
+fn boolean_head<'a, T>(it: &mut Peekable<T>) -> Result<BooleanHead<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let next = it.peek();
+    Ok(match next.cloned().map(|t| t.take_token()) {
+        Some(Token::Operator(Operator::Not)) => {
+            advance_expecting(it, Token::Operator(Operator::Not))?;
+            BooleanHead::Not(p_bool(it)?)
+        }
+        Some(Token::Literal(Literal::Boolean(b))) => {
+            advance_expecting(it, consts::BOOL)?;
+            BooleanHead::BooleanLiteral(b)
+        }
+        _ => BooleanHead::RelationalOperation(relational_operation(it)?),
+    })
+}
+
+fn relational_operation<'a, T>(
+    it: &mut Peekable<T>,
+) -> Result<RelationalOperation<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let head = boolean_unit(it)?;
+    let tail = relational_operation_tail(it)?;
+
+    Ok(RelationalOperation { head, tail })
+}
+
+fn boolean_unit<'a, T>(it: &mut Peekable<T>) -> Result<BooleanUnit<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let next = it.peek();
+    Ok(match next.map(|t| t.token()) {
+        Some(&consts::B_OPEN) => {
+            advance_expecting(it, consts::B_OPEN)?;
+            let expr = expr(it)?;
+            advance_expecting(it, consts::B_CLOSE)?;
+            BooleanUnit::BracketedExpr(expr)
+        }
+        _ => BooleanUnit::Unit(unit(it)?),
+    })
+}
+
+fn relational_operation_tail<'a, T>(
+    it: &mut Peekable<T>,
+) -> Result<RelationalOperationTail<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let opt_lhs_tail = get_expr_tail(it)?;
+
+    let rel = advance_expecting_one_of(it, consts::RELATIONAL_OPS)?;
+    let operator = match rel.token() {
+        Token::Operator(Operator::GreaterThan) => RelationalOperator::GreaterThan,
+        Token::Operator(Operator::LesserThan) => RelationalOperator::LesserThan,
+        Token::Operator(Operator::GreaterOrEquals) => RelationalOperator::GreaterOrEquals,
+        Token::Operator(Operator::LesserOrEquals) => RelationalOperator::LesserOrEquals,
+        Token::Operator(Operator::Equals) => RelationalOperator::Equals,
+        _ => return Err(SyntaxError::LogicalError),
+    };
+
+    let rhs = expr(it)?;
+
+    Ok(RelationalOperationTail {
+        opt_lhs_tail,
+        operator,
+        rhs,
+    })
+}
+
+fn boolean_tail<'a, T>(it: &mut Peekable<T>) -> Result<BoolTail<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let head = bool_tail_head_expr(it)?;
+    let tail = get_bool_tail(it)?;
+
+    Ok(BoolTail { head, tail })
+}
+
+fn bool_tail_head_expr<'a, T>(it: &mut Peekable<T>) -> Result<BoolTailHeadExpr<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let next = it.peek();
+    Ok(match next.map(|t| t.token()) {
+        Some(Token::Operator(Operator::And)) | Some(Token::Operator(Operator::Or)) => {
+            BoolTailHeadExpr::BooleanOperation(boolean_operation(it)?)
+        }
+        _ => BoolTailHeadExpr::RelationalOperationTail(relational_operation_tail(it)?),
+    })
+}
+
+fn boolean_operation<'a, T>(it: &mut Peekable<T>) -> Result<BooleanOperation<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let next = advance_expecting_one_of(
+        it,
+        &[
+            Token::Operator(Operator::Or),
+            Token::Operator(Operator::And),
+        ],
+    )?;
+    let op = match next.token() {
+        Token::Operator(Operator::Or) => BooleanOperator::Or,
+        Token::Operator(Operator::And) => BooleanOperator::And,
+        _ => return Err(SyntaxError::LogicalError),
+    };
+    let rhs = p_bool(it)?;
+
+    Ok(BooleanOperation { op, rhs })
 }
 
 #[cfg(test)]
@@ -428,8 +588,44 @@ mod tests {
     }
 
     #[test]
+    fn parse_condition() {
+        let input = r#"
+        program x;
+        begin
+            while (c < n)
+            begin
+                c := c + 1;
+            end;
+        end
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
     fn parse_full() {
-        let input = "program fib;\r\nbegin\r\nvar n;\r\nvar first := 0;\r\nvar second :=1;\r\nvar next;\r\nvar c :=0 ;\r\nprint \"enter the number of terms\";\r\nget n;\r\nwhile ( c < n)\r\nbegin\r\nif ( c <= 1)\r\nthen begin next := c; end\r\nelse begin\r\n next := first + second;\r\n second := next;\r\nend\r\nprint next;\r\nc := c + 1;\r\nend\r\nend\r\n";
+        let input = r#"
+program fib;
+begin
+    var n;
+    var first := 0;
+    var second :=1;
+    var next;
+    var c :=0 ;
+    print "enter the number of terms";
+    get n;
+    while ( c < n)
+        begin
+        if ( c <= 1)
+        then begin next := c; end
+        else begin
+            next := first + second;
+            second := next;
+        end;
+    print next;
+    c := c + 1;
+    end;
+end"#;
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed)
     }

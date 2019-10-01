@@ -1,0 +1,81 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Ok(
+    Program {
+        id: Identifier(
+            "x",
+        ),
+        compound: Compound {
+            statements: [
+                While(
+                    While {
+                        condition: Bool {
+                            head: RelationalOperation(
+                                RelationalOperation {
+                                    head: Unit(
+                                        Identifier(
+                                            Identifier(
+                                                "c",
+                                            ),
+                                        ),
+                                    ),
+                                    tail: RelationalOperationTail {
+                                        opt_lhs_tail: None,
+                                        operator: LesserThan,
+                                        rhs: Expr {
+                                            head: Unit(
+                                                Identifier(
+                                                    Identifier(
+                                                        "n",
+                                                    ),
+                                                ),
+                                            ),
+                                            tail: None,
+                                        },
+                                    },
+                                },
+                            ),
+                            tail: None,
+                        },
+                        compound: Compound {
+                            statements: [
+                                Assign(
+                                    Assign {
+                                        id: Identifier(
+                                            "c",
+                                        ),
+                                        expr: Expr {
+                                            head: Unit(
+                                                Identifier(
+                                                    Identifier(
+                                                        "c",
+                                                    ),
+                                                ),
+                                            ),
+                                            tail: Some(
+                                                ExprPrime {
+                                                    operator: Plus,
+                                                    operand: Expr {
+                                                        head: Unit(
+                                                            Int(
+                                                                1,
+                                                            ),
+                                                        ),
+                                                        tail: None,
+                                                    },
+                                                    tail: None,
+                                                },
+                                            ),
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    },
+                ),
+            ],
+        },
+    },
+)
