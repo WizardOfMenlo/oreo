@@ -1,0 +1,43 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Err(
+    ExpectedOneOfFound(
+        [
+            Keyword(
+                Var,
+            ),
+            Keyword(
+                If,
+            ),
+            Keyword(
+                Print,
+            ),
+            Keyword(
+                Println,
+            ),
+            Keyword(
+                Get,
+            ),
+            Keyword(
+                While,
+            ),
+            Keyword(
+                Procedure,
+            ),
+            Keyword(
+                Return,
+            ),
+            Identifier(
+                "",
+            ),
+        ],
+        EnrichedToken {
+            inner: Punctuation(
+                Semicolon,
+            ),
+            line_no: 10,
+        },
+    ),
+)

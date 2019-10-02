@@ -1,0 +1,31 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Err(
+    ExpectedOneOfFound(
+        [
+            Literal(
+                Integer(
+                    0,
+                ),
+            ),
+            Literal(
+                String(
+                    "",
+                ),
+            ),
+            Identifier(
+                "",
+            ),
+        ],
+        EnrichedToken {
+            inner: Error(
+                UnclosedString(
+                    "enter the number of terms;",
+                ),
+            ),
+            line_no: 12,
+        },
+    ),
+)

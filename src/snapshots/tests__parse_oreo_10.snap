@@ -1,0 +1,19 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Err(
+    ExpectedFound(
+        Identifier(
+            "",
+        ),
+        EnrichedToken {
+            inner: Literal(
+                Integer(
+                    99,
+                ),
+            ),
+            line_no: 10,
+        },
+    ),
+)

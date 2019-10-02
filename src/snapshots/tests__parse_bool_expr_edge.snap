@@ -1,0 +1,17 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Err(
+    ExpectedFound(
+        Punctuation(
+            Semicolon,
+        ),
+        EnrichedToken {
+            inner: Operator(
+                LesserThan,
+            ),
+            line_no: 3,
+        },
+    ),
+)

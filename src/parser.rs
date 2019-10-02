@@ -89,7 +89,6 @@ where
     // Program -> program id; Compound
     advance_expecting(it, Token::Keyword(Keyword::Program))?;
     let id = advance_expecting_identifier(it)?;
-    advance_expecting(it, consts::SEMICOLON)?;
     let compound = compound(it)?;
 
     Ok(Program { id, compound })
@@ -591,63 +590,63 @@ mod tests {
 
     #[test]
     fn parse_minimal_no_bool_no_expr() {
-        let input = "program fib; begin var n; end";
+        let input = "program fib begin var n; end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_minimal_assignments() {
-        let input = "program fib; begin var n := \"Hello\"; var m := 2; var s := (2); end";
+        let input = "program fib begin var n := \"Hello\"; var m := 2; var s := (2); end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_print_simple() {
-        let input = "program fib; begin print \"Hello\\n\"; println 2; get x; end";
+        let input = "program fib begin print \"Hello\\n\"; println 2; get x; end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_function_no_args() {
-        let input = "program fib; begin procedure main() begin return 1; end end";
+        let input = "program fib begin procedure main() begin return 1; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_function_single_arg() {
-        let input = "program fib; begin procedure id(var x) begin return x; end end";
+        let input = "program fib begin procedure id(var x) begin return x; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_function_mult_arg() {
-        let input = "program fib; begin procedure sum(var x, var y) begin return y; end end";
+        let input = "program fib begin procedure sum(var x, var y) begin return y; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_function_no_arg_call() {
-        let input = "program fib; begin var x := f(); end";
+        let input = "program fib begin var x := f(); end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_function_single_arg_call() {
-        let input = "program fib; begin var x := id(x*y); end";
+        let input = "program fib begin var x := id(x*y); end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_function_multiple_arg_call() {
-        let input = "program fib; begin var x := sum(x+y, y+x); end";
+        let input = "program fib begin var x := sum(x+y, y+x); end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
@@ -655,7 +654,7 @@ mod tests {
     #[test]
     fn parse_condition() {
         let input = r#"
-        program x;
+        program x
         begin
             while (c < n)
             begin
@@ -668,9 +667,36 @@ mod tests {
     }
 
     #[test]
+    fn parse_condition_nested() {
+        let input = r#"
+        program x
+        begin
+            while (c < (n < 1))
+            begin
+                c := c + 1;
+            end;
+        end
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_bool_expr_edge() {
+        let input = r#"
+        program x
+        begin
+            var c := 0 < (c < 1);
+        end
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
     fn parse_full() {
         let input = r#"
-program fib;
+program fib
 begin
     var n;
     var first := 0;
@@ -691,6 +717,343 @@ begin
     c := c + 1;
     end;
 end"#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_1() {
+        let input = r#"
+        {- this should parse without errors -}
+program test
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var c :=0 ; 
+	
+    print "enter the number of terms";
+    
+    get n;  
+    
+    while ( first < (second > 32))
+    begin
+
+       if ( true ) then begin n := 5;  end
+       			   else begin n := 46; end ;
+                        
+                                  
+    c := c + 1;	    
+	end;
+end    
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_2() {
+        let input = r#"
+        {- missing a semi colon -}
+program test
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var c :=0  
+	
+    print "enter the number of terms";
+    
+    get n;  
+    
+    while ( first < (second > 32))
+    begin
+
+       if ( true ) then begin n := 5;  end
+       			   else begin n := 46; end;
+                        
+                                  
+    c := c + 1;	    
+	end;
+end     
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_3() {
+        let input = r#"
+        {- 2 semi colons -}
+program test
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var c :=0;;
+	
+    print "enter the number of terms";
+    
+    get n;  
+    
+    while ( first < (second > 32))
+    begin
+
+       if ( true ) then begin n := 5;  end
+       			   else begin n := 46; end;
+                        
+                                  
+    c := c + 1;	    
+	end;
+end     
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_4() {
+        let input = r#"
+        {- missing bracket -}
+program test
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var c :=0;
+	
+    print "enter the number of terms";
+    
+    get n;  
+    
+    while ( first < (second > 32)
+    begin
+
+       if ( true ) then begin n := 5;  end
+       			   else begin n := 46; end
+                        ;
+                                  
+    c := c + 1;	    
+	end;
+end     
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_5() {
+        let input = r#"
+        {- missing end -}
+program test5
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var c :=0;
+	
+    print "enter the number of terms";
+    
+    get n;  
+    
+    while ( first < (second > 32)  )
+    begin
+
+       if ( true ) then begin n := 5;  end
+       			   else begin n := 46; end; 
+                        
+                                  
+    c := c + 1;	    
+	
+end    
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_6() {
+        let input = r#"
+        {- ambiguous expression in if -}
+program test6
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var c :=0;
+	
+    print "enter the number of terms";
+    
+    get n;  
+    
+    while ( first < (second > 32)  )
+    begin
+
+       if ( not false or true ) then begin n := 5;  end
+       			        else begin n := 46; end;
+                        
+                                  
+    c := c + 1;	    
+	end;
+end    
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_7() {
+        let input = r#"
+        {- string not closed -}
+program test
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var c :=0;
+	
+    print "enter the number of terms;
+    
+    get n;  
+    
+    while ( first < (second > 32)  )
+    begin
+
+       if ( 1 > 2 ) then begin n := 5;  end
+       			   else begin n := 46; end;
+                        
+                                  
+    c := c + 1;	    
+	end;
+end       
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_8() {
+        let input = r#"
+        {- will parse OK -}
+program test
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var c :=0;
+	
+    print "enter the number of terms";
+                 {- comment in body -}
+    get n;  
+    
+    while ( first < (second > 32)  )
+    begin
+
+       if ( 42 < 100 ) then begin n := 5;  end
+       			   else begin n := 46; end;
+                        {- comment
+                        over
+                        multiple 
+                        lines -}
+                                  
+    c := c + 1;	    
+	end;
+end    
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_9() {
+        let input = r#"{- non bool in if -}
+program test
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var c :=0;
+	
+    print "enter the number of terms";
+                 {- comment in body -}
+    get n;  
+    
+    while ( first < (second > 32)  )
+    begin
+
+       if ( 42 ) then begin n := 5;  end
+       			   else begin n := 46; end;
+                        {- comment
+                        over
+                        multiple 
+                        lines -}
+                                  
+    c := c + 1;	    
+	end;
+end    "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed)
+    }
+
+    #[test]
+    fn parse_oreo_10() {
+        let input = r#"
+        {- invalid ID -}
+program test10
+                                   
+begin                              
+                                   
+	var n;
+	var first := 0;  
+	var second :=1; 
+	var next;                           
+	var 99 :=0;
+	
+    print "enter the number of terms";
+                 {- comment in body -}
+    get n;  
+    
+    while ( first < (second > 32)  )
+    begin
+
+       if ( not false) then begin n := 5;  end
+       			   else begin n := 46; end;
+                        {- comment
+                        over
+                        multiple 
+                        lines -}
+                                  
+    c := c + 1;	    
+	end;
+end       
+        "#;
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed)
     }
