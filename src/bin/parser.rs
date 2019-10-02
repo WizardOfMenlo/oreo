@@ -6,7 +6,7 @@ fn main() {
     let input = r#"
         program x
         begin
-            if (id1 < (id2 < id3)) then begin x := 1 end;
+            var x := a < b;
         end
         "#;
 
