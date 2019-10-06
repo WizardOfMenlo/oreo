@@ -5,18 +5,26 @@ expression: parsed
 Err(
     ExpectedOneOfFound(
         [
-            Literal(
-                Integer(
-                    0,
-                ),
+            Identifier(
+                "",
+            ),
+            Punctuation(
+                BracketOpen,
             ),
             Literal(
                 String(
                     "",
                 ),
             ),
-            Identifier(
-                "",
+            Literal(
+                Integer(
+                    0,
+                ),
+            ),
+            Literal(
+                Boolean(
+                    false,
+                ),
             ),
         ],
         EnrichedToken {

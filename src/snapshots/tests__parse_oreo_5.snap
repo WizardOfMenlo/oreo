@@ -3,15 +3,9 @@ source: src/parser.rs
 expression: parsed
 ---
 Err(
-    ExpectedFound(
+    ExpectedButFoundEOF(
         Punctuation(
-            BracketClose,
+            Semicolon,
         ),
-        EnrichedToken {
-            inner: Operator(
-                GreaterThan,
-            ),
-            line_no: 16,
-        },
     ),
 )

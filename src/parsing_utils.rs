@@ -2,6 +2,7 @@ use crate::lexical::EnrichedToken;
 use crate::parser::{consts, ExpToken, SyntaxError, TokenList};
 use crate::syntax::*;
 use crate::tokens::*;
+use std::iter::Peekable;
 
 #[must_use]
 pub fn advance_expecting<'a>(
@@ -58,5 +59,20 @@ pub fn advance_expecting_identifier<'a>(
     match next {
         Some(tok) => get_id(tok),
         None => Err(SyntaxError::ExpectedButFoundEOF(consts::ID)),
+    }
+}
+
+pub fn get_tail<'a, F, R, I>(
+    it: &mut Peekable<I>,
+    possible_starts: TokenList,
+    func: F,
+) -> Result<Option<R>, SyntaxError<'a>>
+where
+    I: Iterator<Item = EnrichedToken<'a>>,
+    F: Fn(&mut Peekable<I>) -> Result<R, SyntaxError<'a>>,
+{
+    match it.peek().map(|t| possible_starts.contains(t.token())) {
+        Some(true) => Ok(Some(func(it)?)),
+        _ => Ok(None),
     }
 }

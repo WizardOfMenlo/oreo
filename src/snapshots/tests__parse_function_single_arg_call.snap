@@ -16,42 +16,57 @@ Ok(
                         ),
                         expr: Some(
                             Expr {
-                                head: Unit(
-                                    FunctionCall(
-                                        FunctionCall {
-                                            id: Identifier(
-                                                "id",
-                                            ),
-                                            args: [
-                                                Expr {
-                                                    head: Unit(
-                                                        Identifier(
-                                                            Identifier(
-                                                                "x",
-                                                            ),
+                                head: Term {
+                                    head: Factor {
+                                        head: Product {
+                                            head: Unit(
+                                                FunctionCall(
+                                                    FunctionCall {
+                                                        id: Identifier(
+                                                            "id",
                                                         ),
-                                                    ),
-                                                    tail: Some(
-                                                        ExprPrime {
-                                                            operator: Times,
-                                                            operand: Expr {
-                                                                head: Unit(
-                                                                    Identifier(
-                                                                        Identifier(
-                                                                            "y",
-                                                                        ),
-                                                                    ),
-                                                                ),
+                                                        args: [
+                                                            Expr {
+                                                                head: Term {
+                                                                    head: Factor {
+                                                                        head: Product {
+                                                                            head: Unit(
+                                                                                Identifier(
+                                                                                    Identifier(
+                                                                                        "x",
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                            tail: Some(
+                                                                                ProductPrime {
+                                                                                    op: Times,
+                                                                                    rhs: Unit(
+                                                                                        Identifier(
+                                                                                            Identifier(
+                                                                                                "y",
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                    tail: None,
+                                                                                },
+                                                                            ),
+                                                                        },
+                                                                        tail: None,
+                                                                    },
+                                                                    tail: None,
+                                                                },
                                                                 tail: None,
                                                             },
-                                                            tail: None,
-                                                        },
-                                                    ),
-                                                },
-                                            ],
+                                                        ],
+                                                    },
+                                                ),
+                                            ),
+                                            tail: None,
                                         },
-                                    ),
-                                ),
+                                        tail: None,
+                                    },
+                                    tail: None,
+                                },
                                 tail: None,
                             },
                         ),

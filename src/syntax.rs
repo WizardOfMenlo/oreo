@@ -1,18 +1,18 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Identifier<'a>(pub(crate) &'a str);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Program<'a> {
     pub id: Identifier<'a>,
     pub compound: Compound<'a>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Compound<'a> {
     pub statements: Vec<Statement<'a>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Statement<'a> {
     Decl(Decl<'a>),
     Print(Print<'a>),
@@ -23,126 +23,64 @@ pub enum Statement<'a> {
     Return(Return<'a>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Decl<'a> {
     pub id: Identifier<'a>,
     pub expr: Option<Expr<'a>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Print<'a> {
     Print(Expr<'a>),
     Println(Expr<'a>),
     Get(Identifier<'a>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct While<'a> {
-    pub condition: Bool<'a>,
+    pub condition: Expr<'a>,
     pub compound: Compound<'a>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct If<'a> {
-    pub condition: Bool<'a>,
+    pub condition: Expr<'a>,
     pub if_branch: Compound<'a>,
     pub else_branch: Option<Compound<'a>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Assign<'a> {
     pub id: Identifier<'a>,
     pub expr: Expr<'a>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FunctionDecl<'a> {
     pub id: Identifier<'a>,
     pub args: Vec<Identifier<'a>>,
     pub inner: Compound<'a>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Return<'a> {
     pub expr: Expr<'a>,
 }
 
-#[derive(Debug)]
-pub struct Expr<'a> {
-    pub head: ExprHead<'a>,
-    pub tail: Option<Box<ExprPrime<'a>>>,
-}
-
-#[derive(Debug)]
-pub enum ExprHead<'a> {
-    Boolean(Box<Bool<'a>>),
-    BracketedExpr(Box<Expr<'a>>),
-    Unit(Unit<'a>),
-}
-
-#[derive(Debug)]
-pub struct ExprPrime<'a> {
-    pub operator: BinaryExprOp,
-    pub operand: Expr<'a>,
-    pub tail: Option<Box<ExprPrime<'a>>>,
-}
-
-#[derive(Debug)]
-pub enum BinaryExprOp {
+#[derive(Debug, Clone)]
+pub enum AdditiveOp {
     Plus,
     Minus,
+}
+
+#[derive(Debug, Clone)]
+pub enum MultiplicativeOp {
     Times,
     Divide,
 }
 
-#[derive(Debug)]
-pub enum Unit<'a> {
-    Int(isize),
-    String(&'a str),
-    Identifier(Identifier<'a>),
-    FunctionCall(FunctionCall<'a>),
-}
-
-#[derive(Debug)]
-pub struct FunctionCall<'a> {
-    pub id: Identifier<'a>,
-    pub args: Vec<Expr<'a>>,
-}
-
-#[derive(Debug)]
-pub struct Bool<'a> {
-    pub head: Box<BooleanHead<'a>>,
-    pub tail: Option<Box<BoolTail<'a>>>,
-}
-
-#[derive(Debug)]
-pub enum BooleanHead<'a> {
-    RelationalOperation(RelationalOperation<'a>),
-    Not(Bool<'a>),
-    BooleanLiteral(bool),
-}
-
-#[derive(Debug)]
-pub struct RelationalOperation<'a> {
-    pub head: BooleanUnit<'a>,
-    pub tail: RelationalOperationTail<'a>,
-}
-
-#[derive(Debug)]
-pub struct RelationalOperationTail<'a> {
-    pub opt_lhs_tail: Option<ExprPrime<'a>>,
-    pub operator: RelationalOperator,
-    pub rhs: Expr<'a>,
-}
-
-#[derive(Debug)]
-pub enum BooleanUnit<'a> {
-    BracketedExpr(Expr<'a>),
-    Unit(Unit<'a>),
-}
-
-#[derive(Debug)]
-pub enum RelationalOperator {
+#[derive(Debug, Clone)]
+pub enum RelationalOp {
     LesserThan,
     GreaterThan,
     Equals,
@@ -150,26 +88,82 @@ pub enum RelationalOperator {
     LesserOrEquals,
 }
 
-#[derive(Debug)]
-pub struct BoolTail<'a> {
-    pub head: BoolTailHeadExpr<'a>,
-    pub tail: Option<Box<BoolTail<'a>>>,
-}
-
-#[derive(Debug)]
-pub enum BoolTailHeadExpr<'a> {
-    RelationalOperationTail(RelationalOperationTail<'a>),
-    BooleanOperation(BooleanOperation<'a>),
-}
-
-#[derive(Debug)]
-pub struct BooleanOperation<'a> {
-    pub op: BooleanOperator,
-    pub rhs: Bool<'a>,
-}
-
-#[derive(Debug)]
-pub enum BooleanOperator {
+#[derive(Debug, Clone)]
+pub enum BooleanOp {
     And,
     Or,
+}
+
+#[derive(Debug, Clone)]
+pub struct Expr<'a> {
+    pub head: Term<'a>,
+    pub tail: Option<ExprPrime<'a>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ExprPrime<'a> {
+    pub op: BooleanOp,
+    pub rhs: Term<'a>,
+    pub tail: Option<Box<ExprPrime<'a>>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Term<'a> {
+    pub head: Factor<'a>,
+    pub tail: Option<TermPrime<'a>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TermPrime<'a> {
+    pub op: RelationalOp,
+    pub rhs: Factor<'a>,
+    pub tail: Option<Box<TermPrime<'a>>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Factor<'a> {
+    pub head: Product<'a>,
+    pub tail: Option<FactorPrime<'a>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct FactorPrime<'a> {
+    pub op: AdditiveOp,
+    pub rhs: Product<'a>,
+    pub tail: Option<Box<FactorPrime<'a>>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Product<'a> {
+    pub head: Atom<'a>,
+    pub tail: Option<ProductPrime<'a>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ProductPrime<'a> {
+    pub op: MultiplicativeOp,
+    pub rhs: Atom<'a>,
+    pub tail: Option<Box<ProductPrime<'a>>>,
+}
+
+#[derive(Debug, Clone)]
+pub enum Atom<'a> {
+    Unit(Unit<'a>),
+    Not(Box<Atom<'a>>),
+}
+
+#[derive(Debug, Clone)]
+pub enum Unit<'a> {
+    Int(isize),
+    Str(&'a str),
+    Boolean(bool),
+    Identifier(Identifier<'a>),
+    FunctionCall(FunctionCall<'a>),
+    BracketedExpr(Box<Expr<'a>>),
+}
+
+#[derive(Debug, Clone)]
+pub struct FunctionCall<'a> {
+    pub id: Identifier<'a>,
+    pub args: Vec<Expr<'a>>,
 }

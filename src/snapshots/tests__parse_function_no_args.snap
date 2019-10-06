@@ -20,11 +20,20 @@ Ok(
                                 Return(
                                     Return {
                                         expr: Expr {
-                                            head: Unit(
-                                                Int(
-                                                    1,
-                                                ),
-                                            ),
+                                            head: Term {
+                                                head: Factor {
+                                                    head: Product {
+                                                        head: Unit(
+                                                            Int(
+                                                                1,
+                                                            ),
+                                                        ),
+                                                        tail: None,
+                                                    },
+                                                    tail: None,
+                                                },
+                                                tail: None,
+                                            },
                                             tail: None,
                                         },
                                     },

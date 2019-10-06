@@ -23,12 +23,27 @@ pub(crate) mod consts {
     pub(crate) const B_OPEN: ExpToken = Token::Punctuation(Punctuation::BracketOpen);
     pub(crate) const B_CLOSE: ExpToken = Token::Punctuation(Punctuation::BracketClose);
 
+    pub(crate) const ADDITIVE_OPS: TokenList = &[
+        Token::Operator(Operator::Plus),
+        Token::Operator(Operator::Minus),
+    ];
+
+    pub(crate) const MULTIPLICATIVE_OPS: TokenList = &[
+        Token::Operator(Operator::Times),
+        Token::Operator(Operator::Divide),
+    ];
+
     pub(crate) const RELATIONAL_OPS: TokenList = &[
         Token::Operator(Operator::LesserOrEquals),
         Token::Operator(Operator::GreaterOrEquals),
         Token::Operator(Operator::GreaterThan),
         Token::Operator(Operator::LesserThan),
         Token::Operator(Operator::Equals),
+    ];
+
+    pub(crate) const BOOL_OPS: TokenList = &[
+        Token::Operator(Operator::And),
+        Token::Operator(Operator::Or),
     ];
 
     pub(crate) const POSSIBLE_STATEMENT_STARTS: TokenList = &[
@@ -43,34 +58,33 @@ pub(crate) mod consts {
         ID,
     ];
 
-    pub(crate) const POSSIBLE_EXPR_PRIME_STARTS: TokenList = &[
-        Token::Operator(Operator::Plus),
-        Token::Operator(Operator::Minus),
-        Token::Operator(Operator::Divide),
-        Token::Operator(Operator::Times),
-    ];
+    pub(crate) const POSSIBLE_UNIT_STARTS: TokenList = &[ID, B_OPEN, STRING, INT, BOOL];
 
-    pub(crate) const POSSIBLE_BOOL_PRIME_STARTS: TokenList = &[
-        Token::Operator(Operator::Plus),
-        Token::Operator(Operator::Minus),
-        Token::Operator(Operator::Divide),
-        Token::Operator(Operator::Times),
-        Token::Operator(Operator::And),
-        Token::Operator(Operator::Or),
-        Token::Operator(Operator::LesserOrEquals),
-        Token::Operator(Operator::GreaterOrEquals),
-        Token::Operator(Operator::GreaterThan),
-        Token::Operator(Operator::LesserThan),
-        Token::Operator(Operator::Equals),
+    pub(crate) const POSSIBLE_EXPR_PRIME_STARTS: TokenList = BOOL_OPS;
+
+    pub(crate) const POSSIBLE_TERM_PRIME_STARTS: TokenList = RELATIONAL_OPS;
+
+    pub(crate) const POSSIBLE_FACTOR_PRIME_STARTS: TokenList = ADDITIVE_OPS;
+
+    pub(crate) const POSSIBLE_PRODUCT_PRIME_STARTS: TokenList = MULTIPLICATIVE_OPS;
+
+    pub(crate) const POSSIBLE_ATOM_START: TokenList = &[
+        Token::Operator(Operator::Not),
+        ID,
+        B_OPEN,
+        STRING,
+        BOOL,
+        INT,
     ];
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum SyntaxError<'a> {
     ExpectedOneOfButFoundEOF(TokenList),
     ExpectedButFoundEOF(ExpToken),
     ExpectedFound(ExpToken, EnrichedToken<'a>),
     ExpectedOneOfFound(TokenList, EnrichedToken<'a>),
+    TypeError,
     LogicalError,
 }
 
@@ -171,7 +185,7 @@ where
 {
     // If -> if (Bool) then Compound; | if (Bool) then Compound else Compound;
     advance_expecting(it, consts::B_OPEN)?;
-    let condition = p_bool(it)?;
+    let condition = expr(it)?;
     advance_expecting(it, consts::B_CLOSE)?;
     advance_expecting(it, Token::Keyword(Keyword::Then))?;
     let if_branch = compound(it)?;
@@ -218,7 +232,7 @@ where
 {
     // While -> while (Bool) Compound;
     advance_expecting(it, consts::B_OPEN)?;
-    let condition = p_bool(it)?;
+    let condition = expr(it)?;
     advance_expecting(it, consts::B_CLOSE)?;
     let compound = compound(it)?;
     advance_expecting(it, consts::SEMICOLON)?;
@@ -294,67 +308,166 @@ where
     Ok(Assign { id, expr })
 }
 
-// Utility for getting the expr tail
-fn get_expr_tail<'a, T>(it: &mut Peekable<T>) -> Result<Option<ExprPrime<'a>>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    match it
-        .peek()
-        .map(|t| consts::POSSIBLE_EXPR_PRIME_STARTS.contains(t.token()))
-    {
-        Some(true) => Ok(Some(expr_prime(it)?)),
-        _ => Ok(None),
-    }
-}
-
 fn expr<'a, T>(it: &mut Peekable<T>) -> Result<Expr<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
-    let head = expr_head(it)?;
-    let tail = get_expr_tail(it)?.map(Box::new);
+    let head = term(it)?;
+    let tail = get_tail(it, consts::POSSIBLE_EXPR_PRIME_STARTS, expr_prime)?;
 
     Ok(Expr { head, tail })
 }
 
-fn expr_head<'a, T>(it: &mut Peekable<T>) -> Result<ExprHead<'a>, SyntaxError<'a>>
+fn expr_prime<'a, T>(it: &mut Peekable<T>) -> Result<ExprPrime<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
-    let next = it.peek();
-    match next.map(|t| t.token()) {
-        Some(&consts::B_OPEN) => {
-            advance_expecting(it, consts::B_OPEN)?;
-            let expr = expr(it)?;
-            advance_expecting(it, consts::B_CLOSE)?;
-            Ok(ExprHead::BracketedExpr(Box::new(expr)))
+    let operator = advance_expecting_one_of(it, consts::POSSIBLE_EXPR_PRIME_STARTS)?;
+
+    let rhs = term(it)?;
+    let tail = get_tail(it, consts::POSSIBLE_EXPR_PRIME_STARTS, expr_prime)?.map(Box::new);
+
+    Ok(ExprPrime {
+        op: match operator.token() {
+            Token::Operator(Operator::Or) => BooleanOp::Or,
+            Token::Operator(Operator::And) => BooleanOp::And,
+            _ => return Err(SyntaxError::LogicalError),
+        },
+        rhs,
+        tail,
+    })
+}
+
+fn term<'a, T>(it: &mut Peekable<T>) -> Result<Term<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let head = factor(it)?;
+    let tail = get_tail(it, consts::POSSIBLE_TERM_PRIME_STARTS, term_prime)?;
+
+    Ok(Term { head, tail })
+}
+
+fn term_prime<'a, T>(it: &mut Peekable<T>) -> Result<TermPrime<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let operator = advance_expecting_one_of(it, consts::POSSIBLE_TERM_PRIME_STARTS)?;
+    let rhs = factor(it)?;
+    let tail = get_tail(it, consts::POSSIBLE_TERM_PRIME_STARTS, term_prime)?.map(Box::new);
+
+    Ok(TermPrime {
+        op: match operator.token() {
+            Token::Operator(Operator::LesserThan) => RelationalOp::LesserThan,
+            Token::Operator(Operator::GreaterThan) => RelationalOp::GreaterThan,
+            Token::Operator(Operator::LesserOrEquals) => RelationalOp::LesserOrEquals,
+            Token::Operator(Operator::GreaterOrEquals) => RelationalOp::GreaterOrEquals,
+            Token::Operator(Operator::Equals) => RelationalOp::Equals,
+            _ => return Err(SyntaxError::LogicalError),
+        },
+        rhs,
+        tail,
+    })
+}
+
+fn factor<'a, T>(it: &mut Peekable<T>) -> Result<Factor<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let head = product(it)?;
+    let tail = get_tail(it, consts::POSSIBLE_FACTOR_PRIME_STARTS, factor_prime)?;
+
+    Ok(Factor { head, tail })
+}
+
+fn factor_prime<'a, T>(it: &mut Peekable<T>) -> Result<FactorPrime<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let operator = advance_expecting_one_of(it, consts::POSSIBLE_FACTOR_PRIME_STARTS)?;
+    let rhs = product(it)?;
+    let tail = get_tail(it, consts::POSSIBLE_FACTOR_PRIME_STARTS, factor_prime)?.map(Box::new);
+
+    Ok(FactorPrime {
+        op: match operator.token() {
+            Token::Operator(Operator::Plus) => AdditiveOp::Plus,
+            Token::Operator(Operator::Minus) => AdditiveOp::Minus,
+            _ => return Err(SyntaxError::LogicalError),
+        },
+        rhs,
+        tail,
+    })
+}
+
+fn product<'a, T>(it: &mut Peekable<T>) -> Result<Product<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let head = atom(it)?;
+    let tail = get_tail(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS, product_prime)?;
+
+    Ok(Product { head, tail })
+}
+
+fn product_prime<'a, T>(it: &mut Peekable<T>) -> Result<ProductPrime<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let operator = advance_expecting_one_of(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS)?;
+    let rhs = atom(it)?;
+    let tail = get_tail(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS, product_prime)?.map(Box::new);
+
+    Ok(ProductPrime {
+        op: match operator.token() {
+            Token::Operator(Operator::Times) => MultiplicativeOp::Times,
+            Token::Operator(Operator::Divide) => MultiplicativeOp::Divide,
+            _ => return Err(SyntaxError::LogicalError),
+        },
+        rhs,
+        tail,
+    })
+}
+
+fn atom<'a, T>(it: &mut Peekable<T>) -> Result<Atom<'a>, SyntaxError<'a>>
+where
+    T: Iterator<Item = EnrichedToken<'a>>,
+{
+    let next = it.peek().map(|t| t.token());
+
+    Ok(match next {
+        Some(Token::Operator(Operator::Not)) => {
+            advance_expecting(it, Token::Operator(Operator::Not))?;
+            Atom::Not(Box::new(atom(it)?))
         }
-        Some(Token::Literal(Literal::Integer(_)))
-        | Some(Token::Literal(Literal::String(_)))
-        | Some(Token::Identifier(_)) => Ok(ExprHead::Unit(unit(it)?)),
-
-        Some(_) => Ok(ExprHead::Boolean(Box::new(p_bool(it)?))),
-
-        // TODO: This should be a EOF error
-        _ => Err(SyntaxError::LogicalError),
-    }
+        Some(_) => Atom::Unit(unit(it)?),
+        _ => {
+            return Err(SyntaxError::ExpectedOneOfButFoundEOF(
+                consts::POSSIBLE_ATOM_START,
+            ))
+        }
+    })
 }
 
 fn unit<'a, T>(it: &mut Peekable<T>) -> Result<Unit<'a>, SyntaxError<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
-    let next = advance_expecting_one_of(it, &[consts::INT, consts::STRING, consts::ID])?;
+    let next = advance_expecting_one_of(it, consts::POSSIBLE_UNIT_STARTS)?;
     Ok(match next.take_token() {
         Token::Literal(Literal::Integer(i)) => Unit::Int(i),
-        Token::Literal(Literal::String(s)) => Unit::String(s),
+        Token::Literal(Literal::String(s)) => Unit::Str(s),
+        Token::Literal(Literal::Boolean(b)) => Unit::Boolean(b),
         Token::Identifier(s) => {
             let next = it.peek().map(|t| t.token());
             match next {
                 Some(&consts::B_OPEN) => Unit::FunctionCall(function_call(it, Identifier(s))?),
                 _ => Unit::Identifier(Identifier(s)),
             }
+        }
+        consts::B_OPEN => {
+            let expr = Box::new(expr(it)?);
+            advance_expecting(it, consts::B_CLOSE)?;
+            Unit::BracketedExpr(expr)
         }
         _ => return Err(SyntaxError::LogicalError),
     })
@@ -396,172 +509,6 @@ where
     advance_expecting(it, consts::B_CLOSE)?;
 
     Ok(FunctionCall { id, args })
-}
-
-fn expr_prime<'a, T>(it: &mut Peekable<T>) -> Result<ExprPrime<'a>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let operator = advance_expecting_one_of(it, consts::POSSIBLE_EXPR_PRIME_STARTS)?;
-
-    let operand = expr(it)?;
-    let tail = get_expr_tail(it)?.map(Box::new);
-
-    Ok(ExprPrime {
-        operator: match operator.token() {
-            Token::Operator(Operator::Plus) => BinaryExprOp::Plus,
-            Token::Operator(Operator::Minus) => BinaryExprOp::Minus,
-            Token::Operator(Operator::Times) => BinaryExprOp::Times,
-            Token::Operator(Operator::Divide) => BinaryExprOp::Divide,
-            _ => return Err(SyntaxError::LogicalError),
-        },
-        operand,
-        tail,
-    })
-}
-
-fn get_bool_tail<'a, T>(it: &mut Peekable<T>) -> Result<Option<Box<BoolTail<'a>>>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    Ok(
-        match it
-            .peek()
-            .map(|t| t.token())
-            .map(|t| consts::POSSIBLE_BOOL_PRIME_STARTS.contains(t))
-        {
-            Some(true) => Some(Box::new(boolean_tail(it)?)),
-            _ => None,
-        },
-    )
-}
-
-fn p_bool<'a, T>(it: &mut Peekable<T>) -> Result<Bool<'a>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let head = Box::new(boolean_head(it)?);
-
-    let tail = get_bool_tail(it)?;
-
-    Ok(Bool { head, tail })
-}
-
-fn boolean_head<'a, T>(it: &mut Peekable<T>) -> Result<BooleanHead<'a>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let next = it.peek();
-    Ok(match next.cloned().map(|t| t.take_token()) {
-        Some(Token::Operator(Operator::Not)) => {
-            advance_expecting(it, Token::Operator(Operator::Not))?;
-            BooleanHead::Not(p_bool(it)?)
-        }
-        Some(Token::Literal(Literal::Boolean(b))) => {
-            advance_expecting(it, consts::BOOL)?;
-            BooleanHead::BooleanLiteral(b)
-        }
-        _ => BooleanHead::RelationalOperation(relational_operation(it)?),
-    })
-}
-
-fn relational_operation<'a, T>(
-    it: &mut Peekable<T>,
-) -> Result<RelationalOperation<'a>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let head = boolean_unit(it)?;
-    let tail = relational_operation_tail(it)?;
-
-    Ok(RelationalOperation { head, tail })
-}
-
-fn boolean_unit<'a, T>(it: &mut Peekable<T>) -> Result<BooleanUnit<'a>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let next = it.peek();
-    Ok(match next.map(|t| t.token()) {
-        Some(&consts::B_OPEN) => {
-            advance_expecting(it, consts::B_OPEN)?;
-            let expr = expr(it)?;
-            advance_expecting(it, consts::B_CLOSE)?;
-            BooleanUnit::BracketedExpr(expr)
-        }
-        _ => BooleanUnit::Unit(unit(it)?),
-    })
-}
-
-fn relational_operation_tail<'a, T>(
-    it: &mut Peekable<T>,
-) -> Result<RelationalOperationTail<'a>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let opt_lhs_tail = get_expr_tail(it)?;
-
-    let rel = advance_expecting_one_of(it, consts::RELATIONAL_OPS)?;
-    let operator = match rel.token() {
-        Token::Operator(Operator::GreaterThan) => RelationalOperator::GreaterThan,
-        Token::Operator(Operator::LesserThan) => RelationalOperator::LesserThan,
-        Token::Operator(Operator::GreaterOrEquals) => RelationalOperator::GreaterOrEquals,
-        Token::Operator(Operator::LesserOrEquals) => RelationalOperator::LesserOrEquals,
-        Token::Operator(Operator::Equals) => RelationalOperator::Equals,
-        _ => return Err(SyntaxError::LogicalError),
-    };
-
-    let rhs = expr(it)?;
-
-    Ok(RelationalOperationTail {
-        opt_lhs_tail,
-        operator,
-        rhs,
-    })
-}
-
-fn boolean_tail<'a, T>(it: &mut Peekable<T>) -> Result<BoolTail<'a>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let head = bool_tail_head_expr(it)?;
-    let tail = get_bool_tail(it)?;
-
-    Ok(BoolTail { head, tail })
-}
-
-fn bool_tail_head_expr<'a, T>(it: &mut Peekable<T>) -> Result<BoolTailHeadExpr<'a>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let next = it.peek();
-    Ok(match next.map(|t| t.token()) {
-        Some(Token::Operator(Operator::And)) | Some(Token::Operator(Operator::Or)) => {
-            BoolTailHeadExpr::BooleanOperation(boolean_operation(it)?)
-        }
-        _ => BoolTailHeadExpr::RelationalOperationTail(relational_operation_tail(it)?),
-    })
-}
-
-fn boolean_operation<'a, T>(it: &mut Peekable<T>) -> Result<BooleanOperation<'a>, SyntaxError<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let next = advance_expecting_one_of(
-        it,
-        &[
-            Token::Operator(Operator::Or),
-            Token::Operator(Operator::And),
-        ],
-    )?;
-    let op = match next.token() {
-        Token::Operator(Operator::Or) => BooleanOperator::Or,
-        Token::Operator(Operator::And) => BooleanOperator::And,
-        _ => return Err(SyntaxError::LogicalError),
-    };
-    let rhs = p_bool(it)?;
-
-    Ok(BooleanOperation { op, rhs })
 }
 
 #[cfg(test)]
@@ -743,7 +690,7 @@ begin
     begin
 
        if ( true ) then begin n := 5;  end
-       			   else begin n := 46; end ;
+       			   else begin n := 46; end;
                         
                                   
     c := c + 1;	    

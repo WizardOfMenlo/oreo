@@ -27,13 +27,22 @@ Ok(
                                 Return(
                                     Return {
                                         expr: Expr {
-                                            head: Unit(
-                                                Identifier(
-                                                    Identifier(
-                                                        "y",
-                                                    ),
-                                                ),
-                                            ),
+                                            head: Term {
+                                                head: Factor {
+                                                    head: Product {
+                                                        head: Unit(
+                                                            Identifier(
+                                                                Identifier(
+                                                                    "y",
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        tail: None,
+                                                    },
+                                                    tail: None,
+                                                },
+                                                tail: None,
+                                            },
                                             tail: None,
                                         },
                                     },

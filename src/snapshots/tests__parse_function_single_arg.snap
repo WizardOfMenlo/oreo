@@ -24,13 +24,22 @@ Ok(
                                 Return(
                                     Return {
                                         expr: Expr {
-                                            head: Unit(
-                                                Identifier(
-                                                    Identifier(
-                                                        "x",
-                                                    ),
-                                                ),
-                                            ),
+                                            head: Term {
+                                                head: Factor {
+                                                    head: Product {
+                                                        head: Unit(
+                                                            Identifier(
+                                                                Identifier(
+                                                                    "x",
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        tail: None,
+                                                    },
+                                                    tail: None,
+                                                },
+                                                tail: None,
+                                            },
                                             tail: None,
                                         },
                                     },

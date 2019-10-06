@@ -11,32 +11,41 @@ Ok(
             statements: [
                 While(
                     While {
-                        condition: Bool {
-                            head: RelationalOperation(
-                                RelationalOperation {
-                                    head: Unit(
-                                        Identifier(
+                        condition: Expr {
+                            head: Term {
+                                head: Factor {
+                                    head: Product {
+                                        head: Unit(
                                             Identifier(
-                                                "c",
-                                            ),
-                                        ),
-                                    ),
-                                    tail: RelationalOperationTail {
-                                        opt_lhs_tail: None,
-                                        operator: LesserThan,
-                                        rhs: Expr {
-                                            head: Unit(
                                                 Identifier(
-                                                    Identifier(
-                                                        "n",
-                                                    ),
+                                                    "c",
                                                 ),
                                             ),
+                                        ),
+                                        tail: None,
+                                    },
+                                    tail: None,
+                                },
+                                tail: Some(
+                                    TermPrime {
+                                        op: LesserThan,
+                                        rhs: Factor {
+                                            head: Product {
+                                                head: Unit(
+                                                    Identifier(
+                                                        Identifier(
+                                                            "n",
+                                                        ),
+                                                    ),
+                                                ),
+                                                tail: None,
+                                            },
                                             tail: None,
                                         },
+                                        tail: None,
                                     },
-                                },
-                            ),
+                                ),
+                            },
                             tail: None,
                         },
                         compound: Compound {
@@ -47,27 +56,36 @@ Ok(
                                             "c",
                                         ),
                                         expr: Expr {
-                                            head: Unit(
-                                                Identifier(
-                                                    Identifier(
-                                                        "c",
-                                                    ),
-                                                ),
-                                            ),
-                                            tail: Some(
-                                                ExprPrime {
-                                                    operator: Plus,
-                                                    operand: Expr {
+                                            head: Term {
+                                                head: Factor {
+                                                    head: Product {
                                                         head: Unit(
-                                                            Int(
-                                                                1,
+                                                            Identifier(
+                                                                Identifier(
+                                                                    "c",
+                                                                ),
                                                             ),
                                                         ),
                                                         tail: None,
                                                     },
-                                                    tail: None,
+                                                    tail: Some(
+                                                        FactorPrime {
+                                                            op: Plus,
+                                                            rhs: Product {
+                                                                head: Unit(
+                                                                    Int(
+                                                                        1,
+                                                                    ),
+                                                                ),
+                                                                tail: None,
+                                                            },
+                                                            tail: None,
+                                                        },
+                                                    ),
                                                 },
-                                            ),
+                                                tail: None,
+                                            },
+                                            tail: None,
                                         },
                                     },
                                 ),

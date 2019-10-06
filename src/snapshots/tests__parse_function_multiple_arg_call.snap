@@ -16,67 +16,94 @@ Ok(
                         ),
                         expr: Some(
                             Expr {
-                                head: Unit(
-                                    FunctionCall(
-                                        FunctionCall {
-                                            id: Identifier(
-                                                "sum",
+                                head: Term {
+                                    head: Factor {
+                                        head: Product {
+                                            head: Unit(
+                                                FunctionCall(
+                                                    FunctionCall {
+                                                        id: Identifier(
+                                                            "sum",
+                                                        ),
+                                                        args: [
+                                                            Expr {
+                                                                head: Term {
+                                                                    head: Factor {
+                                                                        head: Product {
+                                                                            head: Unit(
+                                                                                Identifier(
+                                                                                    Identifier(
+                                                                                        "x",
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                            tail: None,
+                                                                        },
+                                                                        tail: Some(
+                                                                            FactorPrime {
+                                                                                op: Plus,
+                                                                                rhs: Product {
+                                                                                    head: Unit(
+                                                                                        Identifier(
+                                                                                            Identifier(
+                                                                                                "y",
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                    tail: None,
+                                                                                },
+                                                                                tail: None,
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                    tail: None,
+                                                                },
+                                                                tail: None,
+                                                            },
+                                                            Expr {
+                                                                head: Term {
+                                                                    head: Factor {
+                                                                        head: Product {
+                                                                            head: Unit(
+                                                                                Identifier(
+                                                                                    Identifier(
+                                                                                        "y",
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                            tail: None,
+                                                                        },
+                                                                        tail: Some(
+                                                                            FactorPrime {
+                                                                                op: Plus,
+                                                                                rhs: Product {
+                                                                                    head: Unit(
+                                                                                        Identifier(
+                                                                                            Identifier(
+                                                                                                "x",
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                    tail: None,
+                                                                                },
+                                                                                tail: None,
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                    tail: None,
+                                                                },
+                                                                tail: None,
+                                                            },
+                                                        ],
+                                                    },
+                                                ),
                                             ),
-                                            args: [
-                                                Expr {
-                                                    head: Unit(
-                                                        Identifier(
-                                                            Identifier(
-                                                                "x",
-                                                            ),
-                                                        ),
-                                                    ),
-                                                    tail: Some(
-                                                        ExprPrime {
-                                                            operator: Plus,
-                                                            operand: Expr {
-                                                                head: Unit(
-                                                                    Identifier(
-                                                                        Identifier(
-                                                                            "y",
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                                tail: None,
-                                                            },
-                                                            tail: None,
-                                                        },
-                                                    ),
-                                                },
-                                                Expr {
-                                                    head: Unit(
-                                                        Identifier(
-                                                            Identifier(
-                                                                "y",
-                                                            ),
-                                                        ),
-                                                    ),
-                                                    tail: Some(
-                                                        ExprPrime {
-                                                            operator: Plus,
-                                                            operand: Expr {
-                                                                head: Unit(
-                                                                    Identifier(
-                                                                        Identifier(
-                                                                            "x",
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                                tail: None,
-                                                            },
-                                                            tail: None,
-                                                        },
-                                                    ),
-                                                },
-                                            ],
+                                            tail: None,
                                         },
-                                    ),
-                                ),
+                                        tail: None,
+                                    },
+                                    tail: None,
+                                },
                                 tail: None,
                             },
                         ),

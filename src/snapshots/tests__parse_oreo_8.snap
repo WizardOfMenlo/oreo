@@ -3,15 +3,43 @@ source: src/parser.rs
 expression: parsed
 ---
 Err(
-    ExpectedFound(
-        Punctuation(
-            BracketClose,
-        ),
-        EnrichedToken {
-            inner: Operator(
-                GreaterThan,
+    ExpectedOneOfFound(
+        [
+            Keyword(
+                Var,
             ),
-            line_no: 16,
+            Keyword(
+                If,
+            ),
+            Keyword(
+                Print,
+            ),
+            Keyword(
+                Println,
+            ),
+            Keyword(
+                Get,
+            ),
+            Keyword(
+                While,
+            ),
+            Keyword(
+                Procedure,
+            ),
+            Keyword(
+                Return,
+            ),
+            Identifier(
+                "",
+            ),
+        ],
+        EnrichedToken {
+            inner: Error(
+                UnclosedComment(
+                    " comment",
+                ),
+            ),
+            line_no: 21,
         },
     ),
 )

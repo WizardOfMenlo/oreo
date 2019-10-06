@@ -2,16 +2,90 @@
 source: src/parser.rs
 expression: parsed
 ---
-Err(
-    ExpectedFound(
-        Punctuation(
-            Semicolon,
+Ok(
+    Program {
+        id: Identifier(
+            "x",
         ),
-        EnrichedToken {
-            inner: Operator(
-                LesserThan,
-            ),
-            line_no: 3,
+        compound: Compound {
+            statements: [
+                Decl(
+                    Decl {
+                        id: Identifier(
+                            "c",
+                        ),
+                        expr: Some(
+                            Expr {
+                                head: Term {
+                                    head: Factor {
+                                        head: Product {
+                                            head: Unit(
+                                                Int(
+                                                    0,
+                                                ),
+                                            ),
+                                            tail: None,
+                                        },
+                                        tail: None,
+                                    },
+                                    tail: Some(
+                                        TermPrime {
+                                            op: LesserThan,
+                                            rhs: Factor {
+                                                head: Product {
+                                                    head: Unit(
+                                                        BracketedExpr(
+                                                            Expr {
+                                                                head: Term {
+                                                                    head: Factor {
+                                                                        head: Product {
+                                                                            head: Unit(
+                                                                                Identifier(
+                                                                                    Identifier(
+                                                                                        "c",
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                            tail: None,
+                                                                        },
+                                                                        tail: None,
+                                                                    },
+                                                                    tail: Some(
+                                                                        TermPrime {
+                                                                            op: LesserThan,
+                                                                            rhs: Factor {
+                                                                                head: Product {
+                                                                                    head: Unit(
+                                                                                        Int(
+                                                                                            1,
+                                                                                        ),
+                                                                                    ),
+                                                                                    tail: None,
+                                                                                },
+                                                                                tail: None,
+                                                                            },
+                                                                            tail: None,
+                                                                        },
+                                                                    ),
+                                                                },
+                                                                tail: None,
+                                                            },
+                                                        ),
+                                                    ),
+                                                    tail: None,
+                                                },
+                                                tail: None,
+                                            },
+                                            tail: None,
+                                        },
+                                    ),
+                                },
+                                tail: None,
+                            },
+                        ),
+                    },
+                ),
+            ],
         },
-    ),
+    },
 )

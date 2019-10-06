@@ -16,16 +16,25 @@ Ok(
                         ),
                         expr: Some(
                             Expr {
-                                head: Unit(
-                                    FunctionCall(
-                                        FunctionCall {
-                                            id: Identifier(
-                                                "f",
+                                head: Term {
+                                    head: Factor {
+                                        head: Product {
+                                            head: Unit(
+                                                FunctionCall(
+                                                    FunctionCall {
+                                                        id: Identifier(
+                                                            "f",
+                                                        ),
+                                                        args: [],
+                                                    },
+                                                ),
                                             ),
-                                            args: [],
+                                            tail: None,
                                         },
-                                    ),
-                                ),
+                                        tail: None,
+                                    },
+                                    tail: None,
+                                },
                                 tail: None,
                             },
                         ),

@@ -12,11 +12,20 @@ Ok(
                 Print(
                     Print(
                         Expr {
-                            head: Unit(
-                                String(
-                                    "Hello\\n",
-                                ),
-                            ),
+                            head: Term {
+                                head: Factor {
+                                    head: Product {
+                                        head: Unit(
+                                            Str(
+                                                "Hello\\n",
+                                            ),
+                                        ),
+                                        tail: None,
+                                    },
+                                    tail: None,
+                                },
+                                tail: None,
+                            },
                             tail: None,
                         },
                     ),
@@ -24,11 +33,20 @@ Ok(
                 Print(
                     Println(
                         Expr {
-                            head: Unit(
-                                Int(
-                                    2,
-                                ),
-                            ),
+                            head: Term {
+                                head: Factor {
+                                    head: Product {
+                                        head: Unit(
+                                            Int(
+                                                2,
+                                            ),
+                                        ),
+                                        tail: None,
+                                    },
+                                    tail: None,
+                                },
+                                tail: None,
+                            },
                             tail: None,
                         },
                     ),

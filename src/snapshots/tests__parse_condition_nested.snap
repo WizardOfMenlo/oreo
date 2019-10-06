@@ -2,16 +2,130 @@
 source: src/parser.rs
 expression: parsed
 ---
-Err(
-    ExpectedFound(
-        Punctuation(
-            BracketClose,
+Ok(
+    Program {
+        id: Identifier(
+            "x",
         ),
-        EnrichedToken {
-            inner: Operator(
-                LesserThan,
-            ),
-            line_no: 3,
+        compound: Compound {
+            statements: [
+                While(
+                    While {
+                        condition: Expr {
+                            head: Term {
+                                head: Factor {
+                                    head: Product {
+                                        head: Unit(
+                                            Identifier(
+                                                Identifier(
+                                                    "c",
+                                                ),
+                                            ),
+                                        ),
+                                        tail: None,
+                                    },
+                                    tail: None,
+                                },
+                                tail: Some(
+                                    TermPrime {
+                                        op: LesserThan,
+                                        rhs: Factor {
+                                            head: Product {
+                                                head: Unit(
+                                                    BracketedExpr(
+                                                        Expr {
+                                                            head: Term {
+                                                                head: Factor {
+                                                                    head: Product {
+                                                                        head: Unit(
+                                                                            Identifier(
+                                                                                Identifier(
+                                                                                    "n",
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                        tail: None,
+                                                                    },
+                                                                    tail: None,
+                                                                },
+                                                                tail: Some(
+                                                                    TermPrime {
+                                                                        op: LesserThan,
+                                                                        rhs: Factor {
+                                                                            head: Product {
+                                                                                head: Unit(
+                                                                                    Int(
+                                                                                        1,
+                                                                                    ),
+                                                                                ),
+                                                                                tail: None,
+                                                                            },
+                                                                            tail: None,
+                                                                        },
+                                                                        tail: None,
+                                                                    },
+                                                                ),
+                                                            },
+                                                            tail: None,
+                                                        },
+                                                    ),
+                                                ),
+                                                tail: None,
+                                            },
+                                            tail: None,
+                                        },
+                                        tail: None,
+                                    },
+                                ),
+                            },
+                            tail: None,
+                        },
+                        compound: Compound {
+                            statements: [
+                                Assign(
+                                    Assign {
+                                        id: Identifier(
+                                            "c",
+                                        ),
+                                        expr: Expr {
+                                            head: Term {
+                                                head: Factor {
+                                                    head: Product {
+                                                        head: Unit(
+                                                            Identifier(
+                                                                Identifier(
+                                                                    "c",
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        tail: None,
+                                                    },
+                                                    tail: Some(
+                                                        FactorPrime {
+                                                            op: Plus,
+                                                            rhs: Product {
+                                                                head: Unit(
+                                                                    Int(
+                                                                        1,
+                                                                    ),
+                                                                ),
+                                                                tail: None,
+                                                            },
+                                                            tail: None,
+                                                        },
+                                                    ),
+                                                },
+                                                tail: None,
+                                            },
+                                            tail: None,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    },
+                ),
+            ],
         },
-    ),
+    },
 )

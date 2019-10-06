@@ -16,11 +16,20 @@ Ok(
                         ),
                         expr: Some(
                             Expr {
-                                head: Unit(
-                                    String(
-                                        "Hello",
-                                    ),
-                                ),
+                                head: Term {
+                                    head: Factor {
+                                        head: Product {
+                                            head: Unit(
+                                                Str(
+                                                    "Hello",
+                                                ),
+                                            ),
+                                            tail: None,
+                                        },
+                                        tail: None,
+                                    },
+                                    tail: None,
+                                },
                                 tail: None,
                             },
                         ),
@@ -33,11 +42,20 @@ Ok(
                         ),
                         expr: Some(
                             Expr {
-                                head: Unit(
-                                    Int(
-                                        2,
-                                    ),
-                                ),
+                                head: Term {
+                                    head: Factor {
+                                        head: Product {
+                                            head: Unit(
+                                                Int(
+                                                    2,
+                                                ),
+                                            ),
+                                            tail: None,
+                                        },
+                                        tail: None,
+                                    },
+                                    tail: None,
+                                },
                                 tail: None,
                             },
                         ),
@@ -50,16 +68,36 @@ Ok(
                         ),
                         expr: Some(
                             Expr {
-                                head: BracketedExpr(
-                                    Expr {
-                                        head: Unit(
-                                            Int(
-                                                2,
+                                head: Term {
+                                    head: Factor {
+                                        head: Product {
+                                            head: Unit(
+                                                BracketedExpr(
+                                                    Expr {
+                                                        head: Term {
+                                                            head: Factor {
+                                                                head: Product {
+                                                                    head: Unit(
+                                                                        Int(
+                                                                            2,
+                                                                        ),
+                                                                    ),
+                                                                    tail: None,
+                                                                },
+                                                                tail: None,
+                                                            },
+                                                            tail: None,
+                                                        },
+                                                        tail: None,
+                                                    },
+                                                ),
                                             ),
-                                        ),
+                                            tail: None,
+                                        },
                                         tail: None,
                                     },
-                                ),
+                                    tail: None,
+                                },
                                 tail: None,
                             },
                         ),

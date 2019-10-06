@@ -8,10 +8,10 @@ Err(
             BracketClose,
         ),
         EnrichedToken {
-            inner: Operator(
-                GreaterThan,
+            inner: Keyword(
+                Begin,
             ),
-            line_no: 16,
+            line_no: 17,
         },
     ),
 )
