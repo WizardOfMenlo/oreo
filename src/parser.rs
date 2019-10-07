@@ -572,7 +572,7 @@ mod tests {
 
     #[test]
     fn parse_function_mult_arg() {
-        let input = "program fib begin procedure sum(var x, var y) begin return y; end end";
+        let input = "program fib begin procedure sum(var x, var y) begin return x + y; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }

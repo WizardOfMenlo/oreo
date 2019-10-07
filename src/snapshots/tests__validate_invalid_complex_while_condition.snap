@@ -1,0 +1,7 @@
+---
+source: src/validator.rs
+expression: res
+---
+Err(
+    ExpectedBoolFoundArithmetic,
+)

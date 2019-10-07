@@ -33,13 +33,28 @@ Ok(
                                                         head: Unit(
                                                             Identifier(
                                                                 Identifier(
-                                                                    "y",
+                                                                    "x",
                                                                 ),
                                                             ),
                                                         ),
                                                         tail: None,
                                                     },
-                                                    tail: None,
+                                                    tail: Some(
+                                                        FactorPrime {
+                                                            op: Plus,
+                                                            rhs: Product {
+                                                                head: Unit(
+                                                                    Identifier(
+                                                                        Identifier(
+                                                                            "y",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                                tail: None,
+                                                            },
+                                                            tail: None,
+                                                        },
+                                                    ),
                                                 },
                                                 tail: None,
                                             },
