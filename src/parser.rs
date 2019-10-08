@@ -88,6 +88,8 @@ pub enum SyntaxError<'a> {
     LogicalError,
 }
 
+pub type ParsingResult<'a, T> = Result<T, SyntaxError<'a>>;
+
 pub fn parse<'a>(
     it: impl Iterator<Item = EnrichedToken<'a>>,
 ) -> Result<Program<'a>, SyntaxError<'a>> {
@@ -96,7 +98,7 @@ pub fn parse<'a>(
     program(&mut it)
 }
 
-fn program<'a, T>(it: &mut Peekable<T>) -> Result<Program<'a>, SyntaxError<'a>>
+fn program<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Program<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -108,7 +110,7 @@ where
     Ok(Program { id, compound })
 }
 
-fn compound<'a, T>(it: &mut Peekable<T>) -> Result<Compound<'a>, SyntaxError<'a>>
+fn compound<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Compound<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -135,7 +137,7 @@ where
     Ok(Compound { statements })
 }
 
-fn statement<'a, T>(it: &mut Peekable<T>) -> Result<Statement<'a>, SyntaxError<'a>>
+fn statement<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Statement<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -157,7 +159,7 @@ where
     })
 }
 
-fn decl<'a, T>(it: &mut Peekable<T>) -> Result<Decl<'a>, SyntaxError<'a>>
+fn decl<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Decl<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -179,7 +181,7 @@ where
     })
 }
 
-fn p_if<'a, T>(it: &mut Peekable<T>) -> Result<If<'a>, SyntaxError<'a>>
+fn p_if<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, If<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -208,7 +210,7 @@ where
     })
 }
 
-fn print<'a, T>(it: &mut Peekable<T>, token: Token<'a>) -> Result<Print<'a>, SyntaxError<'a>>
+fn print<'a, T>(it: &mut Peekable<T>, token: Token<'a>) -> ParsingResult<'a, Print<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -226,7 +228,7 @@ where
     Ok(print_stat)
 }
 
-fn p_while<'a, T>(it: &mut Peekable<T>) -> Result<While<'a>, SyntaxError<'a>>
+fn p_while<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, While<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -243,7 +245,7 @@ where
     })
 }
 
-fn function<'a, T>(it: &mut Peekable<T>) -> Result<FunctionDecl<'a>, SyntaxError<'a>>
+fn function<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, FunctionDecl<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -286,7 +288,7 @@ where
     Ok(FunctionDecl { id, args, inner })
 }
 
-fn p_return<'a, T>(it: &mut Peekable<T>) -> Result<Return<'a>, SyntaxError<'a>>
+fn p_return<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Return<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -296,7 +298,7 @@ where
     Ok(Return { expr })
 }
 
-fn assign<'a, T>(it: &mut Peekable<T>, id: Identifier<'a>) -> Result<Assign<'a>, SyntaxError<'a>>
+fn assign<'a, T>(it: &mut Peekable<T>, id: Identifier<'a>) -> ParsingResult<'a, Assign<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -308,7 +310,7 @@ where
     Ok(Assign { id, expr })
 }
 
-fn expr<'a, T>(it: &mut Peekable<T>) -> Result<Expr<'a>, SyntaxError<'a>>
+fn expr<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Expr<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -318,7 +320,7 @@ where
     Ok(Expr { head, tail })
 }
 
-fn expr_prime<'a, T>(it: &mut Peekable<T>) -> Result<ExprPrime<'a>, SyntaxError<'a>>
+fn expr_prime<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, ExprPrime<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -338,7 +340,7 @@ where
     })
 }
 
-fn term<'a, T>(it: &mut Peekable<T>) -> Result<Term<'a>, SyntaxError<'a>>
+fn term<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Term<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -348,7 +350,7 @@ where
     Ok(Term { head, tail })
 }
 
-fn term_prime<'a, T>(it: &mut Peekable<T>) -> Result<TermPrime<'a>, SyntaxError<'a>>
+fn term_prime<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, TermPrime<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -370,7 +372,7 @@ where
     })
 }
 
-fn factor<'a, T>(it: &mut Peekable<T>) -> Result<Factor<'a>, SyntaxError<'a>>
+fn factor<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Factor<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -380,7 +382,7 @@ where
     Ok(Factor { head, tail })
 }
 
-fn factor_prime<'a, T>(it: &mut Peekable<T>) -> Result<FactorPrime<'a>, SyntaxError<'a>>
+fn factor_prime<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, FactorPrime<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -399,7 +401,7 @@ where
     })
 }
 
-fn product<'a, T>(it: &mut Peekable<T>) -> Result<Product<'a>, SyntaxError<'a>>
+fn product<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Product<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -409,7 +411,7 @@ where
     Ok(Product { head, tail })
 }
 
-fn product_prime<'a, T>(it: &mut Peekable<T>) -> Result<ProductPrime<'a>, SyntaxError<'a>>
+fn product_prime<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, ProductPrime<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -428,7 +430,7 @@ where
     })
 }
 
-fn atom<'a, T>(it: &mut Peekable<T>) -> Result<Atom<'a>, SyntaxError<'a>>
+fn atom<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Atom<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -448,7 +450,7 @@ where
     })
 }
 
-fn unit<'a, T>(it: &mut Peekable<T>) -> Result<Unit<'a>, SyntaxError<'a>>
+fn unit<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Unit<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {
@@ -476,7 +478,7 @@ where
 fn function_call<'a, T>(
     it: &mut Peekable<T>,
     id: Identifier<'a>,
-) -> Result<FunctionCall<'a>, SyntaxError<'a>>
+) -> ParsingResult<'a, FunctionCall<'a>>
 where
     T: Iterator<Item = EnrichedToken<'a>>,
 {

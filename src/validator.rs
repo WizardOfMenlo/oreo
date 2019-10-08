@@ -244,7 +244,7 @@ mod tests {
 
     #[test]
     fn validate_function_single_arg_call() {
-        let input = "program fib var x := id(x*y); end";
+        let input = "program fib begin var x := id(x*y); end";
         let res = validate_program(&parse_program(input));
         assert_debug_snapshot!(res)
     }
