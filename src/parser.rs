@@ -2,7 +2,6 @@ use crate::lexical::EnrichedToken;
 use crate::parsing_utils::*;
 use crate::syntax::*;
 use crate::tokens::*;
-use std::iter::Peekable;
 
 pub(crate) type ExpToken = Token<'static>;
 pub(crate) type TokenList = &'static [ExpToken];
@@ -58,6 +57,12 @@ pub(crate) mod consts {
         ID,
     ];
 
+    pub(crate) const PRINT_STARTS: TokenList = &[
+        Token::Keyword(Keyword::Print),
+        Token::Keyword(Keyword::Println),
+        Token::Keyword(Keyword::Get),
+    ];
+
     pub(crate) const POSSIBLE_UNIT_STARTS: TokenList = &[ID, B_OPEN, STRING, INT, BOOL];
 
     pub(crate) const POSSIBLE_EXPR_PRIME_STARTS: TokenList = BOOL_OPS;
@@ -90,18 +95,13 @@ pub enum SyntaxError<'a> {
 
 pub type ParsingResult<'a, T> = Result<T, SyntaxError<'a>>;
 
-pub fn parse<'a>(
-    it: impl Iterator<Item = EnrichedToken<'a>>,
-) -> Result<Program<'a>, SyntaxError<'a>> {
+pub fn parse<'a>(it: impl Iterator<Item = EnrichedToken<'a>>) -> ParsingResult<'a, Program<'a>> {
     // Note we skip comments completely
-    let mut it = it.filter(|s| !s.token().is_comment()).peekable();
+    let mut it = CollectorStream::new(it.filter(|s| !s.token().is_comment()).peekable());
     program(&mut it)
 }
 
-fn program<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Program<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn program<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Program<'a>> {
     // Program -> program id; Compound
     advance_expecting(it, Token::Keyword(Keyword::Program))?;
     let id = advance_expecting_identifier(it)?;
@@ -110,10 +110,7 @@ where
     Ok(Program { id, compound })
 }
 
-fn compound<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Compound<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn compound<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Compound<'a>> {
     use consts::END;
 
     // Compound -> Statement+
@@ -137,33 +134,30 @@ where
     Ok(Compound { statements })
 }
 
-fn statement<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Statement<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn statement<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Statement<'a>> {
     // Statement -> Decl | If | Print | While | Procedure | Return | Assign
 
-    let matched = advance_expecting_one_of(it, consts::POSSIBLE_STATEMENT_STARTS)?;
-    let token = matched.take_token();
+    let matched = peek_expecting_one_of(it, consts::POSSIBLE_STATEMENT_STARTS)?;
+    let token = matched.token();
     Ok(match token {
         Token::Keyword(Keyword::Var) => Statement::Decl(decl(it)?),
         Token::Keyword(Keyword::If) => Statement::If(p_if(it)?),
-        Token::Keyword(Keyword::Print) => Statement::Print(print(it, token)?),
-        Token::Keyword(Keyword::Println) => Statement::Print(print(it, token)?),
-        Token::Keyword(Keyword::Get) => Statement::Print(print(it, token)?),
+
+        Token::Keyword(Keyword::Print)
+        | Token::Keyword(Keyword::Println)
+        | Token::Keyword(Keyword::Get) => Statement::Print(print(it)?),
+
         Token::Keyword(Keyword::While) => Statement::While(p_while(it)?),
         Token::Keyword(Keyword::Procedure) => Statement::FunctionDecl(function(it)?),
         Token::Keyword(Keyword::Return) => Statement::Return(p_return(it)?),
-        Token::Identifier(s) => Statement::Assign(assign(it, Identifier(s))?),
+        Token::Identifier(_) => Statement::Assign(assign(it)?),
         _ => return Err(SyntaxError::LogicalError),
     })
 }
 
-fn decl<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Decl<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn decl<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Decl<'a>> {
     // Decl -> var id := Expr; | var id;
+    advance_expecting(it, Token::Keyword(Keyword::Var))?;
     let id = advance_expecting_identifier(it)?;
     let next = advance_expecting_one_of(
         it,
@@ -181,11 +175,9 @@ where
     })
 }
 
-fn p_if<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, If<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn p_if<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, If<'a>> {
     // If -> if (Bool) then Compound; | if (Bool) then Compound else Compound;
+    advance_expecting(it, Token::Keyword(Keyword::If))?;
     advance_expecting(it, consts::B_OPEN)?;
     let condition = expr(it)?;
     advance_expecting(it, consts::B_CLOSE)?;
@@ -210,12 +202,11 @@ where
     })
 }
 
-fn print<'a, T>(it: &mut Peekable<T>, token: Token<'a>) -> ParsingResult<'a, Print<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn print<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Print<'a>> {
     // Print -> print Expr; | println Expr; | get Expr;
-    let print_stat = match token {
+    let next = advance_expecting_one_of(it, consts::PRINT_STARTS)?;
+
+    let print_stat = match next.token() {
         Token::Keyword(Keyword::Print) => Print::Print(expr(it)?),
         Token::Keyword(Keyword::Println) => Print::Println(expr(it)?),
         Token::Keyword(Keyword::Get) => Print::Get(advance_expecting_identifier(it)?),
@@ -228,11 +219,9 @@ where
     Ok(print_stat)
 }
 
-fn p_while<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, While<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn p_while<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, While<'a>> {
     // While -> while (Bool) Compound;
+    advance_expecting(it, Token::Keyword(Keyword::While))?;
     advance_expecting(it, consts::B_OPEN)?;
     let condition = expr(it)?;
     advance_expecting(it, consts::B_CLOSE)?;
@@ -245,11 +234,9 @@ where
     })
 }
 
-fn function<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, FunctionDecl<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn function<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, FunctionDecl<'a>> {
     // Procedure -> procedure id((var i,)*) begin Compound end
+    advance_expecting(it, Token::Keyword(Keyword::Procedure))?;
     let id = advance_expecting_identifier(it)?;
     advance_expecting(it, consts::B_OPEN)?;
 
@@ -288,21 +275,17 @@ where
     Ok(FunctionDecl { id, args, inner })
 }
 
-fn p_return<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Return<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn p_return<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Return<'a>> {
     // Return -> return Expr;
+    advance_expecting(it, Token::Keyword(Keyword::Return))?;
     let expr = expr(it)?;
     advance_expecting(it, consts::SEMICOLON)?;
     Ok(Return { expr })
 }
 
-fn assign<'a, T>(it: &mut Peekable<T>, id: Identifier<'a>) -> ParsingResult<'a, Assign<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn assign<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Assign<'a>> {
     // Assign -> id := Expr;
+    let id = advance_expecting_identifier(it)?;
     advance_expecting(it, Token::Operator(Operator::Assignement))?;
     let expr = expr(it)?;
     advance_expecting(it, consts::SEMICOLON)?;
@@ -310,20 +293,14 @@ where
     Ok(Assign { id, expr })
 }
 
-fn expr<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Expr<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn expr<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Expr<'a>> {
     let head = term(it)?;
     let tail = get_tail(it, consts::POSSIBLE_EXPR_PRIME_STARTS, expr_prime)?;
 
     Ok(Expr { head, tail })
 }
 
-fn expr_prime<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, ExprPrime<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn expr_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, ExprPrime<'a>> {
     let operator = advance_expecting_one_of(it, consts::POSSIBLE_EXPR_PRIME_STARTS)?;
 
     let rhs = term(it)?;
@@ -340,20 +317,14 @@ where
     })
 }
 
-fn term<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Term<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn term<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Term<'a>> {
     let head = factor(it)?;
     let tail = get_tail(it, consts::POSSIBLE_TERM_PRIME_STARTS, term_prime)?;
 
     Ok(Term { head, tail })
 }
 
-fn term_prime<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, TermPrime<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn term_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, TermPrime<'a>> {
     let operator = advance_expecting_one_of(it, consts::POSSIBLE_TERM_PRIME_STARTS)?;
     let rhs = factor(it)?;
     let tail = get_tail(it, consts::POSSIBLE_TERM_PRIME_STARTS, term_prime)?.map(Box::new);
@@ -372,20 +343,14 @@ where
     })
 }
 
-fn factor<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Factor<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn factor<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Factor<'a>> {
     let head = product(it)?;
     let tail = get_tail(it, consts::POSSIBLE_FACTOR_PRIME_STARTS, factor_prime)?;
 
     Ok(Factor { head, tail })
 }
 
-fn factor_prime<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, FactorPrime<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn factor_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, FactorPrime<'a>> {
     let operator = advance_expecting_one_of(it, consts::POSSIBLE_FACTOR_PRIME_STARTS)?;
     let rhs = product(it)?;
     let tail = get_tail(it, consts::POSSIBLE_FACTOR_PRIME_STARTS, factor_prime)?.map(Box::new);
@@ -401,20 +366,14 @@ where
     })
 }
 
-fn product<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Product<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn product<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Product<'a>> {
     let head = atom(it)?;
     let tail = get_tail(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS, product_prime)?;
 
     Ok(Product { head, tail })
 }
 
-fn product_prime<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, ProductPrime<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn product_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, ProductPrime<'a>> {
     let operator = advance_expecting_one_of(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS)?;
     let rhs = atom(it)?;
     let tail = get_tail(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS, product_prime)?.map(Box::new);
@@ -430,30 +389,19 @@ where
     })
 }
 
-fn atom<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Atom<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
-    let next = it.peek().map(|t| t.token());
+fn atom<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Atom<'a>> {
+    let next = peek_expecting_one_of(it, consts::POSSIBLE_ATOM_START)?;
 
-    Ok(match next {
-        Some(Token::Operator(Operator::Not)) => {
+    Ok(match next.token() {
+        Token::Operator(Operator::Not) => {
             advance_expecting(it, Token::Operator(Operator::Not))?;
             Atom::Not(Box::new(atom(it)?))
         }
-        Some(_) => Atom::Unit(unit(it)?),
-        _ => {
-            return Err(SyntaxError::ExpectedOneOfButFoundEOF(
-                consts::POSSIBLE_ATOM_START,
-            ))
-        }
+        _ => Atom::Unit(unit(it)?),
     })
 }
 
-fn unit<'a, T>(it: &mut Peekable<T>) -> ParsingResult<'a, Unit<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+fn unit<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Unit<'a>> {
     let next = advance_expecting_one_of(it, consts::POSSIBLE_UNIT_STARTS)?;
     Ok(match next.take_token() {
         Token::Literal(Literal::Integer(i)) => Unit::Int(i),
@@ -475,13 +423,10 @@ where
     })
 }
 
-fn function_call<'a, T>(
-    it: &mut Peekable<T>,
+fn function_call<'a>(
+    it: &mut impl TokenStream<'a>,
     id: Identifier<'a>,
-) -> ParsingResult<'a, FunctionCall<'a>>
-where
-    T: Iterator<Item = EnrichedToken<'a>>,
-{
+) -> ParsingResult<'a, FunctionCall<'a>> {
     advance_expecting(it, consts::B_OPEN)?;
 
     let mut args = Vec::new();

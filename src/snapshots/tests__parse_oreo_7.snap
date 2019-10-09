@@ -5,6 +5,9 @@ expression: parsed
 Err(
     ExpectedOneOfFound(
         [
+            Operator(
+                Not,
+            ),
             Identifier(
                 "",
             ),
@@ -17,13 +20,13 @@ Err(
                 ),
             ),
             Literal(
-                Integer(
-                    0,
+                Boolean(
+                    false,
                 ),
             ),
             Literal(
-                Boolean(
-                    false,
+                Integer(
+                    0,
                 ),
             ),
         ],
