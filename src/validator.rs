@@ -1,6 +1,7 @@
 use crate::syntax::*;
+use serde::Serialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum ValidationError<'a> {
     ExpectedBoolFoundArithmetic,
     ExpectedBoolFound(Unit<'a>),

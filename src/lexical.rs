@@ -2,6 +2,7 @@ use crate::scanner::{Scanned, ScannedItem};
 use crate::tokens::{Keyword, LexicalError, Literal, Operator, Punctuation, Token};
 
 use lazy_static::lazy_static;
+use serde::Serialize;
 use std::collections::HashMap;
 
 lazy_static! {
@@ -42,7 +43,7 @@ lazy_static! {
     };
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Hash, Serialize)]
 pub struct EnrichedToken<'a> {
     inner: Token<'a>,
     line_no: usize,

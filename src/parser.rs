@@ -2,6 +2,7 @@ use crate::lexical::EnrichedToken;
 use crate::parsing_utils::*;
 use crate::syntax::*;
 use crate::tokens::*;
+use serde::Serialize;
 
 pub(crate) type ExpToken = Token<'static>;
 pub(crate) type TokenList = &'static [ExpToken];
@@ -83,13 +84,12 @@ pub(crate) mod consts {
     ];
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum SyntaxError<'a> {
     ExpectedOneOfButFoundEOF(TokenList),
     ExpectedButFoundEOF(ExpToken),
     ExpectedFound(ExpToken, EnrichedToken<'a>),
     ExpectedOneOfFound(TokenList, EnrichedToken<'a>),
-    TypeError,
     LogicalError,
 }
 

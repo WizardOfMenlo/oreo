@@ -1,4 +1,6 @@
-#[derive(Debug, Clone, PartialEq, Eq)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum Token<'a> {
     Keyword(Keyword),
     Punctuation(Punctuation),
@@ -45,7 +47,7 @@ impl<'a> Token<'a> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum Keyword {
     Program,
     Begin,
@@ -62,7 +64,7 @@ pub enum Keyword {
     Return,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum Punctuation {
     Comma,
     Semicolon,
@@ -70,7 +72,7 @@ pub enum Punctuation {
     BracketClose,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum Operator {
     Assignement,
     Plus,
@@ -87,14 +89,14 @@ pub enum Operator {
     Not,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum Literal<'a> {
     Integer(isize),
     Boolean(bool),
     String(&'a str),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum LexicalError<'a> {
     ExpectedDoubleEqualsEOF,
     ExpectedAssignementEOF,
