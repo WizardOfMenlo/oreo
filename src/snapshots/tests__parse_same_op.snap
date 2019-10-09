@@ -1,0 +1,73 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Ok(
+    Program {
+        id: Identifier(
+            "fib",
+        ),
+        compound: Compound {
+            statements: [
+                Decl(
+                    Decl {
+                        id: Identifier(
+                            "x",
+                        ),
+                        expr: Some(
+                            Expr {
+                                head: Term {
+                                    head: Factor {
+                                        head: Product {
+                                            head: Unit(
+                                                Identifier(
+                                                    Identifier(
+                                                        "a",
+                                                    ),
+                                                ),
+                                            ),
+                                            tail: None,
+                                        },
+                                        tail: Some(
+                                            FactorPrime {
+                                                op: Minus,
+                                                rhs: Product {
+                                                    head: Unit(
+                                                        Identifier(
+                                                            Identifier(
+                                                                "b",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    tail: None,
+                                                },
+                                                tail: Some(
+                                                    FactorPrime {
+                                                        op: Minus,
+                                                        rhs: Product {
+                                                            head: Unit(
+                                                                Identifier(
+                                                                    Identifier(
+                                                                        "c",
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                            tail: None,
+                                                        },
+                                                        tail: None,
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                    },
+                                    tail: None,
+                                },
+                                tail: None,
+                            },
+                        ),
+                    },
+                ),
+            ],
+        },
+    },
+)

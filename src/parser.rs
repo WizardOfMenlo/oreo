@@ -546,6 +546,20 @@ mod tests {
     }
 
     #[test]
+    fn parse_precedence() {
+        let input = "program fib begin var x := not 1 * 2 + 3 < 4 and 5; end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_same_op() {
+        let input = "program fib begin var x := a - b - c; end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
     fn parse_condition() {
         let input = r#"
         program x
