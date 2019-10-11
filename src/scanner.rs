@@ -1,10 +1,10 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Scanned<'a> {
     pub(crate) inner: ScannedItem<'a>,
     pub(crate) line: usize,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ScannedItem<'a> {
     Str(&'a str),
     UnclosedStr(&'a str),
