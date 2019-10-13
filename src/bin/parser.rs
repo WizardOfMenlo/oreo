@@ -74,7 +74,7 @@ fn token_list_to_string(t: impl IntoIterator<Item = &'static Token<'static>>) ->
         .join(",")
 }
 
-fn print_syntax_error<'a>(error: SyntaxError<'a>, total_lines: usize) {
+fn print_syntax_error(error: SyntaxError, total_lines: usize) {
     let (expected, found) = match error {
         SyntaxError::ExpectedOneOfButFoundEOF(l) => (token_list_to_string(l), None),
         SyntaxError::ExpectedButFoundEOF(t) => (token_to_string(&t), None),
@@ -114,8 +114,7 @@ fn main() {
 
     let parse_res = parse(tokens.into_iter());
 
-    if parse_res.is_err() {
-        let err = parse_res.unwrap_err();
+    if let Err(err) = parse_res {
         print_syntax_error(err, total_lines);
         return;
     }
@@ -123,8 +122,8 @@ fn main() {
     let program = parse_res.unwrap();
 
     let validation = oreo::validator::validate_program(&program);
-    if validation.is_err() {
-        println!("Error validating the typing, {:?}", validation.unwrap_err());
+    if let Err(err) = validation {
+        println!("Error validating the typing, {:?}", err);
     }
 
     let out = match opt.mode {

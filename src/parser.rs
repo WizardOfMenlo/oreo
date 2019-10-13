@@ -150,7 +150,7 @@ fn statement<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Statement<'
         Token::Keyword(Keyword::While) => Statement::While(p_while(it)?),
         Token::Keyword(Keyword::Procedure) => Statement::FunctionDecl(function(it)?),
         Token::Keyword(Keyword::Return) => Statement::Return(p_return(it)?),
-        Token::Identifier(_) => Statement::Assign(assign(it)?),
+        Token::Identifier(_) => assign_or_function_call(it)?,
         _ => return Err(SyntaxError::LogicalError),
     })
 }
@@ -283,9 +283,26 @@ fn p_return<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Return<'a>> 
     Ok(Return { expr })
 }
 
-fn assign<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Assign<'a>> {
-    // Assign -> id := Expr;
+fn assign_or_function_call<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Statement<'a>> {
     let id = advance_expecting_identifier(it)?;
+    let next = peek_expecting_one_of(
+        it,
+        &[Token::Operator(Operator::Assignement), consts::B_OPEN],
+    )?;
+
+    Ok(match next.token() {
+        &consts::B_OPEN => {
+            let res = Statement::FunctionCall(function_call(it, id)?);
+            advance_expecting(it, consts::SEMICOLON)?;
+            res
+        }
+        Token::Operator(Operator::Assignement) => Statement::Assign(assign(it, id)?),
+        _ => return Err(SyntaxError::LogicalError),
+    })
+}
+
+fn assign<'a>(it: &mut impl TokenStream<'a>, id: Identifier<'a>) -> ParsingResult<'a, Assign<'a>> {
+    // Assign -> id := Expr;
     advance_expecting(it, Token::Operator(Operator::Assignement))?;
     let expr = expr(it)?;
     advance_expecting(it, consts::SEMICOLON)?;
@@ -595,6 +612,18 @@ mod tests {
         program x
         begin
             var c := 0 < (c < 1);
+        end
+        "#;
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn parse_fun_call() {
+        let input = r#"
+        program x
+        begin
+            f();
         end
         "#;
         let parsed = parse(make_tokens_from_str(input));

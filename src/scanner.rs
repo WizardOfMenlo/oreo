@@ -28,7 +28,7 @@ pub struct LineScannerIt<'a> {
 }
 
 fn count_new_lines(s: &str) -> usize {
-    s.as_bytes().iter().filter(|&&s| s == b'\n').count()
+    bytecount::count(s.as_bytes(), b'\n')
 }
 
 impl<'a> Iterator for LineScannerIt<'a> {

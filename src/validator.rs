@@ -28,6 +28,7 @@ fn validate_statement<'a>(s: &Statement<'a>) -> Result<(), ValidationError<'a>> 
         Statement::FunctionDecl(d) => validate_compound(&d.inner),
         Statement::Print(p) => validate_print(p),
         Statement::Return(r) => validate_expr(&r.expr),
+        Statement::FunctionCall(f) => validate_func_call(f),
         _ => Ok(()),
     }
 }

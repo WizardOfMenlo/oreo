@@ -21,6 +21,7 @@ pub enum Statement<'a> {
     While(While<'a>),
     If(If<'a>),
     Assign(Assign<'a>),
+    FunctionCall(FunctionCall<'a>),
     FunctionDecl(FunctionDecl<'a>),
     Return(Return<'a>),
 }

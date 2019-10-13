@@ -1,0 +1,23 @@
+---
+source: src/parser.rs
+expression: parsed
+---
+Ok(
+    Program {
+        id: Identifier(
+            "x",
+        ),
+        compound: Compound {
+            statements: [
+                FunctionCall(
+                    FunctionCall {
+                        id: Identifier(
+                            "f",
+                        ),
+                        args: [],
+                    },
+                ),
+            ],
+        },
+    },
+)
