@@ -3,82 +3,82 @@ source: src/scanner.rs
 expression: res
 ---
 [
-    Scanned {
+    RangedObject {
         inner: Rest(
             "(x",
         ),
-        line: 0,
+        range: 0..2,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "<=",
         ),
-        line: 0,
+        range: 3..5,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ">",
         ),
-        line: 0,
+        range: 6..7,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ">=",
         ),
-        line: 0,
+        range: 8..10,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "<",
         ),
-        line: 0,
+        range: 11..12,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "y",
         ),
-        line: 0,
+        range: 13..14,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "99.88l8",
         ),
-        line: 0,
+        range: 15..22,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ")",
         ),
-        line: 0,
+        range: 23..24,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "x",
         ),
-        line: 1,
+        range: 25..26,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ")",
         ),
-        line: 1,
+        range: 27..28,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "(",
         ),
-        line: 1,
+        range: 29..30,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ">=",
         ),
-        line: 1,
+        range: 31..33,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "y",
         ),
-        line: 1,
+        range: 34..35,
     },
 ]

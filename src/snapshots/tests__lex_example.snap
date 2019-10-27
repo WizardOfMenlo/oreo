@@ -3,82 +3,82 @@ source: src/lexical.rs
 expression: res
 ---
 [
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             BracketOpen,
         ),
-        line_no: 0,
+        range: 0..1,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "x",
         ),
-        line_no: 0,
+        range: 1..2,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             LesserOrEquals,
         ),
-        line_no: 0,
+        range: 3..5,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             GreaterThan,
         ),
-        line_no: 0,
+        range: 6..7,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             GreaterOrEquals,
         ),
-        line_no: 0,
+        range: 8..10,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             LesserThan,
         ),
-        line_no: 0,
+        range: 11..12,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "y",
         ),
-        line_no: 0,
+        range: 13..14,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Literal(
             Integer(
                 99,
             ),
         ),
-        line_no: 0,
+        range: 15..17,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Error(
             UnknownChar(
                 '.',
             ),
         ),
-        line_no: 0,
+        range: 17..18,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Literal(
             Integer(
                 88,
             ),
         ),
-        line_no: 0,
+        range: 18..20,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "l8",
         ),
-        line_no: 0,
+        range: 20..22,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             BracketClose,
         ),
-        line_no: 0,
+        range: 23..24,
     },
 ]

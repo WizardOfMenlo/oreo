@@ -3,466 +3,466 @@ source: src/lexical.rs
 expression: res
 ---
 [
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Program,
         ),
-        line_no: 0,
+        range: 0..7,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "fib",
         ),
-        line_no: 0,
+        range: 8..11,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 0,
+        range: 11..12,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Begin,
         ),
-        line_no: 1,
+        range: 14..19,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Var,
         ),
-        line_no: 2,
+        range: 21..24,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "n",
         ),
-        line_no: 2,
+        range: 25..26,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 2,
+        range: 26..27,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Var,
         ),
-        line_no: 3,
+        range: 29..32,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "first",
         ),
-        line_no: 3,
+        range: 33..38,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             Assignement,
         ),
-        line_no: 3,
+        range: 39..41,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Literal(
             Integer(
                 0,
             ),
         ),
-        line_no: 3,
+        range: 42..43,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 3,
+        range: 43..44,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Var,
         ),
-        line_no: 4,
+        range: 46..49,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "second",
         ),
-        line_no: 4,
+        range: 50..56,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             Assignement,
         ),
-        line_no: 4,
+        range: 57..59,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Literal(
             Integer(
                 1,
             ),
         ),
-        line_no: 4,
+        range: 59..60,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 4,
+        range: 60..61,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Var,
         ),
-        line_no: 5,
+        range: 63..66,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "next",
         ),
-        line_no: 5,
+        range: 67..71,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 5,
+        range: 71..72,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Var,
         ),
-        line_no: 6,
+        range: 74..77,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "c",
         ),
-        line_no: 6,
+        range: 78..79,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             Assignement,
         ),
-        line_no: 6,
+        range: 80..82,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Literal(
             Integer(
                 0,
             ),
         ),
-        line_no: 6,
+        range: 82..83,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 6,
+        range: 84..85,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Print,
         ),
-        line_no: 7,
+        range: 87..92,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Literal(
             String(
                 "enter the number of terms",
             ),
         ),
-        line_no: 7,
+        range: 93..120,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 7,
+        range: 120..121,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Get,
         ),
-        line_no: 8,
+        range: 123..126,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "n",
         ),
-        line_no: 8,
+        range: 127..128,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 8,
+        range: 128..129,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             While,
         ),
-        line_no: 9,
+        range: 131..136,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             BracketOpen,
         ),
-        line_no: 9,
+        range: 137..138,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "c",
         ),
-        line_no: 9,
+        range: 139..140,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             LesserThan,
         ),
-        line_no: 9,
+        range: 141..142,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "n",
         ),
-        line_no: 9,
+        range: 143..144,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             BracketClose,
         ),
-        line_no: 9,
+        range: 144..145,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Begin,
         ),
-        line_no: 10,
+        range: 147..152,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             If,
         ),
-        line_no: 11,
+        range: 154..156,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             BracketOpen,
         ),
-        line_no: 11,
+        range: 157..158,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "c",
         ),
-        line_no: 11,
+        range: 159..160,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             LesserOrEquals,
         ),
-        line_no: 11,
+        range: 161..163,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Literal(
             Integer(
                 1,
             ),
         ),
-        line_no: 11,
+        range: 164..165,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             BracketClose,
         ),
-        line_no: 11,
+        range: 165..166,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Then,
         ),
-        line_no: 12,
+        range: 168..172,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Begin,
         ),
-        line_no: 12,
+        range: 173..178,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "next",
         ),
-        line_no: 12,
+        range: 179..183,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             Assignement,
         ),
-        line_no: 12,
+        range: 184..186,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "c",
         ),
-        line_no: 12,
+        range: 187..188,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 12,
+        range: 188..189,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             End,
         ),
-        line_no: 12,
+        range: 190..193,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Else,
         ),
-        line_no: 13,
+        range: 195..199,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Begin,
         ),
-        line_no: 13,
+        range: 200..205,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "next",
         ),
-        line_no: 14,
+        range: 208..212,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             Assignement,
         ),
-        line_no: 14,
+        range: 213..215,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "first",
         ),
-        line_no: 14,
+        range: 216..221,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             Plus,
         ),
-        line_no: 14,
+        range: 222..223,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "second",
         ),
-        line_no: 14,
+        range: 224..230,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 14,
+        range: 230..231,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "second",
         ),
-        line_no: 15,
+        range: 234..240,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             Assignement,
         ),
-        line_no: 15,
+        range: 241..243,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "next",
         ),
-        line_no: 15,
+        range: 244..248,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 15,
+        range: 248..249,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             End,
         ),
-        line_no: 16,
+        range: 251..254,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Print,
         ),
-        line_no: 17,
+        range: 256..261,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "next",
         ),
-        line_no: 17,
+        range: 262..266,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 17,
+        range: 266..267,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "c",
         ),
-        line_no: 18,
+        range: 269..270,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             Assignement,
         ),
-        line_no: 18,
+        range: 271..273,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "c",
         ),
-        line_no: 18,
+        range: 274..275,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Operator(
             Plus,
         ),
-        line_no: 18,
+        range: 276..277,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Literal(
             Integer(
                 1,
             ),
         ),
-        line_no: 18,
+        range: 278..279,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 18,
+        range: 279..280,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             End,
         ),
-        line_no: 19,
+        range: 282..285,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             End,
         ),
-        line_no: 20,
+        range: 287..290,
     },
 ]

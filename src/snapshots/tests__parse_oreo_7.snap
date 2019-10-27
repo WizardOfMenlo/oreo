@@ -30,13 +30,13 @@ Err(
                 ),
             ),
         ],
-        EnrichedToken {
+        RangedObject {
             inner: Error(
                 UnclosedString(
                     "enter the number of terms;\n    \n    get n;  \n    \n    while ( first < (second > 32)  )\n    begin\n\n       if ( 1 > 2 ) then begin n := 5;  end\n       \t\t\t   else begin n := 46; end;\n                        \n                                  \n    c := c + 1;\t    \n\tend;\nend       \n        ",
                 ),
             ),
-            line_no: 12,
+            range: 261..548,
         },
     ),
 )

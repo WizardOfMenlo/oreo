@@ -3,358 +3,358 @@ source: src/scanner.rs
 expression: res
 ---
 [
-    Scanned {
+    RangedObject {
         inner: Comment(
             " will parse OK ",
         ),
-        line: 1,
+        range: 9..28,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "program",
         ),
-        line: 2,
+        range: 29..36,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "test",
         ),
-        line: 2,
+        range: 37..41,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "begin",
         ),
-        line: 4,
+        range: 78..83,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "var",
         ),
-        line: 6,
+        range: 151..154,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "n;",
         ),
-        line: 6,
+        range: 155..157,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "var",
         ),
-        line: 7,
+        range: 159..162,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "first",
         ),
-        line: 7,
+        range: 163..168,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ":=",
         ),
-        line: 7,
+        range: 169..171,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "0;",
         ),
-        line: 7,
+        range: 172..174,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "var",
         ),
-        line: 8,
+        range: 178..181,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "second",
         ),
-        line: 8,
+        range: 182..188,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ":=1;",
         ),
-        line: 8,
+        range: 189..193,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "var",
         ),
-        line: 9,
+        range: 196..199,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "next;",
         ),
-        line: 9,
+        range: 200..205,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "var",
         ),
-        line: 10,
+        range: 234..237,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "c",
         ),
-        line: 10,
+        range: 238..239,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ":=0;",
         ),
-        line: 10,
+        range: 240..244,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "print",
         ),
-        line: 12,
+        range: 251..256,
     },
-    Scanned {
+    RangedObject {
         inner: Str(
             "enter the number of terms",
         ),
-        line: 12,
+        range: 257..284,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ";",
         ),
-        line: 12,
+        range: 284..285,
     },
-    Scanned {
+    RangedObject {
         inner: Comment(
             " comment in body ",
         ),
-        line: 13,
+        range: 303..324,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "get",
         ),
-        line: 14,
+        range: 329..332,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "n;",
         ),
-        line: 14,
+        range: 333..335,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "while",
         ),
-        line: 16,
+        range: 347..352,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "(",
         ),
-        line: 16,
+        range: 353..354,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "first",
         ),
-        line: 16,
+        range: 355..360,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "<",
         ),
-        line: 16,
+        range: 361..362,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "(second",
         ),
-        line: 16,
+        range: 363..370,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ">",
         ),
-        line: 16,
+        range: 371..372,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "32)",
         ),
-        line: 16,
+        range: 373..376,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ")",
         ),
-        line: 16,
+        range: 378..379,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "begin",
         ),
-        line: 17,
+        range: 384..389,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "if",
         ),
-        line: 19,
+        range: 398..400,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "(",
         ),
-        line: 19,
+        range: 401..402,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "42",
         ),
-        line: 19,
+        range: 403..405,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "<",
         ),
-        line: 19,
+        range: 406..407,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "100",
         ),
-        line: 19,
+        range: 408..411,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ")",
         ),
-        line: 19,
+        range: 412..413,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "then",
         ),
-        line: 19,
+        range: 414..418,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "begin",
         ),
-        line: 19,
+        range: 419..424,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "n",
         ),
-        line: 19,
+        range: 425..426,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ":=",
         ),
-        line: 19,
+        range: 427..429,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "5;",
         ),
-        line: 19,
+        range: 430..432,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "end",
         ),
-        line: 19,
+        range: 434..437,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "else",
         ),
-        line: 20,
+        range: 451..455,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "begin",
         ),
-        line: 20,
+        range: 456..461,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "n",
         ),
-        line: 20,
+        range: 462..463,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ":=",
         ),
-        line: 20,
+        range: 464..466,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "46;",
         ),
-        line: 20,
+        range: 467..470,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "end;",
         ),
-        line: 20,
+        range: 471..475,
     },
-    Scanned {
+    RangedObject {
         inner: Comment(
             " comment\n                        over\n                        multiple \n                        lines ",
         ),
-        line: 21,
+        range: 500..606,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "c",
         ),
-        line: 26,
+        range: 646..647,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             ":=",
         ),
-        line: 26,
+        range: 648..650,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "c",
         ),
-        line: 26,
+        range: 651..652,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "+",
         ),
-        line: 26,
+        range: 653..654,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "1;",
         ),
-        line: 26,
+        range: 655..657,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "end;",
         ),
-        line: 27,
+        range: 664..668,
     },
-    Scanned {
+    RangedObject {
         inner: Rest(
             "end",
         ),
-        line: 28,
+        range: 669..672,
     },
 ]

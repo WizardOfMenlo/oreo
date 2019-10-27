@@ -1,8 +1,8 @@
-use crate::scanner::{Scanned, ScannedItem};
+use crate::range::RangedObject;
+use crate::scanner::ScannedItem;
 use crate::tokens::{Keyword, LexicalError, Literal, Operator, Punctuation, Token};
 
 use lazy_static::lazy_static;
-use serde::Serialize;
 use std::collections::HashMap;
 
 lazy_static! {
@@ -43,51 +43,24 @@ lazy_static! {
     };
 }
 
-#[derive(Debug, PartialEq, Clone, Hash, Serialize)]
-pub struct EnrichedToken<'a> {
-    inner: Token<'a>,
-    line_no: usize,
-}
-
-impl<'a> EnrichedToken<'a> {
-    pub fn token(&self) -> &Token {
-        &self.inner
-    }
-
-    pub fn take_token(self) -> Token<'a> {
-        self.inner
-    }
-
-    pub fn line_no(&self) -> usize {
-        self.line_no
-    }
-}
-
 pub fn lexicalize<'a>(
-    it: impl Iterator<Item = Scanned<'a>>,
-) -> impl Iterator<Item = EnrichedToken<'a>> {
-    it.map(|s| {
-        let line = s.line;
-        lexicalize_one(s.inner).map(move |token| EnrichedToken {
-            inner: token,
-            line_no: line,
-        })
-    })
-    .flatten()
+    it: impl Iterator<Item = RangedObject<ScannedItem<'a>>>,
+) -> impl Iterator<Item = RangedObject<Token<'a>>> {
+    it.map(lexicalize_one).flatten()
 }
 
-fn lexicalize_one(scan: ScannedItem) -> impl Iterator<Item = Token> {
+fn lexicalize_one(scan: RangedObject<ScannedItem>) -> impl Iterator<Item = RangedObject<Token>> {
     LexicalIt::new(scan)
 }
 
 struct LexicalIt<'a> {
-    s: ScannedItem<'a>,
+    s: RangedObject<ScannedItem<'a>>,
     curr_position: usize,
     terminate: bool,
 }
 
 impl<'a> LexicalIt<'a> {
-    fn new(s: ScannedItem<'a>) -> Self {
+    fn new(s: RangedObject<ScannedItem<'a>>) -> Self {
         LexicalIt {
             s,
             curr_position: 0,
@@ -97,35 +70,44 @@ impl<'a> LexicalIt<'a> {
 }
 
 impl<'a> Iterator for LexicalIt<'a> {
-    type Item = Token<'a>;
+    type Item = RangedObject<Token<'a>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.terminate {
             return None;
         }
 
-        let remaining = match self.s {
+        let remaining = match self.s.inner() {
             ScannedItem::Rest(s) => &s[self.curr_position..],
 
             // Equivalent of std::iter::once
             ScannedItem::Str(s) => {
                 self.terminate = true;
-                return Some(Token::Literal(Literal::String(s)));
+                return Some(RangedObject::new(
+                    Token::Literal(Literal::String(s)),
+                    self.s.range().clone(),
+                ));
             }
 
             ScannedItem::Comment(s) => {
                 self.terminate = true;
-                return Some(Token::Comment(s));
+                return Some(RangedObject::new(Token::Comment(s), self.s.range().clone()));
             }
 
             ScannedItem::UnclosedComment(s) => {
                 self.terminate = true;
-                return Some(Token::Error(LexicalError::UnclosedComment(s)));
+                return Some(RangedObject::new(
+                    Token::Error(LexicalError::UnclosedComment(s)),
+                    self.s.range().clone(),
+                ));
             }
 
             ScannedItem::UnclosedStr(s) => {
                 self.terminate = true;
-                return Some(Token::Error(LexicalError::UnclosedString(s)));
+                return Some(RangedObject::new(
+                    Token::Error(LexicalError::UnclosedString(s)),
+                    self.s.range().clone(),
+                ));
             }
         };
 
@@ -133,13 +115,19 @@ impl<'a> Iterator for LexicalIt<'a> {
             return None;
         }
 
+        let offset = self.s.range().start;
+        let initial_pos = self.curr_position + offset;
+
         let mut chars = remaining.chars();
         let start_char = chars.next().unwrap();
 
         // This resolves all unambiguos single chars
         if SINGLE_CHAR_TOKEN.contains_key(&start_char) {
             self.curr_position += 1;
-            return SINGLE_CHAR_TOKEN.get(&start_char).cloned();
+            return SINGLE_CHAR_TOKEN
+                .get(&start_char)
+                .cloned()
+                .map(|s| RangedObject::new(s, initial_pos..self.curr_position + offset));
         }
 
         // Handle the single ambiguos chars
@@ -161,29 +149,46 @@ impl<'a> Iterator for LexicalIt<'a> {
                 ('=', None) => (Token::Error(LexicalError::ExpectedDoubleEqualsEOF), false),
 
                 // If we get here, a lot must be wrong
-                _ => return Some(Token::Error(LexicalError::UnknownChar('?'))),
+                _ => {
+                    return Some(RangedObject::new(
+                        Token::Error(LexicalError::UnknownChar('?')),
+                        initial_pos..self.curr_position + offset,
+                    ))
+                }
             };
 
             self.curr_position += 1 + move_forward as usize;
-            return Some(token);
+            return Some(RangedObject::new(
+                token,
+                initial_pos..self.curr_position + offset,
+            ));
         }
 
         // Get a integer literal
         if start_char.is_numeric() {
             let (token, read) = parse_literal(remaining);
             self.curr_position += read;
-            return Some(token);
+            return Some(RangedObject::new(
+                token,
+                initial_pos..self.curr_position + offset,
+            ));
         }
 
         // Handle stuff that looks like identifiers
         if start_char.is_alphabetic() || start_char == '_' {
             let (token, read) = parse_identifier(remaining);
             self.curr_position += read;
-            return Some(token);
+            return Some(RangedObject::new(
+                token,
+                initial_pos..self.curr_position + offset,
+            ));
         }
 
         self.curr_position += 1;
-        Some(Token::Error(LexicalError::UnknownChar(start_char)))
+        Some(RangedObject::new(
+            Token::Error(LexicalError::UnknownChar(start_char)),
+            initial_pos..self.curr_position + offset,
+        ))
     }
 }
 

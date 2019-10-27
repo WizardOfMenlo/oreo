@@ -33,11 +33,11 @@ Err(
                 "",
             ),
         ],
-        EnrichedToken {
+        RangedObject {
             inner: Punctuation(
                 Semicolon,
             ),
-            line_no: 10,
+            range: 244..245,
         },
     ),
 )

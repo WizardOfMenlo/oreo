@@ -7,13 +7,13 @@ Err(
         Identifier(
             "",
         ),
-        EnrichedToken {
+        RangedObject {
             inner: Literal(
                 Integer(
                     99,
                 ),
             ),
-            line_no: 10,
+            range: 237..239,
         },
     ),
 )

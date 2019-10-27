@@ -1,4 +1,5 @@
 use oreo::lexical::lexicalize;
+use oreo::range::RangedObject;
 use oreo::scanner::scan;
 use oreo::tokens::{LexicalError, Token};
 use structopt::StructOpt;
@@ -10,52 +11,53 @@ struct Args {
     input: String,
 }
 
-fn print_error(error: &LexicalError, line: usize) {
-    let (exp, found) = match error {
+fn print_error(error: RangedObject<&LexicalError>, input: &str) {
+    let (exp, found) = match error.inner() {
         LexicalError::ExpectedDoubleEqualsEOF => ('=', None),
         LexicalError::ExpectedAssignementEOF => ('=', None),
         LexicalError::ExpectedDoubleEquals(c) => ('=', Some(c)),
         LexicalError::ExpectedAssignement(c) => ('=', Some(c)),
         LexicalError::UnknownChar(c) => {
-            println!("Unknown char '{}' at line {}.", c, line);
+            println!("Unknown char '{}' in {}.", c, error.span(input));
             return;
         }
         LexicalError::UnclosedString(s) => {
-            println!("Unclosed string \"{}\" at line {}.", s, line);
+            println!("Unclosed string \"{}\" in {}.", s, error.span(input));
             return;
         }
         LexicalError::UnclosedComment(s) => {
-            println!("Unclosed comment \"{}\" at line {}.", s, line);
+            println!("Unclosed comment \"{}\" in {}.", s, error.span(input));
             return;
         }
     };
 
     println!(
-        "Expected '{}', found '{}' at line {}",
+        "Expected '{}', found '{}' in {}",
         exp,
         found
             .map(ToString::to_string)
             .unwrap_or_else(|| String::from("EOF")),
-        line
+        error.span(input)
     );
 }
 
 fn main() {
     let opt = Args::from_args();
-    let tokens = lexicalize(scan(&opt.input)).collect::<Vec<_>>();
+    let input = opt.input;
+    let tokens = lexicalize(scan(&input)).collect::<Vec<_>>();
     tokens
         .iter()
-        .filter(|t| t.token().is_error())
+        .filter(|t| t.inner().is_error())
         .for_each(|error| {
-            if let Token::Error(e) = error.token() {
-                print_error(e, error.line_no())
+            if let Token::Error(e) = error.inner() {
+                print_error(RangedObject::new(e, error.range().clone()), &input)
             }
         });
 
     tokens
         .iter()
-        .filter(|t| !t.token().is_error())
+        .filter(|t| !t.inner().is_error())
         .for_each(|el| {
-            println!("{:?}", el.token());
+            println!("{:?}", el.inner());
         })
 }

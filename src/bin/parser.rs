@@ -1,5 +1,6 @@
 use oreo::lexical::lexicalize;
 use oreo::parser::{parse, SyntaxError};
+use oreo::range::RangedObject;
 use oreo::scanner::scan;
 use oreo::tokens::{LexicalError, Token};
 use std::str::FromStr;
@@ -33,33 +34,33 @@ struct Args {
     mode: LexMode,
 }
 
-fn print_lexical_error(error: &LexicalError, line: usize) {
-    let (exp, found) = match error {
+fn print_lexical_error(error: RangedObject<&LexicalError>, input: &str) {
+    let (exp, found) = match error.inner() {
         LexicalError::ExpectedDoubleEqualsEOF => ('=', None),
         LexicalError::ExpectedAssignementEOF => ('=', None),
         LexicalError::ExpectedDoubleEquals(c) => ('=', Some(c)),
         LexicalError::ExpectedAssignement(c) => ('=', Some(c)),
         LexicalError::UnknownChar(c) => {
-            println!("Unknown char '{}' at line {}.", c, line);
+            println!("Unknown char '{}' in {}.", c, error.span(input));
             return;
         }
         LexicalError::UnclosedString(s) => {
-            println!("Unclosed string \"{}\" at line {}.", s, line);
+            println!("Unclosed string \"{}\" in {}.", s, error.span(input));
             return;
         }
         LexicalError::UnclosedComment(s) => {
-            println!("Unclosed comment \"{}\" at line {}.", s, line);
+            println!("Unclosed comment \"{}\" in {}.", s, error.span(input));
             return;
         }
     };
 
     println!(
-        "Expected '{}', found '{}' at line {}",
+        "Expected '{}', found '{}' in {}",
         exp,
         found
             .map(ToString::to_string)
             .unwrap_or_else(|| String::from("EOF")),
-        line
+        error.span(input)
     );
 }
 
@@ -74,7 +75,7 @@ fn token_list_to_string(t: impl IntoIterator<Item = &'static Token<'static>>) ->
         .join(",")
 }
 
-fn print_syntax_error(error: SyntaxError, total_lines: usize) {
+fn print_syntax_error(error: SyntaxError, input: &str) {
     let (expected, found) = match error {
         SyntaxError::ExpectedOneOfButFoundEOF(l) => (token_list_to_string(l), None),
         SyntaxError::ExpectedButFoundEOF(t) => (token_to_string(&t), None),
@@ -86,36 +87,38 @@ fn print_syntax_error(error: SyntaxError, total_lines: usize) {
         }
     };
 
-    let line = found.as_ref().map(|t| t.line_no()).unwrap_or(total_lines);
+    let range = found
+        .as_ref()
+        .map(|t| t.range().clone())
+        .unwrap_or(0..input.len());
 
     println!(
-        "Expected {}, found {} at line {}",
+        "Expected {}, found {} in {}",
         expected,
         found
-            .map(|t| token_to_string(t.token()))
+            .map(|t| token_to_string(t.inner()))
             .unwrap_or_else(|| String::from("EOF")),
-        line
+        &input[range]
     )
 }
 
 fn main() {
     let opt = Args::from_args();
-    let total_lines = opt.input.lines().count();
     let tokens = lexicalize(scan(&opt.input)).collect::<Vec<_>>();
     // Print lexing errors before parsing error
     tokens
         .iter()
-        .filter(|t| t.token().is_error())
+        .filter(|t| t.inner().is_error())
         .for_each(|error| {
-            if let Token::Error(e) = error.token() {
-                print_lexical_error(e, error.line_no())
+            if let Token::Error(e) = error.inner() {
+                print_lexical_error(RangedObject::new(e, error.range().clone()), &opt.input)
             }
         });
 
     let parse_res = parse(tokens.into_iter());
 
     if let Err(err) = parse_res {
-        print_syntax_error(err, total_lines);
+        print_syntax_error(err, &opt.input);
         return;
     }
 

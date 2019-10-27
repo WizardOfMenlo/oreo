@@ -3,88 +3,88 @@ source: src/lexical.rs
 expression: res
 ---
 [
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Procedure,
         ),
-        line_no: 0,
+        range: 0..9,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "id",
         ),
-        line_no: 0,
+        range: 10..12,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             BracketOpen,
         ),
-        line_no: 0,
+        range: 12..13,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Var,
         ),
-        line_no: 0,
+        range: 13..16,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "x",
         ),
-        line_no: 0,
+        range: 17..18,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Comma,
         ),
-        line_no: 0,
+        range: 18..19,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Var,
         ),
-        line_no: 0,
+        range: 20..23,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "y",
         ),
-        line_no: 0,
+        range: 24..25,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             BracketClose,
         ),
-        line_no: 0,
+        range: 25..26,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Begin,
         ),
-        line_no: 0,
+        range: 27..32,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             Return,
         ),
-        line_no: 0,
+        range: 33..39,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Identifier(
             "x",
         ),
-        line_no: 0,
+        range: 40..41,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Punctuation(
             Semicolon,
         ),
-        line_no: 0,
+        range: 41..42,
     },
-    EnrichedToken {
+    RangedObject {
         inner: Keyword(
             End,
         ),
-        line_no: 0,
+        range: 43..46,
     },
 ]

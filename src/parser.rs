@@ -1,5 +1,5 @@
-use crate::lexical::EnrichedToken;
 use crate::parsing_utils::*;
+use crate::range::RangedObject;
 use crate::syntax::*;
 use crate::tokens::*;
 use serde::Serialize;
@@ -88,16 +88,18 @@ pub(crate) mod consts {
 pub enum SyntaxError<'a> {
     ExpectedOneOfButFoundEOF(TokenList),
     ExpectedButFoundEOF(ExpToken),
-    ExpectedFound(ExpToken, EnrichedToken<'a>),
-    ExpectedOneOfFound(TokenList, EnrichedToken<'a>),
+    ExpectedFound(ExpToken, RangedObject<Token<'a>>),
+    ExpectedOneOfFound(TokenList, RangedObject<Token<'a>>),
     LogicalError,
 }
 
 pub type ParsingResult<'a, T> = Result<T, SyntaxError<'a>>;
 
-pub fn parse<'a>(it: impl Iterator<Item = EnrichedToken<'a>>) -> ParsingResult<'a, Program<'a>> {
+pub fn parse<'a>(
+    it: impl Iterator<Item = RangedObject<Token<'a>>>,
+) -> ParsingResult<'a, Program<'a>> {
     // Note we skip comments completely
-    let mut it = CollectorStream::new(it.filter(|s| !s.token().is_comment()).peekable());
+    let mut it = ParserStream::new(it.filter(|s| !s.inner().is_comment()).peekable());
     program(&mut it)
 }
 
@@ -118,7 +120,7 @@ fn compound<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Compound<'a>
     let mut statements = Vec::new();
     loop {
         if let Some(tok) = it.peek() {
-            let token = tok.token();
+            let token = tok.inner();
             if token.same_kind(&END) {
                 break;
             }
@@ -138,7 +140,7 @@ fn statement<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Statement<'
     // Statement -> Decl | If | Print | While | Procedure | Return | Assign
 
     let matched = peek_expecting_one_of(it, consts::POSSIBLE_STATEMENT_STARTS)?;
-    let token = matched.token();
+    let token = matched.inner();
     Ok(match token {
         Token::Keyword(Keyword::Var) => Statement::Decl(decl(it)?),
         Token::Keyword(Keyword::If) => Statement::If(p_if(it)?),
@@ -164,7 +166,7 @@ fn decl<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Decl<'a>> {
         &[consts::SEMICOLON, Token::Operator(Operator::Assignement)],
     )?;
 
-    Ok(match next.token() {
+    Ok(match next.inner() {
         Token::Punctuation(Punctuation::Semicolon) => Decl { id, expr: None },
         Token::Operator(Operator::Assignement) => {
             let expr = Some(expr(it)?);
@@ -185,7 +187,7 @@ fn p_if<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, If<'a>> {
     let if_branch = compound(it)?;
     let next = advance_expecting_one_of(it, &[Token::Keyword(Keyword::Else), consts::SEMICOLON])?;
 
-    let else_branch = match next.token() {
+    let else_branch = match next.inner() {
         Token::Keyword(Keyword::Else) => {
             let tmp = compound(it)?;
             advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
@@ -206,7 +208,7 @@ fn print<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Print<'a>> {
     // Print -> print Expr; | println Expr; | get Expr;
     let next = advance_expecting_one_of(it, consts::PRINT_STARTS)?;
 
-    let print_stat = match next.token() {
+    let print_stat = match next.inner() {
         Token::Keyword(Keyword::Print) => Print::Print(expr(it)?),
         Token::Keyword(Keyword::Println) => Print::Println(expr(it)?),
         Token::Keyword(Keyword::Get) => Print::Get(advance_expecting_identifier(it)?),
@@ -243,7 +245,7 @@ fn function<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, FunctionDecl
     let mut args = Vec::new();
     loop {
         if let Some(tok) = it.peek() {
-            if tok.token().same_kind(&consts::B_CLOSE) {
+            if tok.inner().same_kind(&consts::B_CLOSE) {
                 break;
             }
 
@@ -253,7 +255,7 @@ fn function<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, FunctionDecl
 
             if it
                 .peek()
-                .map(|t| t.token().same_kind(&consts::B_CLOSE))
+                .map(|t| t.inner().same_kind(&consts::B_CLOSE))
                 .unwrap_or(false)
             {
                 break;
@@ -290,7 +292,7 @@ fn assign_or_function_call<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'
         &[Token::Operator(Operator::Assignement), consts::B_OPEN],
     )?;
 
-    Ok(match next.token() {
+    Ok(match next.inner() {
         &consts::B_OPEN => {
             let res = Statement::FunctionCall(function_call(it, id)?);
             advance_expecting(it, consts::SEMICOLON)?;
@@ -324,7 +326,7 @@ fn expr_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, ExprPrime<
     let tail = get_tail(it, consts::POSSIBLE_EXPR_PRIME_STARTS, expr_prime)?.map(Box::new);
 
     Ok(ExprPrime {
-        op: match operator.token() {
+        op: match operator.inner() {
             Token::Operator(Operator::Or) => BooleanOp::Or,
             Token::Operator(Operator::And) => BooleanOp::And,
             _ => return Err(SyntaxError::LogicalError),
@@ -347,7 +349,7 @@ fn term_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, TermPrime<
     let tail = get_tail(it, consts::POSSIBLE_TERM_PRIME_STARTS, term_prime)?.map(Box::new);
 
     Ok(TermPrime {
-        op: match operator.token() {
+        op: match operator.inner() {
             Token::Operator(Operator::LesserThan) => RelationalOp::LesserThan,
             Token::Operator(Operator::GreaterThan) => RelationalOp::GreaterThan,
             Token::Operator(Operator::LesserOrEquals) => RelationalOp::LesserOrEquals,
@@ -373,7 +375,7 @@ fn factor_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, FactorPr
     let tail = get_tail(it, consts::POSSIBLE_FACTOR_PRIME_STARTS, factor_prime)?.map(Box::new);
 
     Ok(FactorPrime {
-        op: match operator.token() {
+        op: match operator.inner() {
             Token::Operator(Operator::Plus) => AdditiveOp::Plus,
             Token::Operator(Operator::Minus) => AdditiveOp::Minus,
             _ => return Err(SyntaxError::LogicalError),
@@ -396,7 +398,7 @@ fn product_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Product
     let tail = get_tail(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS, product_prime)?.map(Box::new);
 
     Ok(ProductPrime {
-        op: match operator.token() {
+        op: match operator.inner() {
             Token::Operator(Operator::Times) => MultiplicativeOp::Times,
             Token::Operator(Operator::Divide) => MultiplicativeOp::Divide,
             _ => return Err(SyntaxError::LogicalError),
@@ -409,7 +411,7 @@ fn product_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Product
 fn atom<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Atom<'a>> {
     let next = peek_expecting_one_of(it, consts::POSSIBLE_ATOM_START)?;
 
-    Ok(match next.token() {
+    Ok(match next.inner() {
         Token::Operator(Operator::Not) => {
             advance_expecting(it, Token::Operator(Operator::Not))?;
             Atom::Not(Box::new(atom(it)?))
@@ -420,12 +422,12 @@ fn atom<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Atom<'a>> {
 
 fn unit<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Unit<'a>> {
     let next = advance_expecting_one_of(it, consts::POSSIBLE_UNIT_STARTS)?;
-    Ok(match next.take_token() {
+    Ok(match next.take_inner() {
         Token::Literal(Literal::Integer(i)) => Unit::Int(i),
         Token::Literal(Literal::String(s)) => Unit::Str(s),
         Token::Literal(Literal::Boolean(b)) => Unit::Boolean(b),
         Token::Identifier(s) => {
-            let next = it.peek().map(|t| t.token());
+            let next = it.peek().map(|t| t.inner());
             match next {
                 Some(&consts::B_OPEN) => Unit::FunctionCall(function_call(it, Identifier(s))?),
                 _ => Unit::Identifier(Identifier(s)),
@@ -449,7 +451,7 @@ fn function_call<'a>(
     let mut args = Vec::new();
     loop {
         if let Some(tok) = it.peek() {
-            if tok.token().same_kind(&consts::B_CLOSE) {
+            if tok.inner().same_kind(&consts::B_CLOSE) {
                 break;
             }
 
@@ -458,7 +460,7 @@ fn function_call<'a>(
 
             if it
                 .peek()
-                .map(|t| t.token().same_kind(&consts::B_CLOSE))
+                .map(|t| t.inner().same_kind(&consts::B_CLOSE))
                 .unwrap_or(false)
             {
                 break;
@@ -480,7 +482,7 @@ mod tests {
     use super::*;
     use insta::assert_debug_snapshot;
 
-    fn make_tokens_from_str(s: &str) -> impl Iterator<Item = EnrichedToken> {
+    fn make_tokens_from_str(s: &str) -> impl Iterator<Item = RangedObject<Token>> {
         use crate::lexical::lexicalize;
         use crate::scanner::scan;
 

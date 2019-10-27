@@ -7,11 +7,11 @@ Err(
         Punctuation(
             BracketClose,
         ),
-        EnrichedToken {
+        RangedObject {
             inner: Keyword(
                 Begin,
             ),
-            line_no: 17,
+            range: 349..354,
         },
     ),
 )

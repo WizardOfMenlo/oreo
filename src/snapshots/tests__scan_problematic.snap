@@ -3,16 +3,16 @@ source: src/scanner.rs
 expression: res
 ---
 [
-    Scanned {
+    RangedObject {
         inner: Rest(
             "x",
         ),
-        line: 0,
+        range: 0..1,
     },
-    Scanned {
+    RangedObject {
         inner: Str(
             "something",
         ),
-        line: 0,
+        range: 1..12,
     },
 ]

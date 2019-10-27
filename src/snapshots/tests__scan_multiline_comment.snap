@@ -3,10 +3,10 @@ source: src/scanner.rs
 expression: res
 ---
 [
-    Scanned {
+    RangedObject {
         inner: Comment(
             "some comment\n which is long! ",
         ),
-        line: 0,
+        range: 0..33,
     },
 ]

@@ -7,11 +7,11 @@ Err(
         Punctuation(
             Semicolon,
         ),
-        EnrichedToken {
+        RangedObject {
             inner: Keyword(
                 Print,
             ),
-            line_no: 12,
+            range: 259..264,
         },
     ),
 )

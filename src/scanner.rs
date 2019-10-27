@@ -1,8 +1,4 @@
-#[derive(Debug, PartialEq, Clone)]
-pub struct Scanned<'a> {
-    pub(crate) inner: ScannedItem<'a>,
-    pub(crate) line: usize,
-}
+use crate::range::RangedObject;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ScannedItem<'a> {
@@ -13,26 +9,17 @@ pub enum ScannedItem<'a> {
     Rest(&'a str),
 }
 
-pub fn scan(input: &str) -> impl Iterator<Item = Scanned> {
-    LineScannerIt {
-        input,
-        pos: 0,
-        line_no: 0,
-    }
+pub fn scan(input: &str) -> impl Iterator<Item = RangedObject<ScannedItem>> {
+    LineScannerIt { input, pos: 0 }
 }
 
 pub struct LineScannerIt<'a> {
     input: &'a str,
     pos: usize,
-    line_no: usize,
-}
-
-fn count_new_lines(s: &str) -> usize {
-    bytecount::count(s.as_bytes(), b'\n')
 }
 
 impl<'a> Iterator for LineScannerIt<'a> {
-    type Item = Scanned<'a>;
+    type Item = RangedObject<ScannedItem<'a>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let remaining = &self.input[self.pos..];
@@ -44,49 +31,36 @@ impl<'a> Iterator for LineScannerIt<'a> {
         }
 
         let first_non_whitespace_index = first_non_whitespace_index.unwrap();
-        self.line_no += count_new_lines(&remaining[..first_non_whitespace_index]);
 
         let remaining = &remaining[first_non_whitespace_index..];
         self.pos += first_non_whitespace_index;
+
+        let range_start = self.pos;
 
         // Get the next chars
         let mut chars = remaining.chars().peekable();
         let first_char = chars.next().unwrap();
 
-        let start_line_no = self.line_no;
-
         if first_char == '"' {
-            let (result, read, lines) = parse_string(remaining);
+            let (result, read) = parse_string(remaining);
             self.pos += read;
-            self.line_no += lines;
-            return Some(Scanned {
-                inner: result,
-                line: start_line_no,
-            });
+            return Some(RangedObject::new(result, range_start..self.pos));
         } else if first_char == '{' {
             let second = chars.peek();
             if let Some('-') = second {
-                let (result, read, lines) = parse_comment(remaining);
+                let (result, read) = parse_comment(remaining);
                 self.pos += read;
-                self.line_no += lines;
-                return Some(Scanned {
-                    inner: result,
-                    line: start_line_no,
-                });
+                return Some(RangedObject::new(result, range_start..self.pos));
             }
         }
 
-        let (result, read, lines) = parse_block(remaining);
+        let (result, read) = parse_block(remaining);
         self.pos += read;
-        self.line_no += lines;
-        Some(Scanned {
-            inner: result,
-            line: start_line_no,
-        })
+        Some(RangedObject::new(result, range_start..self.pos))
     }
 }
 
-fn parse_comment(input: &str) -> (ScannedItem, usize, usize) {
+fn parse_comment(input: &str) -> (ScannedItem, usize) {
     let chars_pairs = input.chars().zip(input.chars().skip(1));
     let mut index = None;
     for (i, (first, second)) in chars_pairs.enumerate() {
@@ -99,19 +73,13 @@ fn parse_comment(input: &str) -> (ScannedItem, usize, usize) {
         }
     }
 
-    let lines = count_new_lines(index.map(|i| &input[2..i]).unwrap_or_else(|| &input[2..]));
-
     match index {
-        Some(i) => (ScannedItem::Comment(&input[2..i]), i + 2, lines),
-        None => (
-            ScannedItem::UnclosedComment(&input[2..]),
-            input.len(),
-            lines,
-        ),
+        Some(i) => (ScannedItem::Comment(&input[2..i]), i + 2),
+        None => (ScannedItem::UnclosedComment(&input[2..]), input.len()),
     }
 }
 
-fn parse_string(input: &str) -> (ScannedItem, usize, usize) {
+fn parse_string(input: &str) -> (ScannedItem, usize) {
     let mut next_is_escape = false;
     let mut index = None;
     for (i, ch) in input.chars().enumerate().skip(1) {
@@ -126,15 +94,13 @@ fn parse_string(input: &str) -> (ScannedItem, usize, usize) {
         next_is_escape = false;
     }
 
-    let lines = count_new_lines(index.map(|i| &input[1..i]).unwrap_or_else(|| &input[1..]));
-
     match index {
-        Some(i) => (ScannedItem::Str(&input[1..i]), i + 1, lines),
-        None => (ScannedItem::UnclosedStr(&input[1..]), input.len(), lines),
+        Some(i) => (ScannedItem::Str(&input[1..i]), i + 1),
+        None => (ScannedItem::UnclosedStr(&input[1..]), input.len()),
     }
 }
 
-fn parse_block(input: &str) -> (ScannedItem, usize, usize) {
+fn parse_block(input: &str) -> (ScannedItem, usize) {
     let first_whitespace_index = input
         .find(|c: char| c.is_whitespace())
         .unwrap_or_else(|| input.len());
@@ -143,19 +109,13 @@ fn parse_block(input: &str) -> (ScannedItem, usize, usize) {
         .find(|c: char| c == '"' || c == '{')
         .unwrap_or_else(|| input.len());
     let to_read = std::cmp::min(first_whitespace_index, first_problematic);
-    (ScannedItem::Rest(&input[0..to_read]), to_read, 0)
+    (ScannedItem::Rest(&input[0..to_read]), to_read)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use insta::assert_debug_snapshot;
-
-    #[test]
-    fn scan_empty() {
-        let mut res = scan("");
-        assert_eq!(res.next(), None);
-    }
 
     #[test]
     fn scan_example() {
