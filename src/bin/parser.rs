@@ -1,5 +1,5 @@
 use oreo::lexical::lexicalize;
-use oreo::parser::{parse, SyntaxError};
+use oreo::parser::parse;
 use oreo::range::RangedObject;
 use oreo::scanner::scan;
 use oreo::tokens::{LexicalError, Token};
@@ -75,6 +75,7 @@ fn token_list_to_string(t: impl IntoIterator<Item = &'static Token<'static>>) ->
         .join(",")
 }
 
+/*
 fn print_syntax_error(error: SyntaxError, input: &str) {
     let (expected, found) = match error {
         SyntaxError::ExpectedOneOfButFoundEOF(l) => (token_list_to_string(l), None),
@@ -101,8 +102,10 @@ fn print_syntax_error(error: SyntaxError, input: &str) {
         &input[range]
     )
 }
+*/
 
 fn main() {
+    std::env::set_var("RUST_BACKTRACE", "1");
     let opt = Args::from_args();
     let tokens = lexicalize(scan(&opt.input)).collect::<Vec<_>>();
     // Print lexing errors before parsing error
@@ -117,23 +120,5 @@ fn main() {
 
     let parse_res = parse(tokens.into_iter());
 
-    if let Err(err) = parse_res {
-        print_syntax_error(err, &opt.input);
-        return;
-    }
-
-    let program = parse_res.unwrap();
-
-    let validation = oreo::validator::validate_program(&program);
-    if let Err(err) = validation {
-        println!("Error validating the typing, {:?}", err);
-    }
-
-    let out = match opt.mode {
-        LexMode::Json => serde_json::to_string_pretty(&program).unwrap(),
-        LexMode::Yaml => serde_yaml::to_string(&program).unwrap(),
-        LexMode::Rust => format!("{:?}", program),
-    };
-
-    println!("{}", out);
+    println!("{:?}", parse_res);
 }

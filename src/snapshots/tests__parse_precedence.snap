@@ -2,100 +2,186 @@
 source: src/parser.rs
 expression: parsed
 ---
-Ok(
-    Program {
-        id: Identifier(
-            "fib",
-        ),
-        compound: Compound {
-            statements: [
-                Decl(
-                    Decl {
-                        id: Identifier(
-                            "x",
-                        ),
-                        expr: Some(
-                            Expr {
-                                head: Term {
-                                    head: Factor {
-                                        head: Product {
-                                            head: Not(
-                                                Unit(
-                                                    Int(
-                                                        1,
-                                                    ),
-                                                ),
-                                            ),
-                                            tail: Some(
-                                                ProductPrime {
-                                                    op: Times,
-                                                    rhs: Unit(
-                                                        Int(
-                                                            2,
-                                                        ),
-                                                    ),
-                                                    tail: None,
+Node {
+    ty: Program,
+    text_range: 0..55,
+    children: [
+        Node {
+            ty: Identifier,
+            text_range: 8..11,
+            children: [],
+        },
+        Node {
+            ty: Compound,
+            text_range: 12..55,
+            children: [
+                Node {
+                    ty: Decl,
+                    text_range: 18..51,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 22..23,
+                            children: [],
+                        },
+                        Node {
+                            ty: Expr,
+                            text_range: 27..50,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 27..44,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 27..40,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 27..36,
+                                                    children: [
+                                                        Node {
+                                                            ty: Not,
+                                                            text_range: 27..32,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 31..32,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Int(
+                                                                                1,
+                                                                            ),
+                                                                            text_range: 31..32,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                        Node {
+                                                            ty: Times,
+                                                            text_range: 33..36,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 35..36,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Int(
+                                                                                2,
+                                                                            ),
+                                                                            text_range: 35..36,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
                                                 },
-                                            ),
+                                                Node {
+                                                    ty: Plus,
+                                                    text_range: 37..40,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 39..40,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 39..40,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Int(
+                                                                                3,
+                                                                            ),
+                                                                            text_range: 39..40,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
                                         },
-                                        tail: Some(
-                                            FactorPrime {
-                                                op: Plus,
-                                                rhs: Product {
-                                                    head: Unit(
-                                                        Int(
-                                                            3,
-                                                        ),
-                                                    ),
-                                                    tail: None,
+                                        Node {
+                                            ty: LesserThan,
+                                            text_range: 41..44,
+                                            children: [
+                                                Node {
+                                                    ty: Factor,
+                                                    text_range: 43..44,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 43..44,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 43..44,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Int(
+                                                                                4,
+                                                                            ),
+                                                                            text_range: 43..44,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
                                                 },
-                                                tail: None,
-                                            },
-                                        ),
-                                    },
-                                    tail: Some(
-                                        TermPrime {
-                                            op: LesserThan,
-                                            rhs: Factor {
-                                                head: Product {
-                                                    head: Unit(
-                                                        Int(
-                                                            4,
-                                                        ),
-                                                    ),
-                                                    tail: None,
-                                                },
-                                                tail: None,
-                                            },
-                                            tail: None,
+                                            ],
                                         },
-                                    ),
+                                    ],
                                 },
-                                tail: Some(
-                                    ExprPrime {
-                                        op: And,
-                                        rhs: Term {
-                                            head: Factor {
-                                                head: Product {
-                                                    head: Unit(
-                                                        Int(
-                                                            5,
-                                                        ),
-                                                    ),
-                                                    tail: None,
+                                Node {
+                                    ty: And,
+                                    text_range: 45..50,
+                                    children: [
+                                        Node {
+                                            ty: Term,
+                                            text_range: 49..50,
+                                            children: [
+                                                Node {
+                                                    ty: Factor,
+                                                    text_range: 49..50,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 49..50,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 49..50,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Int(
+                                                                                5,
+                                                                            ),
+                                                                            text_range: 49..50,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
                                                 },
-                                                tail: None,
-                                            },
-                                            tail: None,
+                                            ],
                                         },
-                                        tail: None,
-                                    },
-                                ),
-                            },
-                        ),
-                    },
-                ),
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
             ],
         },
-    },
-)
+    ],
+}

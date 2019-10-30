@@ -42,8 +42,8 @@ pub(crate) mod consts {
     pub(crate) const AND: ExpToken = Token::Operator(Operator::And);
     pub(crate) const OR: ExpToken = Token::Operator(Operator::Or);
 
-    pub(crate) const LESS: ExpToken = Token::Operator(Operator::LesserOrEquals);
-    pub(crate) const GREAT: ExpToken = Token::Operator(Operator::GreaterOrEquals);
+    pub(crate) const LESS: ExpToken = Token::Operator(Operator::LesserThan);
+    pub(crate) const GREAT: ExpToken = Token::Operator(Operator::GreaterThan);
     pub(crate) const LEQ: ExpToken = Token::Operator(Operator::LesserOrEquals);
     pub(crate) const GEQ: ExpToken = Token::Operator(Operator::GreaterOrEquals);
     pub(crate) const EQ: ExpToken = Token::Operator(Operator::Equals);
@@ -150,9 +150,13 @@ fn p_if<'a, 'b, T: TokenStream<'a>>(builder: NodeBuilder<'a, 'b, T>) -> NodeBuil
         .children(compound)
         .peek_and_type(
             &[consts::SEMICOLON, Token::Keyword(Keyword::Else)],
-            PeekMapping::new()
-                .add(consts::SEMICOLON, |s| s)
-                .add(Token::Keyword(Keyword::Else), |b| b.children(compound)),
+            PeekMapping::new().add(consts::SEMICOLON, |s| s).add(
+                Token::Keyword(Keyword::Else),
+                |b| {
+                    b.advance_expecting(Token::Keyword(Keyword::Else))
+                        .children(compound)
+                },
+            ),
         )
         .advance_expecting(consts::SEMICOLON)
 }
@@ -171,7 +175,10 @@ fn p_while<'a, 'b, T: TokenStream<'a>>(builder: NodeBuilder<'a, 'b, T>) -> NodeB
 fn printstat<'a, 'b, T: TokenStream<'a>>(
     builder: NodeBuilder<'a, 'b, T>,
 ) -> NodeBuilder<'a, 'b, T> {
-    builder.ty(NodeType::PrintStat).children(print)
+    builder
+        .ty(NodeType::PrintStat)
+        .children(print)
+        .advance_expecting(consts::SEMICOLON)
 }
 
 fn print<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {

@@ -127,6 +127,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
 
         // Update the end
         self.end = Some(new_node.text_range.end);
+
         self.children.push(new_node);
 
         self
@@ -148,6 +149,12 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         let found_token = next.unwrap();
         let inner = *found_token.inner();
 
+        if self.start.is_none() {
+            self.start = Some(found_token.range().start);
+        }
+
+        self.end = Some(found_token.range().end);
+
         if !inner.same_kind(&tok) {
             self.ty = Some(NodeType::Error(SyntaxError::ExpectedFound(
                 tok,
@@ -155,12 +162,6 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
             )));
             return (self, inner);
         }
-
-        if self.start.is_none() {
-            self.start = Some(found_token.range().start);
-        }
-
-        self.end = Some(found_token.range().end);
 
         (self, inner)
     }
@@ -184,6 +185,12 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
 
         let found_token = next.unwrap();
 
+        if self.start.is_none() {
+            self.start = Some(found_token.range().start);
+        }
+
+        self.end = Some(found_token.range().end);
+
         if !toks.iter().any(|t| found_token.inner().same_kind(t)) {
             self.ty = Some(NodeType::Error(SyntaxError::ExpectedOneOfFound(
                 toks,
@@ -191,12 +198,6 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
             )));
             return self;
         }
-
-        if self.start.is_none() {
-            self.start = Some(found_token.range().start);
-        }
-
-        self.end = Some(found_token.range().end);
 
         self
     }

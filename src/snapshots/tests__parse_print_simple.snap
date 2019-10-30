@@ -2,63 +2,133 @@
 source: src/parser.rs
 expression: parsed
 ---
-Ok(
-    Program {
-        id: Identifier(
-            "fib",
-        ),
-        compound: Compound {
-            statements: [
-                Print(
-                    Print(
-                        Expr {
-                            head: Term {
-                                head: Factor {
-                                    head: Product {
-                                        head: Unit(
-                                            Str(
-                                                "Hello\\n",
-                                            ),
-                                        ),
-                                        tail: None,
-                                    },
-                                    tail: None,
+Node {
+    ty: Program,
+    text_range: 0..56,
+    children: [
+        Node {
+            ty: Identifier,
+            text_range: 8..11,
+            children: [],
+        },
+        Node {
+            ty: Compound,
+            text_range: 12..56,
+            children: [
+                Node {
+                    ty: PrintStat,
+                    text_range: 18..34,
+                    children: [
+                        Node {
+                            ty: Print,
+                            text_range: 18..33,
+                            children: [
+                                Node {
+                                    ty: Expr,
+                                    text_range: 24..33,
+                                    children: [
+                                        Node {
+                                            ty: Term,
+                                            text_range: 24..33,
+                                            children: [
+                                                Node {
+                                                    ty: Factor,
+                                                    text_range: 24..33,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 24..33,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 24..33,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Str,
+                                                                            text_range: 24..33,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
                                 },
-                                tail: None,
-                            },
-                            tail: None,
+                            ],
                         },
-                    ),
-                ),
-                Print(
-                    Println(
-                        Expr {
-                            head: Term {
-                                head: Factor {
-                                    head: Product {
-                                        head: Unit(
-                                            Int(
-                                                2,
-                                            ),
-                                        ),
-                                        tail: None,
-                                    },
-                                    tail: None,
+                    ],
+                },
+                Node {
+                    ty: PrintStat,
+                    text_range: 35..45,
+                    children: [
+                        Node {
+                            ty: Println,
+                            text_range: 35..44,
+                            children: [
+                                Node {
+                                    ty: Expr,
+                                    text_range: 43..44,
+                                    children: [
+                                        Node {
+                                            ty: Term,
+                                            text_range: 43..44,
+                                            children: [
+                                                Node {
+                                                    ty: Factor,
+                                                    text_range: 43..44,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 43..44,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 43..44,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Int(
+                                                                                2,
+                                                                            ),
+                                                                            text_range: 43..44,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
                                 },
-                                tail: None,
-                            },
-                            tail: None,
+                            ],
                         },
-                    ),
-                ),
-                Print(
-                    Get(
-                        Identifier(
-                            "x",
-                        ),
-                    ),
-                ),
+                    ],
+                },
+                Node {
+                    ty: PrintStat,
+                    text_range: 46..52,
+                    children: [
+                        Node {
+                            ty: Get,
+                            text_range: 46..51,
+                            children: [
+                                Node {
+                                    ty: Identifier,
+                                    text_range: 50..51,
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
             ],
         },
-    },
-)
+    ],
+}

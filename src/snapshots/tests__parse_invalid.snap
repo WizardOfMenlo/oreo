@@ -2,16 +2,20 @@
 source: src/parser.rs
 expression: parsed
 ---
-Err(
-    ExpectedFound(
-        Keyword(
-            Program,
-        ),
-        RangedObject {
-            inner: Punctuation(
-                BracketOpen,
+Node {
+    ty: Error(
+        ExpectedFound(
+            Keyword(
+                Program,
             ),
-            range: 0..1,
-        },
+            RangedObject {
+                inner: Punctuation(
+                    BracketOpen,
+                ),
+                range: 0..1,
+            },
+        ),
     ),
-)
+    text_range: 0..1,
+    children: [],
+}

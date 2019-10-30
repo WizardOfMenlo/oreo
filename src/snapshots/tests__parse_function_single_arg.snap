@@ -2,53 +2,89 @@
 source: src/parser.rs
 expression: parsed
 ---
-Ok(
-    Program {
-        id: Identifier(
-            "fib",
-        ),
-        compound: Compound {
-            statements: [
-                FunctionDecl(
-                    FunctionDecl {
-                        id: Identifier(
-                            "id",
-                        ),
-                        args: [
-                            Identifier(
-                                "x",
-                            ),
-                        ],
-                        inner: Compound {
-                            statements: [
-                                Return(
-                                    Return {
-                                        expr: Expr {
-                                            head: Term {
-                                                head: Factor {
-                                                    head: Product {
-                                                        head: Unit(
-                                                            Identifier(
-                                                                Identifier(
-                                                                    "x",
-                                                                ),
-                                                            ),
-                                                        ),
-                                                        tail: None,
-                                                    },
-                                                    tail: None,
-                                                },
-                                                tail: None,
-                                            },
-                                            tail: None,
-                                        },
-                                    },
-                                ),
+Node {
+    ty: Program,
+    text_range: 0..61,
+    children: [
+        Node {
+            ty: Identifier,
+            text_range: 8..11,
+            children: [],
+        },
+        Node {
+            ty: Compound,
+            text_range: 12..61,
+            children: [
+                Node {
+                    ty: FunctionDecl,
+                    text_range: 18..57,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 28..30,
+                            children: [],
+                        },
+                        Node {
+                            ty: FunctionDeclArgs,
+                            text_range: 31..36,
+                            children: [
+                                Node {
+                                    ty: Identifier,
+                                    text_range: 35..36,
+                                    children: [],
+                                },
                             ],
                         },
-                    },
-                ),
+                        Node {
+                            ty: Compound,
+                            text_range: 38..57,
+                            children: [
+                                Node {
+                                    ty: Return,
+                                    text_range: 44..53,
+                                    children: [
+                                        Node {
+                                            ty: Expr,
+                                            text_range: 51..52,
+                                            children: [
+                                                Node {
+                                                    ty: Term,
+                                                    text_range: 51..52,
+                                                    children: [
+                                                        Node {
+                                                            ty: Factor,
+                                                            text_range: 51..52,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Product,
+                                                                    text_range: 51..52,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Unit,
+                                                                            text_range: 51..52,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Identifier,
+                                                                                    text_range: 51..52,
+                                                                                    children: [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
             ],
         },
-    },
-)
+    ],
+}
