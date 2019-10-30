@@ -3,6 +3,7 @@ use crate::range::RangedObject;
 use crate::tokens::*;
 use crate::untyped::*;
 use std::iter::Peekable;
+use std::ops::Range;
 
 pub trait TokenStream<'a>: Iterator<Item = RangedObject<Token<'a>>> {
     fn peek(&mut self) -> Option<&RangedObject<Token<'a>>>;
@@ -109,6 +110,16 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self.ty.as_ref().map(|t| t.is_error()).unwrap_or(false)
     }
 
+    fn update_given_range(&mut self, text_range: &Range<usize>) {
+        // Update the start
+        if self.start.is_none() {
+            self.start = Some(text_range.start);
+        }
+
+        // Update the end
+        self.end = Some(text_range.end);
+    }
+
     pub fn children<F>(mut self, f: F) -> Self
     where
         F: Fn(&mut T) -> Node<'a>,
@@ -120,13 +131,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
 
         let new_node = f(self.it);
 
-        // Update the start
-        if self.start.is_none() {
-            self.start = Some(new_node.text_range.start);
-        }
-
-        // Update the end
-        self.end = Some(new_node.text_range.end);
+        self.update_given_range(&new_node.text_range);
 
         self.children.push(new_node);
 
@@ -149,11 +154,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         let found_token = next.unwrap();
         let inner = *found_token.inner();
 
-        if self.start.is_none() {
-            self.start = Some(found_token.range().start);
-        }
-
-        self.end = Some(found_token.range().end);
+        self.update_given_range(found_token.range());
 
         if !inner.same_kind(&tok) {
             self.ty = Some(NodeType::Error(SyntaxError::ExpectedFound(
@@ -185,11 +186,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
 
         let found_token = next.unwrap();
 
-        if self.start.is_none() {
-            self.start = Some(found_token.range().start);
-        }
-
-        self.end = Some(found_token.range().end);
+        self.update_given_range(found_token.range());
 
         if !toks.iter().any(|t| found_token.inner().same_kind(t)) {
             self.ty = Some(NodeType::Error(SyntaxError::ExpectedOneOfFound(
@@ -240,10 +237,14 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
                 self.ty = Some(NodeType::Error(SyntaxError::ExpectedOneOfFound(
                     tokens,
                     tok.clone(),
-                )))
+                )));
+
+                // Advance
+                self.it.next();
+                self.update_given_range(tok.range());
             }
         } else {
-            self.ty = Some(NodeType::Error(SyntaxError::ExpectedOneOfFoundEOF(tokens)))
+            self.ty = Some(NodeType::Error(SyntaxError::ExpectedOneOfFoundEOF(tokens)));
         }
         self
     }
@@ -298,7 +299,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         Node {
             ty: self.ty.expect("Type has not been set"),
             children: self.children,
-            text_range: self.start.unwrap()..self.end.unwrap(),
+            text_range: self.start.unwrap_or(0)..self.end.unwrap_or(0),
         }
     }
 }

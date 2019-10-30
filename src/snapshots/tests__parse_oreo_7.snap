@@ -2,41 +2,276 @@
 source: src/parser.rs
 expression: parsed
 ---
-Err(
-    ExpectedOneOfFound(
-        [
-            Operator(
-                Not,
-            ),
-            Identifier(
-                "",
-            ),
-            Punctuation(
-                BracketOpen,
-            ),
-            Literal(
-                String(
-                    "",
-                ),
-            ),
-            Literal(
-                Boolean(
-                    false,
-                ),
-            ),
-            Literal(
-                Integer(
-                    0,
-                ),
-            ),
-        ],
-        RangedObject {
-            inner: Error(
-                UnclosedString(
-                    "enter the number of terms;\n    \n    get n;  \n    \n    while ( first < (second > 32)  )\n    begin\n\n       if ( 1 > 2 ) then begin n := 5;  end\n       \t\t\t   else begin n := 46; end;\n                        \n                                  \n    c := c + 1;\t    \n\tend;\nend       \n        ",
-                ),
-            ),
-            range: 261..548,
+Node {
+    ty: Program,
+    text_range: 33..87,
+    children: [
+        Node {
+            ty: Identifier,
+            text_range: 41..45,
+            children: [],
         },
-    ),
-)
+        Node {
+            ty: Error(
+                ExpectedFoundEOF(
+                    Keyword(
+                        End,
+                    ),
+                ),
+            ),
+            text_range: 82..87,
+            children: [
+                Node {
+                    ty: Decl,
+                    text_range: 155..161,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 159..160,
+                            children: [],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Decl,
+                    text_range: 163..178,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 167..172,
+                            children: [],
+                        },
+                        Node {
+                            ty: Expr,
+                            text_range: 176..177,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 176..177,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 176..177,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 176..177,
+                                                    children: [
+                                                        Node {
+                                                            ty: Unit,
+                                                            text_range: 176..177,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Int(
+                                                                        0,
+                                                                    ),
+                                                                    text_range: 176..177,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Decl,
+                    text_range: 182..197,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 186..192,
+                            children: [],
+                        },
+                        Node {
+                            ty: Expr,
+                            text_range: 195..196,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 195..196,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 195..196,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 195..196,
+                                                    children: [
+                                                        Node {
+                                                            ty: Unit,
+                                                            text_range: 195..196,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Int(
+                                                                        1,
+                                                                    ),
+                                                                    text_range: 195..196,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Decl,
+                    text_range: 200..209,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 204..208,
+                            children: [],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Decl,
+                    text_range: 238..248,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 242..243,
+                            children: [],
+                        },
+                        Node {
+                            ty: Expr,
+                            text_range: 246..247,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 246..247,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 246..247,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 246..247,
+                                                    children: [
+                                                        Node {
+                                                            ty: Unit,
+                                                            text_range: 246..247,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Int(
+                                                                        0,
+                                                                    ),
+                                                                    text_range: 246..247,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Error(
+                        ExpectedFoundEOF(
+                            Punctuation(
+                                Semicolon,
+                            ),
+                        ),
+                    ),
+                    text_range: 255..548,
+                    children: [
+                        Node {
+                            ty: Print,
+                            text_range: 255..548,
+                            children: [
+                                Node {
+                                    ty: Expr,
+                                    text_range: 261..548,
+                                    children: [
+                                        Node {
+                                            ty: Term,
+                                            text_range: 261..548,
+                                            children: [
+                                                Node {
+                                                    ty: Factor,
+                                                    text_range: 261..548,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 261..548,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Error(
+                                                                        ExpectedOneOfFound(
+                                                                            [
+                                                                                Operator(
+                                                                                    Not,
+                                                                                ),
+                                                                                Identifier(
+                                                                                    "",
+                                                                                ),
+                                                                                Punctuation(
+                                                                                    BracketOpen,
+                                                                                ),
+                                                                                Literal(
+                                                                                    String(
+                                                                                        "",
+                                                                                    ),
+                                                                                ),
+                                                                                Literal(
+                                                                                    Boolean(
+                                                                                        false,
+                                                                                    ),
+                                                                                ),
+                                                                                Literal(
+                                                                                    Integer(
+                                                                                        0,
+                                                                                    ),
+                                                                                ),
+                                                                            ],
+                                                                            RangedObject {
+                                                                                inner: Error(
+                                                                                    UnclosedString(
+                                                                                        "enter the number of terms;\n    \n    get n;  \n    \n    while ( first < (second > 32)  )\n    begin\n\n       if ( 1 > 2 ) then begin n := 5;  end\n       \t\t\t   else begin n := 46; end;\n                        \n                                  \n    c := c + 1;\t    \n\tend;\nend       \n        ",
+                                                                                    ),
+                                                                                ),
+                                                                                range: 261..548,
+                                                                            },
+                                                                        ),
+                                                                    ),
+                                                                    text_range: 261..548,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+}
