@@ -4,8 +4,9 @@ use crate::parser::{ExpToken, TokenList};
 use crate::range::RangedObject;
 use crate::syntax::{AdditiveOp, BooleanOp, MultiplicativeOp, RelationalOp};
 use crate::tokens::Token;
+use serde::Serialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum SyntaxError<'a> {
     ExpectedOneOfFoundEOF(TokenList),
     ExpectedFoundEOF(ExpToken),
@@ -14,7 +15,7 @@ pub enum SyntaxError<'a> {
     LogicalError,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum NodeType<'a> {
     // Error node
     Error(SyntaxError<'a>),
@@ -64,7 +65,7 @@ pub enum NodeType<'a> {
     Times,
     Divide,
 
-    // Atom (TODO: might be wrong)
+    // Atom
     Unit,
     Not,
 
@@ -85,7 +86,7 @@ impl<'a> NodeType<'a> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Node<'a> {
     pub ty: NodeType<'a>,
     pub text_range: Range<usize>,

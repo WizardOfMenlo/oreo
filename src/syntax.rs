@@ -66,21 +66,45 @@ impl<'a, 'b> Decl<'a, 'b> {
 pub struct PrintStat<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> PrintStat<'a, 'b> {
-    pub fn downcast(&self) -> Print<'a, 'b> {
+    pub fn downcast(&self) -> PrintTypes<'a, 'b> {
         let node = &self.0.children[0];
-        match self.0.ty {
-            NodeType::Print => Print::Print(Expr(node)),
-            NodeType::Println => Print::Println(Expr(node)),
-            NodeType::Get => Print::Get(Identifier(node)),
+        match node.ty {
+            NodeType::Print => PrintTypes::Print(Print(node)),
+            NodeType::Println => PrintTypes::Println(Println(node)),
+            NodeType::Get => PrintTypes::Get(Get(node)),
             _ => panic!("Invalid node constructed"),
         }
     }
 }
 
-pub enum Print<'a, 'b> {
-    Print(Expr<'a, 'b>),
-    Println(Expr<'a, 'b>),
-    Get(Identifier<'a, 'b>),
+pub enum PrintTypes<'a, 'b> {
+    Print(Print<'a, 'b>),
+    Println(Println<'a, 'b>),
+    Get(Get<'a, 'b>),
+}
+
+pub struct Print<'a, 'b>(&'a Node<'b>);
+
+impl<'a, 'b> Print<'a, 'b> {
+    pub fn expr(&self) -> Expr<'a, 'b> {
+        Expr(&self.0.children[0])
+    }
+}
+
+pub struct Println<'a, 'b>(&'a Node<'b>);
+
+impl<'a, 'b> Println<'a, 'b> {
+    pub fn expr(&self) -> Expr<'a, 'b> {
+        Expr(&self.0.children[0])
+    }
+}
+
+pub struct Get<'a, 'b>(&'a Node<'b>);
+
+impl<'a, 'b> Get<'a, 'b> {
+    pub fn id(&self) -> Identifier<'a, 'b> {
+        Identifier(&self.0.children[0])
+    }
 }
 
 pub struct While<'a, 'b>(&'a Node<'b>);
@@ -362,4 +386,84 @@ pub enum RelationalOp {
 pub enum BooleanOp {
     And,
     Or,
+}
+
+pub enum SyntaxNode<'a, 'b> {
+    Program(Program<'a, 'b>),
+    Compound(Compound<'a, 'b>),
+    Statement(Statement<'a, 'b>),
+    Decl(Decl<'a, 'b>),
+    PrintStat(PrintStat<'a, 'b>),
+    Print(Print<'a, 'b>),
+    Println(Println<'a, 'b>),
+    Get(Get<'a, 'b>),
+    While(While<'a, 'b>),
+    If(If<'a, 'b>),
+    Assign(Assign<'a, 'b>),
+    FunctionDecl(FunctionDecl<'a, 'b>),
+    FunctionDeclArgs(FunctionDeclArgs<'a, 'b>),
+    FunctionCall(FunctionCall<'a, 'b>),
+    FunctionCallArgs(FunctionCallArgs<'a, 'b>),
+    Return(Return<'a, 'b>),
+    Expr(Expr<'a, 'b>),
+    ExprPrime(ExprPrime<'a, 'b>),
+    Term(Term<'a, 'b>),
+    TermPrime(TermPrime<'a, 'b>),
+    Factor(Factor<'a, 'b>),
+    FactorPrime(FactorPrime<'a, 'b>),
+    Product(Product<'a, 'b>),
+    ProductPrime(ProductPrime<'a, 'b>),
+    Atom(Atom<'a, 'b>),
+    Unit(Unit<'a, 'b>),
+    Identifier(Identifier<'a, 'b>),
+}
+
+impl<'a, 'b> From<&'b Node<'a>> for SyntaxNode<'a, 'b> {
+    fn from(input: &'b Node<'a>) -> Self {
+        match input.ty {
+            NodeType::Program => SyntaxNode::Program(Program(input)),
+            NodeType::Compound => SyntaxNode::Compound(Compound(input)),
+            NodeType::Decl => SyntaxNode::Decl(Decl(input)),
+            NodeType::PrintStat => SyntaxNode::PrintStat(PrintStat(input)),
+
+            NodeType::While => SyntaxNode::While(While(input)),
+            NodeType::If => SyntaxNode::If(If(input)),
+            NodeType::Assign => SyntaxNode::Assign(Assign(input)),
+            NodeType::FunctionCall => SyntaxNode::FunctionCall(FunctionCall(input)),
+            NodeType::FunctionDecl => SyntaxNode::FunctionDecl(FunctionDecl(input)),
+            NodeType::Return => SyntaxNode::Return(Return(input)),
+            NodeType::Print => SyntaxNode::Print(Print(input)),
+            NodeType::Println => SyntaxNode::Println(Println(input)),
+            NodeType::Get => SyntaxNode::Get(Get(input)),
+            NodeType::FunctionDeclArgs => SyntaxNode::FunctionDeclArgs(FunctionDeclArgs(input)),
+            NodeType::FunctionCallArgs => SyntaxNode::FunctionCallArgs(FunctionCallArgs(input)),
+
+            NodeType::Expr => SyntaxNode::Expr(Expr(input)),
+            NodeType::And | NodeType::Or => SyntaxNode::ExprPrime(ExprPrime(input)),
+
+            NodeType::Term => SyntaxNode::Term(Term(input)),
+            NodeType::LesserThan
+            | NodeType::GreaterThan
+            | NodeType::Equals
+            | NodeType::GreaterOrEquals
+            | NodeType::LesserOrEquals => SyntaxNode::TermPrime(TermPrime(input)),
+
+            NodeType::Factor => SyntaxNode::Factor(Factor(input)),
+            NodeType::Plus | NodeType::Minus => SyntaxNode::FactorPrime(FactorPrime(input)),
+
+            NodeType::Product => SyntaxNode::Product(Product(input)),
+            NodeType::Times | NodeType::Divide => SyntaxNode::ProductPrime(ProductPrime(input)),
+
+            NodeType::Unit | NodeType::Not => SyntaxNode::Atom(Atom(input)),
+
+            NodeType::Int(_)
+            | NodeType::Str
+            | NodeType::Bool(_)
+            | NodeType::BracketedExpr => SyntaxNode::Unit(Unit(input)),
+
+            NodeType::Identifier => SyntaxNode::Identifier(Identifier(input)),
+
+            NodeType::Error(_) => panic!("Called on error node"),
+        }
+    }
 }

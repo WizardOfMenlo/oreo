@@ -75,35 +75,6 @@ fn token_list_to_string(t: impl IntoIterator<Item = &'static Token<'static>>) ->
         .join(",")
 }
 
-/*
-fn print_syntax_error(error: SyntaxError, input: &str) {
-    let (expected, found) = match error {
-        SyntaxError::ExpectedOneOfButFoundEOF(l) => (token_list_to_string(l), None),
-        SyntaxError::ExpectedButFoundEOF(t) => (token_to_string(&t), None),
-        SyntaxError::ExpectedFound(e, f) => (token_to_string(&e), Some(f)),
-        SyntaxError::ExpectedOneOfFound(e, f) => (token_list_to_string(e), Some(f)),
-        SyntaxError::LogicalError => {
-            println!("Something went really wrong");
-            return;
-        }
-    };
-
-    let range = found
-        .as_ref()
-        .map(|t| t.range().clone())
-        .unwrap_or(0..input.len());
-
-    println!(
-        "Expected {}, found {} in {}",
-        expected,
-        found
-            .map(|t| token_to_string(t.inner()))
-            .unwrap_or_else(|| String::from("EOF")),
-        &input[range]
-    )
-}
-*/
-
 fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
     let opt = Args::from_args();
@@ -118,7 +89,13 @@ fn main() {
             }
         });
 
-    let parse_res = parse(tokens.into_iter());
+    let parse_tree = parse(tokens.into_iter());
 
-    println!("{:?}", parse_res);
+    let out = match opt.mode {
+        LexMode::Json => serde_json::to_string_pretty(&parse_tree).unwrap(),
+        LexMode::Yaml => serde_yaml::to_string(&parse_tree).unwrap(),
+        LexMode::Rust => format!("{:?}", parse_tree),
+    };
+
+    println!("{}", out);
 }
