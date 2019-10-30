@@ -5,11 +5,11 @@ pub mod range;
 pub mod scanner;
 pub mod syntax;
 pub mod tokens;
-pub mod validator;
+pub mod untyped;
+//pub mod validator;
 
-use parser::ParsingResult;
-use syntax::Program;
+use untyped::Node;
 
-pub fn parse(input: &str) -> ParsingResult<Program> {
+pub fn parse(input: &str) -> Node {
     parser::parse(lexical::lexicalize(scanner::scan(input)))
 }

@@ -1,8 +1,7 @@
-use crate::parsing_utils::*;
+use crate::parsing_utils::{NodeBuilder, ParserStream, PeekMapping, TokenStream};
 use crate::range::RangedObject;
-use crate::syntax::*;
 use crate::tokens::*;
-use serde::Serialize;
+use crate::untyped::*;
 
 pub(crate) type ExpToken = Token<'static>;
 pub(crate) type TokenList = &'static [ExpToken];
@@ -12,57 +11,57 @@ pub(crate) mod consts {
     use crate::tokens::*;
 
     pub(crate) const ID: ExpToken = Token::Identifier("");
-    pub(crate) const INT: Token<'static> = Token::Literal(Literal::Integer(0));
-    pub(crate) const STRING: Token<'static> = Token::Literal(Literal::String(""));
+    pub(crate) const INT: ExpToken = Token::Literal(Literal::Integer(0));
+    pub(crate) const STRING: ExpToken = Token::Literal(Literal::String(""));
     pub(crate) const BOOL: ExpToken = Token::Literal(Literal::Boolean(false));
-
-    pub(crate) const END: ExpToken = Token::Keyword(Keyword::End);
-    pub(crate) const VAR: ExpToken = Token::Keyword(Keyword::Var);
 
     pub(crate) const SEMICOLON: ExpToken = Token::Punctuation(Punctuation::Semicolon);
     pub(crate) const B_OPEN: ExpToken = Token::Punctuation(Punctuation::BracketOpen);
     pub(crate) const B_CLOSE: ExpToken = Token::Punctuation(Punctuation::BracketClose);
 
-    pub(crate) const ADDITIVE_OPS: TokenList = &[
-        Token::Operator(Operator::Plus),
-        Token::Operator(Operator::Minus),
-    ];
+    pub(crate) const IF: ExpToken = Token::Keyword(Keyword::If);
+    pub(crate) const PRINT: ExpToken = Token::Keyword(Keyword::Print);
+    pub(crate) const PRINTLN: ExpToken = Token::Keyword(Keyword::Println);
+    pub(crate) const GET: ExpToken = Token::Keyword(Keyword::Get);
+    pub(crate) const WHILE: ExpToken = Token::Keyword(Keyword::While);
+    pub(crate) const PROCEDURE: ExpToken = Token::Keyword(Keyword::Procedure);
+    pub(crate) const RETURN: ExpToken = Token::Keyword(Keyword::Return);
+    pub(crate) const VAR: ExpToken = Token::Keyword(Keyword::Var);
+    pub(crate) const END: ExpToken = Token::Keyword(Keyword::End);
 
-    pub(crate) const MULTIPLICATIVE_OPS: TokenList = &[
-        Token::Operator(Operator::Times),
-        Token::Operator(Operator::Divide),
-    ];
+    pub(crate) const ASSIGN: ExpToken = Token::Operator(Operator::Assignement);
 
-    pub(crate) const RELATIONAL_OPS: TokenList = &[
-        Token::Operator(Operator::LesserOrEquals),
-        Token::Operator(Operator::GreaterOrEquals),
-        Token::Operator(Operator::GreaterThan),
-        Token::Operator(Operator::LesserThan),
-        Token::Operator(Operator::Equals),
-    ];
+    pub(crate) const POSSIBLE_DECL_SYMBOLS: TokenList = &[ASSIGN, SEMICOLON];
 
-    pub(crate) const BOOL_OPS: TokenList = &[
-        Token::Operator(Operator::And),
-        Token::Operator(Operator::Or),
-    ];
+    pub(crate) const PLUS: ExpToken = Token::Operator(Operator::Plus);
+    pub(crate) const MINUS: ExpToken = Token::Operator(Operator::Minus);
 
-    pub(crate) const POSSIBLE_STATEMENT_STARTS: TokenList = &[
-        Token::Keyword(Keyword::Var),
-        Token::Keyword(Keyword::If),
-        Token::Keyword(Keyword::Print),
-        Token::Keyword(Keyword::Println),
-        Token::Keyword(Keyword::Get),
-        Token::Keyword(Keyword::While),
-        Token::Keyword(Keyword::Procedure),
-        Token::Keyword(Keyword::Return),
-        ID,
-    ];
+    pub(crate) const TIMES: ExpToken = Token::Operator(Operator::Times);
+    pub(crate) const DIVIDE: ExpToken = Token::Operator(Operator::Divide);
 
-    pub(crate) const PRINT_STARTS: TokenList = &[
-        Token::Keyword(Keyword::Print),
-        Token::Keyword(Keyword::Println),
-        Token::Keyword(Keyword::Get),
-    ];
+    pub(crate) const AND: ExpToken = Token::Operator(Operator::And);
+    pub(crate) const OR: ExpToken = Token::Operator(Operator::Or);
+
+    pub(crate) const LESS: ExpToken = Token::Operator(Operator::LesserOrEquals);
+    pub(crate) const GREAT: ExpToken = Token::Operator(Operator::GreaterOrEquals);
+    pub(crate) const LEQ: ExpToken = Token::Operator(Operator::LesserOrEquals);
+    pub(crate) const GEQ: ExpToken = Token::Operator(Operator::GreaterOrEquals);
+    pub(crate) const EQ: ExpToken = Token::Operator(Operator::Equals);
+
+    pub(crate) const NOT: ExpToken = Token::Operator(Operator::Not);
+
+    pub(crate) const ADDITIVE_OPS: TokenList = &[PLUS, MINUS];
+
+    pub(crate) const MULTIPLICATIVE_OPS: TokenList = &[TIMES, DIVIDE];
+
+    pub(crate) const RELATIONAL_OPS: TokenList = &[LESS, GREAT, GEQ, LEQ, EQ];
+
+    pub(crate) const BOOL_OPS: TokenList = &[AND, OR];
+
+    pub(crate) const POSSIBLE_STATEMENT_STARTS: TokenList =
+        &[VAR, IF, PRINT, PRINTLN, GET, WHILE, PROCEDURE, RETURN, ID];
+
+    pub(crate) const PRINT_STARTS: TokenList = &[PRINT, PRINTLN, GET];
 
     pub(crate) const POSSIBLE_UNIT_STARTS: TokenList = &[ID, B_OPEN, STRING, INT, BOOL];
 
@@ -74,407 +73,359 @@ pub(crate) mod consts {
 
     pub(crate) const POSSIBLE_PRODUCT_PRIME_STARTS: TokenList = MULTIPLICATIVE_OPS;
 
-    pub(crate) const POSSIBLE_ATOM_START: TokenList = &[
-        Token::Operator(Operator::Not),
-        ID,
-        B_OPEN,
-        STRING,
-        BOOL,
-        INT,
-    ];
+    pub(crate) const POSSIBLE_ATOM_START: TokenList = &[NOT, ID, B_OPEN, STRING, BOOL, INT];
 }
 
-#[derive(Debug, Clone, Serialize)]
-pub enum SyntaxError<'a> {
-    ExpectedOneOfButFoundEOF(TokenList),
-    ExpectedButFoundEOF(ExpToken),
-    ExpectedFound(ExpToken, RangedObject<Token<'a>>),
-    ExpectedOneOfFound(TokenList, RangedObject<Token<'a>>),
-    LogicalError,
-}
-
-pub type ParsingResult<'a, T> = Result<T, SyntaxError<'a>>;
-
-pub fn parse<'a>(
-    it: impl Iterator<Item = RangedObject<Token<'a>>>,
-) -> ParsingResult<'a, Program<'a>> {
+pub fn parse<'a>(it: impl Iterator<Item = RangedObject<Token<'a>>>) -> Node<'a> {
     // Note we skip comments completely
     let mut it = ParserStream::new(it.filter(|s| !s.inner().is_comment()).peekable());
     program(&mut it)
 }
 
-fn program<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Program<'a>> {
+fn program<'a>(it: &mut impl TokenStream<'a>) -> Node<'a> {
     // Program -> program id; Compound
-    advance_expecting(it, Token::Keyword(Keyword::Program))?;
-    let id = advance_expecting_identifier(it)?;
-    let compound = compound(it)?;
-
-    Ok(Program { id, compound })
+    NodeBuilder::new(NodeType::Program, it)
+        .advance_expecting(Token::Keyword(Keyword::Program))
+        .children(identifier)
+        .children(compound)
+        .build()
 }
 
-fn compound<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Compound<'a>> {
-    use consts::END;
-
-    // Compound -> Statement+
-    advance_expecting(it, Token::Keyword(Keyword::Begin))?;
-    let mut statements = Vec::new();
-    loop {
-        if let Some(tok) = it.peek() {
-            let token = tok.inner();
-            if token.same_kind(&END) {
-                break;
-            }
-
-            statements.push(statement(it)?);
-        } else {
-            return Err(SyntaxError::ExpectedButFoundEOF(END));
-        }
-    }
-
-    advance_expecting(it, END)?;
-
-    Ok(Compound { statements })
+fn identifier<'a>(it: &mut impl TokenStream<'a>) -> Node<'a> {
+    NodeBuilder::new(NodeType::Identifier, it)
+        .advance_expecting(consts::ID)
+        .build()
 }
 
-fn statement<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Statement<'a>> {
-    // Statement -> Decl | If | Print | While | Procedure | Return | Assign
-
-    let matched = peek_expecting_one_of(it, consts::POSSIBLE_STATEMENT_STARTS)?;
-    let token = matched.inner();
-    Ok(match token {
-        Token::Keyword(Keyword::Var) => Statement::Decl(decl(it)?),
-        Token::Keyword(Keyword::If) => Statement::If(p_if(it)?),
-
-        Token::Keyword(Keyword::Print)
-        | Token::Keyword(Keyword::Println)
-        | Token::Keyword(Keyword::Get) => Statement::Print(print(it)?),
-
-        Token::Keyword(Keyword::While) => Statement::While(p_while(it)?),
-        Token::Keyword(Keyword::Procedure) => Statement::FunctionDecl(function(it)?),
-        Token::Keyword(Keyword::Return) => Statement::Return(p_return(it)?),
-        Token::Identifier(_) => assign_or_function_call(it)?,
-        _ => return Err(SyntaxError::LogicalError),
-    })
+fn compound<'a>(it: &mut impl TokenStream<'a>) -> Node<'a> {
+    NodeBuilder::new(NodeType::Compound, it)
+        .advance_expecting(Token::Keyword(Keyword::Begin))
+        .take_until(consts::END, statement)
+        .advance_expecting(consts::END)
+        .build()
 }
 
-fn decl<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Decl<'a>> {
-    // Decl -> var id := Expr; | var id;
-    advance_expecting(it, Token::Keyword(Keyword::Var))?;
-    let id = advance_expecting_identifier(it)?;
-    let next = advance_expecting_one_of(
-        it,
-        &[consts::SEMICOLON, Token::Operator(Operator::Assignement)],
-    )?;
-
-    Ok(match next.inner() {
-        Token::Punctuation(Punctuation::Semicolon) => Decl { id, expr: None },
-        Token::Operator(Operator::Assignement) => {
-            let expr = Some(expr(it)?);
-            advance_expecting(it, consts::SEMICOLON)?;
-            Decl { id, expr }
-        }
-        _ => return Err(SyntaxError::LogicalError),
-    })
+fn statement<'a>(it: &mut impl TokenStream<'a>) -> Node<'a> {
+    NodeBuilder::new_untyped(it)
+        .peek_and_type(
+            consts::POSSIBLE_STATEMENT_STARTS,
+            PeekMapping::new()
+                .add(consts::VAR, decl)
+                .add(consts::IF, p_if)
+                .add(consts::PRINT, printstat)
+                .add(consts::PRINTLN, printstat)
+                .add(consts::GET, printstat)
+                .add(consts::WHILE, p_while)
+                .add(consts::PROCEDURE, func_decl)
+                .add(consts::RETURN, p_return)
+                .add(consts::ID, assign_or_fun_call),
+        )
+        .build()
 }
 
-fn p_if<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, If<'a>> {
-    // If -> if (Bool) then Compound; | if (Bool) then Compound else Compound;
-    advance_expecting(it, Token::Keyword(Keyword::If))?;
-    advance_expecting(it, consts::B_OPEN)?;
-    let condition = expr(it)?;
-    advance_expecting(it, consts::B_CLOSE)?;
-    advance_expecting(it, Token::Keyword(Keyword::Then))?;
-    let if_branch = compound(it)?;
-    let next = advance_expecting_one_of(it, &[Token::Keyword(Keyword::Else), consts::SEMICOLON])?;
-
-    let else_branch = match next.inner() {
-        Token::Keyword(Keyword::Else) => {
-            let tmp = compound(it)?;
-            advance_expecting(it, Token::Punctuation(Punctuation::Semicolon))?;
-            Some(tmp)
-        }
-        &consts::SEMICOLON => None,
-        _ => return Err(SyntaxError::LogicalError),
-    };
-
-    Ok(If {
-        condition,
-        if_branch,
-        else_branch,
-    })
+fn decl<'a, 'b, T: TokenStream<'a>>(builder: NodeBuilder<'a, 'b, T>) -> NodeBuilder<'a, 'b, T> {
+    builder
+        .ty(NodeType::Decl)
+        .advance_expecting(consts::VAR)
+        .children(identifier)
+        .peek_and_type(
+            consts::POSSIBLE_DECL_SYMBOLS,
+            PeekMapping::new()
+                .add(consts::ASSIGN, |b: NodeBuilder<'a, 'b, T>| {
+                    b.advance_expecting(consts::ASSIGN).children(expr)
+                })
+                .add(consts::SEMICOLON, |s| s),
+        )
+        .advance_expecting(consts::SEMICOLON)
 }
 
-fn print<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Print<'a>> {
-    // Print -> print Expr; | println Expr; | get Expr;
-    let next = advance_expecting_one_of(it, consts::PRINT_STARTS)?;
-
-    let print_stat = match next.inner() {
-        Token::Keyword(Keyword::Print) => Print::Print(expr(it)?),
-        Token::Keyword(Keyword::Println) => Print::Println(expr(it)?),
-        Token::Keyword(Keyword::Get) => Print::Get(advance_expecting_identifier(it)?),
-        // Should only be called with normal stuff
-        _ => return Err(SyntaxError::LogicalError),
-    };
-
-    advance_expecting(it, consts::SEMICOLON)?;
-
-    Ok(print_stat)
+fn p_if<'a, 'b, T: TokenStream<'a>>(builder: NodeBuilder<'a, 'b, T>) -> NodeBuilder<'a, 'b, T> {
+    builder
+        .ty(NodeType::If)
+        .advance_expecting(consts::IF)
+        .advance_expecting(consts::B_OPEN)
+        .children(expr)
+        .advance_expecting(consts::B_CLOSE)
+        .advance_expecting(Token::Keyword(Keyword::Then))
+        .children(compound)
+        .peek_and_type(
+            &[consts::SEMICOLON, Token::Keyword(Keyword::Else)],
+            PeekMapping::new()
+                .add(consts::SEMICOLON, |s| s)
+                .add(Token::Keyword(Keyword::Else), |b| b.children(compound)),
+        )
+        .advance_expecting(consts::SEMICOLON)
 }
 
-fn p_while<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, While<'a>> {
-    // While -> while (Bool) Compound;
-    advance_expecting(it, Token::Keyword(Keyword::While))?;
-    advance_expecting(it, consts::B_OPEN)?;
-    let condition = expr(it)?;
-    advance_expecting(it, consts::B_CLOSE)?;
-    let compound = compound(it)?;
-    advance_expecting(it, consts::SEMICOLON)?;
-
-    Ok(While {
-        condition,
-        compound,
-    })
+fn p_while<'a, 'b, T: TokenStream<'a>>(builder: NodeBuilder<'a, 'b, T>) -> NodeBuilder<'a, 'b, T> {
+    builder
+        .ty(NodeType::While)
+        .advance_expecting(consts::WHILE)
+        .advance_expecting(consts::B_OPEN)
+        .children(expr)
+        .advance_expecting(consts::B_CLOSE)
+        .children(compound)
+        .advance_expecting(consts::SEMICOLON)
 }
 
-fn function<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, FunctionDecl<'a>> {
-    // Procedure -> procedure id((var i,)*) begin Compound end
-    advance_expecting(it, Token::Keyword(Keyword::Procedure))?;
-    let id = advance_expecting_identifier(it)?;
-    advance_expecting(it, consts::B_OPEN)?;
-
-    let mut args = Vec::new();
-    loop {
-        if let Some(tok) = it.peek() {
-            if tok.inner().same_kind(&consts::B_CLOSE) {
-                break;
-            }
-
-            advance_expecting(it, consts::VAR)?;
-            let arg_name = advance_expecting_identifier(it)?;
-            args.push(arg_name);
-
-            if it
-                .peek()
-                .map(|t| t.inner().same_kind(&consts::B_CLOSE))
-                .unwrap_or(false)
-            {
-                break;
-            }
-
-            advance_expecting(it, Token::Punctuation(Punctuation::Comma))?;
-        } else {
-            return Err(SyntaxError::ExpectedOneOfButFoundEOF(&[
-                consts::B_CLOSE,
-                consts::VAR,
-            ]));
-        }
-    }
-
-    advance_expecting(it, consts::B_CLOSE)?;
-
-    let inner = compound(it)?;
-
-    Ok(FunctionDecl { id, args, inner })
+fn printstat<'a, 'b, T: TokenStream<'a>>(
+    builder: NodeBuilder<'a, 'b, T>,
+) -> NodeBuilder<'a, 'b, T> {
+    builder.ty(NodeType::PrintStat).children(print)
 }
 
-fn p_return<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Return<'a>> {
-    // Return -> return Expr;
-    advance_expecting(it, Token::Keyword(Keyword::Return))?;
-    let expr = expr(it)?;
-    advance_expecting(it, consts::SEMICOLON)?;
-    Ok(Return { expr })
+fn print<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
+    NodeBuilder::new_untyped(it)
+        .peek_and_type(
+            consts::PRINT_STARTS,
+            PeekMapping::new()
+                .add(consts::PRINT, |b: NodeBuilder<'a, 'b, T>| {
+                    b.ty(NodeType::Print)
+                        .advance_expecting(consts::PRINT)
+                        .children(expr)
+                })
+                .add(consts::PRINTLN, |b| {
+                    b.ty(NodeType::Println)
+                        .advance_expecting(consts::PRINTLN)
+                        .children(expr)
+                })
+                .add(consts::GET, |b| {
+                    b.ty(NodeType::Get)
+                        .advance_expecting(consts::GET)
+                        .children(identifier)
+                }),
+        )
+        .build()
 }
 
-fn assign_or_function_call<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Statement<'a>> {
-    let id = advance_expecting_identifier(it)?;
-    let next = peek_expecting_one_of(
-        it,
-        &[Token::Operator(Operator::Assignement), consts::B_OPEN],
-    )?;
-
-    Ok(match next.inner() {
-        &consts::B_OPEN => {
-            let res = Statement::FunctionCall(function_call(it, id)?);
-            advance_expecting(it, consts::SEMICOLON)?;
-            res
-        }
-        Token::Operator(Operator::Assignement) => Statement::Assign(assign(it, id)?),
-        _ => return Err(SyntaxError::LogicalError),
-    })
+fn func_decl<'a, 'b, T: TokenStream<'a>>(
+    builder: NodeBuilder<'a, 'b, T>,
+) -> NodeBuilder<'a, 'b, T> {
+    builder
+        .ty(NodeType::FunctionDecl)
+        .advance_expecting(consts::PROCEDURE)
+        .children(identifier)
+        .advance_expecting(consts::B_OPEN)
+        // TODO: This also allows procedure a(var x,)
+        .take_until(consts::B_CLOSE, |it| {
+            NodeBuilder::new(NodeType::FunctionDeclArgs, it)
+                .advance_expecting(consts::VAR)
+                .children(identifier)
+                .peek_and_type(
+                    &[Token::Punctuation(Punctuation::Comma), consts::B_CLOSE],
+                    PeekMapping::new()
+                        .add(consts::B_CLOSE, |s| s)
+                        .add(Token::Punctuation(Punctuation::Comma), |b| {
+                            b.advance_expecting(Token::Punctuation(Punctuation::Comma))
+                        }),
+                )
+                .build()
+        })
+        .advance_expecting(consts::B_CLOSE)
+        .children(compound)
 }
 
-fn assign<'a>(it: &mut impl TokenStream<'a>, id: Identifier<'a>) -> ParsingResult<'a, Assign<'a>> {
-    // Assign -> id := Expr;
-    advance_expecting(it, Token::Operator(Operator::Assignement))?;
-    let expr = expr(it)?;
-    advance_expecting(it, consts::SEMICOLON)?;
-
-    Ok(Assign { id, expr })
+fn p_return<'a, 'b, T: TokenStream<'a>>(builder: NodeBuilder<'a, 'b, T>) -> NodeBuilder<'a, 'b, T> {
+    builder
+        .ty(NodeType::Return)
+        .advance_expecting(consts::RETURN)
+        .children(expr)
+        .advance_expecting(consts::SEMICOLON)
 }
 
-fn expr<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Expr<'a>> {
-    let head = term(it)?;
-    let tail = get_tail(it, consts::POSSIBLE_EXPR_PRIME_STARTS, expr_prime)?;
-
-    Ok(Expr { head, tail })
+fn assign_or_fun_call<'a, 'b, T: TokenStream<'a>>(
+    builder: NodeBuilder<'a, 'b, T>,
+) -> NodeBuilder<'a, 'b, T> {
+    builder
+        .children(identifier)
+        .peek_and_type(
+            &[Token::Operator(Operator::Assignement), consts::B_OPEN],
+            PeekMapping::new()
+                .add(
+                    Token::Operator(Operator::Assignement),
+                    |b: NodeBuilder<'a, 'b, T>| {
+                        b.ty(NodeType::Assign)
+                            .advance_expecting(Token::Operator(Operator::Assignement))
+                            .children(expr)
+                    },
+                )
+                .add(consts::B_OPEN, fun_call_args),
+        )
+        .advance_expecting(consts::SEMICOLON)
 }
 
-fn expr_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, ExprPrime<'a>> {
-    let operator = advance_expecting_one_of(it, consts::POSSIBLE_EXPR_PRIME_STARTS)?;
-
-    let rhs = term(it)?;
-    let tail = get_tail(it, consts::POSSIBLE_EXPR_PRIME_STARTS, expr_prime)?.map(Box::new);
-
-    Ok(ExprPrime {
-        op: match operator.inner() {
-            Token::Operator(Operator::Or) => BooleanOp::Or,
-            Token::Operator(Operator::And) => BooleanOp::And,
-            _ => return Err(SyntaxError::LogicalError),
-        },
-        rhs,
-        tail,
-    })
+fn fun_call_args<'a, 'b, T: TokenStream<'a>>(
+    builder: NodeBuilder<'a, 'b, T>,
+) -> NodeBuilder<'a, 'b, T> {
+    builder
+        .ty(NodeType::FunctionCall)
+        .advance_expecting(consts::B_OPEN)
+        .take_until(consts::B_CLOSE, |it| {
+            NodeBuilder::new(NodeType::FunctionCallArgs, it)
+                .children(expr)
+                .peek_and_type(
+                    &[Token::Punctuation(Punctuation::Comma), consts::B_CLOSE],
+                    PeekMapping::new()
+                        .add(consts::B_CLOSE, |s| s)
+                        .add(Token::Punctuation(Punctuation::Comma), |b| {
+                            b.advance_expecting(Token::Punctuation(Punctuation::Comma))
+                        }),
+                )
+                .build()
+        })
+        .advance_expecting(consts::B_CLOSE)
 }
 
-fn term<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Term<'a>> {
-    let head = factor(it)?;
-    let tail = get_tail(it, consts::POSSIBLE_TERM_PRIME_STARTS, term_prime)?;
-
-    Ok(Term { head, tail })
+fn expr<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
+    NodeBuilder::new(NodeType::Expr, it)
+        .children(term)
+        .add_tail(consts::POSSIBLE_EXPR_PRIME_STARTS, expr_prime)
+        .build()
 }
 
-fn term_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, TermPrime<'a>> {
-    let operator = advance_expecting_one_of(it, consts::POSSIBLE_TERM_PRIME_STARTS)?;
-    let rhs = factor(it)?;
-    let tail = get_tail(it, consts::POSSIBLE_TERM_PRIME_STARTS, term_prime)?.map(Box::new);
-
-    Ok(TermPrime {
-        op: match operator.inner() {
-            Token::Operator(Operator::LesserThan) => RelationalOp::LesserThan,
-            Token::Operator(Operator::GreaterThan) => RelationalOp::GreaterThan,
-            Token::Operator(Operator::LesserOrEquals) => RelationalOp::LesserOrEquals,
-            Token::Operator(Operator::GreaterOrEquals) => RelationalOp::GreaterOrEquals,
-            Token::Operator(Operator::Equals) => RelationalOp::Equals,
-            _ => return Err(SyntaxError::LogicalError),
-        },
-        rhs,
-        tail,
-    })
+fn expr_prime<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
+    NodeBuilder::new_untyped(it)
+        .peek_and_type(
+            consts::POSSIBLE_EXPR_PRIME_STARTS,
+            PeekMapping::new()
+                .add(consts::AND, |b: NodeBuilder<'a, 'b, T>| b.ty(NodeType::And))
+                .add(consts::OR, |b| b.ty(NodeType::Or)),
+        )
+        .advance_expecting_one_of(consts::POSSIBLE_EXPR_PRIME_STARTS)
+        .children(term)
+        .add_tail(consts::POSSIBLE_EXPR_PRIME_STARTS, expr_prime)
+        .build()
 }
 
-fn factor<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Factor<'a>> {
-    let head = product(it)?;
-    let tail = get_tail(it, consts::POSSIBLE_FACTOR_PRIME_STARTS, factor_prime)?;
-
-    Ok(Factor { head, tail })
+fn term<'a>(it: &mut impl TokenStream<'a>) -> Node<'a> {
+    NodeBuilder::new(NodeType::Term, it)
+        .children(factor)
+        .add_tail(consts::POSSIBLE_TERM_PRIME_STARTS, term_prime)
+        .build()
 }
 
-fn factor_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, FactorPrime<'a>> {
-    let operator = advance_expecting_one_of(it, consts::POSSIBLE_FACTOR_PRIME_STARTS)?;
-    let rhs = product(it)?;
-    let tail = get_tail(it, consts::POSSIBLE_FACTOR_PRIME_STARTS, factor_prime)?.map(Box::new);
-
-    Ok(FactorPrime {
-        op: match operator.inner() {
-            Token::Operator(Operator::Plus) => AdditiveOp::Plus,
-            Token::Operator(Operator::Minus) => AdditiveOp::Minus,
-            _ => return Err(SyntaxError::LogicalError),
-        },
-        rhs,
-        tail,
-    })
+fn term_prime<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
+    NodeBuilder::new_untyped(it)
+        .peek_and_type(
+            consts::POSSIBLE_TERM_PRIME_STARTS,
+            PeekMapping::new()
+                .add(consts::GREAT, |b: NodeBuilder<'a, 'b, T>| {
+                    b.ty(NodeType::GreaterThan)
+                })
+                .add(consts::LESS, |b| b.ty(NodeType::LesserThan))
+                .add(consts::GEQ, |b| b.ty(NodeType::GreaterOrEquals))
+                .add(consts::LEQ, |b| b.ty(NodeType::LesserOrEquals))
+                .add(consts::EQ, |b| b.ty(NodeType::Equals)),
+        )
+        .advance_expecting_one_of(consts::POSSIBLE_TERM_PRIME_STARTS)
+        .children(factor)
+        .add_tail(consts::POSSIBLE_TERM_PRIME_STARTS, term_prime)
+        .build()
 }
 
-fn product<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Product<'a>> {
-    let head = atom(it)?;
-    let tail = get_tail(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS, product_prime)?;
-
-    Ok(Product { head, tail })
+fn factor<'a>(it: &mut impl TokenStream<'a>) -> Node<'a> {
+    NodeBuilder::new(NodeType::Factor, it)
+        .children(product)
+        .add_tail(consts::POSSIBLE_FACTOR_PRIME_STARTS, factor_prime)
+        .build()
 }
 
-fn product_prime<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, ProductPrime<'a>> {
-    let operator = advance_expecting_one_of(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS)?;
-    let rhs = atom(it)?;
-    let tail = get_tail(it, consts::POSSIBLE_PRODUCT_PRIME_STARTS, product_prime)?.map(Box::new);
-
-    Ok(ProductPrime {
-        op: match operator.inner() {
-            Token::Operator(Operator::Times) => MultiplicativeOp::Times,
-            Token::Operator(Operator::Divide) => MultiplicativeOp::Divide,
-            _ => return Err(SyntaxError::LogicalError),
-        },
-        rhs,
-        tail,
-    })
+fn factor_prime<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
+    NodeBuilder::new_untyped(it)
+        .peek_and_type(
+            consts::POSSIBLE_FACTOR_PRIME_STARTS,
+            PeekMapping::new()
+                .add(consts::PLUS, |b: NodeBuilder<'a, 'b, T>| {
+                    b.ty(NodeType::Plus)
+                })
+                .add(consts::MINUS, |b| b.ty(NodeType::Minus)),
+        )
+        .advance_expecting_one_of(consts::POSSIBLE_FACTOR_PRIME_STARTS)
+        .children(product)
+        .add_tail(consts::POSSIBLE_FACTOR_PRIME_STARTS, factor_prime)
+        .build()
 }
 
-fn atom<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Atom<'a>> {
-    let next = peek_expecting_one_of(it, consts::POSSIBLE_ATOM_START)?;
-
-    Ok(match next.inner() {
-        Token::Operator(Operator::Not) => {
-            advance_expecting(it, Token::Operator(Operator::Not))?;
-            Atom::Not(Box::new(atom(it)?))
-        }
-        _ => Atom::Unit(unit(it)?),
-    })
+fn product<'a>(it: &mut impl TokenStream<'a>) -> Node<'a> {
+    NodeBuilder::new(NodeType::Product, it)
+        .children(atom)
+        .add_tail(consts::POSSIBLE_PRODUCT_PRIME_STARTS, product_prime)
+        .build()
 }
 
-fn unit<'a>(it: &mut impl TokenStream<'a>) -> ParsingResult<'a, Unit<'a>> {
-    let next = advance_expecting_one_of(it, consts::POSSIBLE_UNIT_STARTS)?;
-    Ok(match next.take_inner() {
-        Token::Literal(Literal::Integer(i)) => Unit::Int(i),
-        Token::Literal(Literal::String(s)) => Unit::Str(s),
-        Token::Literal(Literal::Boolean(b)) => Unit::Boolean(b),
-        Token::Identifier(s) => {
-            let next = it.peek().map(|t| t.inner());
-            match next {
-                Some(&consts::B_OPEN) => Unit::FunctionCall(function_call(it, Identifier(s))?),
-                _ => Unit::Identifier(Identifier(s)),
-            }
-        }
-        consts::B_OPEN => {
-            let expr = Box::new(expr(it)?);
-            advance_expecting(it, consts::B_CLOSE)?;
-            Unit::BracketedExpr(expr)
-        }
-        _ => return Err(SyntaxError::LogicalError),
-    })
+fn product_prime<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
+    NodeBuilder::new_untyped(it)
+        .peek_and_type(
+            consts::POSSIBLE_PRODUCT_PRIME_STARTS,
+            PeekMapping::new()
+                .add(consts::TIMES, |b: NodeBuilder<'a, 'b, T>| {
+                    b.ty(NodeType::Times)
+                })
+                .add(consts::DIVIDE, |b| b.ty(NodeType::Divide)),
+        )
+        .advance_expecting_one_of(consts::POSSIBLE_PRODUCT_PRIME_STARTS)
+        .children(atom)
+        .add_tail(consts::POSSIBLE_PRODUCT_PRIME_STARTS, product_prime)
+        .build()
 }
 
-fn function_call<'a>(
-    it: &mut impl TokenStream<'a>,
-    id: Identifier<'a>,
-) -> ParsingResult<'a, FunctionCall<'a>> {
-    advance_expecting(it, consts::B_OPEN)?;
+fn atom<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
+    NodeBuilder::new_untyped(it)
+        .peek_and_type(
+            consts::POSSIBLE_ATOM_START,
+            PeekMapping::new()
+                .add(consts::NOT, |b: NodeBuilder<'a, 'b, T>| {
+                    b.ty(NodeType::Not)
+                        .advance_expecting(consts::NOT)
+                        .children(atom)
+                })
+                .add_all(consts::POSSIBLE_UNIT_STARTS, |b| {
+                    b.ty(NodeType::Unit).children(unit)
+                }),
+        )
+        .build()
+}
 
-    let mut args = Vec::new();
-    loop {
-        if let Some(tok) = it.peek() {
-            if tok.inner().same_kind(&consts::B_CLOSE) {
-                break;
-            }
-
-            let expr = expr(it)?;
-            args.push(expr);
-
-            if it
-                .peek()
-                .map(|t| t.inner().same_kind(&consts::B_CLOSE))
-                .unwrap_or(false)
-            {
-                break;
-            }
-
-            advance_expecting(it, Token::Punctuation(Punctuation::Comma))?;
-        } else {
-            return Err(SyntaxError::ExpectedButFoundEOF(consts::B_CLOSE));
-        }
-    }
-
-    advance_expecting(it, consts::B_CLOSE)?;
-
-    Ok(FunctionCall { id, args })
+fn unit<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
+    NodeBuilder::new_untyped(it)
+        .peek_and_type(
+            consts::POSSIBLE_UNIT_STARTS,
+            PeekMapping::new()
+                .add(consts::B_OPEN, |b: NodeBuilder<'a, 'b, T>| {
+                    b.ty(NodeType::BracketedExpr)
+                        .advance_expecting(consts::B_OPEN)
+                        .children(expr)
+                        .advance_expecting(consts::B_CLOSE)
+                })
+                .add(consts::STRING, |b| {
+                    b.ty(NodeType::Str).advance_expecting(consts::STRING)
+                })
+                .add(consts::ID, |b| {
+                    // If we find a bracket we have a fun call, else just identifier
+                    b.advance_expecting(consts::ID).peek_if_else(
+                        &[consts::B_OPEN],
+                        fun_call_args,
+                        |b| b.ty(NodeType::Identifier),
+                    )
+                })
+                .add(consts::INT, |b| {
+                    let (b, tok) = b.advance_expecting_and_get(consts::INT);
+                    b.ty(match tok {
+                        Token::Literal(Literal::Integer(i)) => NodeType::Int(i),
+                        // This should only happen if the type was already set
+                        _ => panic!("Something"),
+                    })
+                })
+                .add(consts::BOOL, |b| {
+                    let (b, tok) = b.advance_expecting_and_get(consts::BOOL);
+                    b.ty(match tok {
+                        Token::Literal(Literal::Boolean(b)) => NodeType::Bool(b),
+                        // This should only happen if the type was already set
+                        _ => panic!("Something"),
+                    })
+                }),
+        )
+        .build()
 }
 
 #[cfg(test)]
