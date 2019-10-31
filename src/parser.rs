@@ -1,7 +1,7 @@
-use crate::nodebuilder::{NodeBuilder, PeekMapping};
+use crate::node_builder::{NodeBuilder, PeekMapping};
 use crate::range::RangedObject;
 use crate::tokens::*;
-use crate::tokenstream::{ParserStream, TokenStream};
+use crate::token_stream::{ParserStream, TokenStream};
 use crate::untyped::*;
 
 pub(crate) type ExpToken = Token<'static>;

@@ -1,11 +1,11 @@
 pub mod lexical;
-pub mod nodebuilder;
+pub mod node_builder;
 pub mod parser;
 pub mod range;
 pub mod scanner;
 pub mod syntax;
+pub mod token_stream;
 pub mod tokens;
-pub mod tokenstream;
 pub mod untyped;
 //pub mod validator;
 

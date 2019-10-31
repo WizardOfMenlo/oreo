@@ -1,6 +1,6 @@
 use crate::parser::{ExpToken, TokenList};
 use crate::tokens::Token;
-use crate::tokenstream::TokenStream;
+use crate::token_stream::TokenStream;
 use crate::untyped::{Node, NodeType, SyntaxError};
 use std::ops::Range;
 
