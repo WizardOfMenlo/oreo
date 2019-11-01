@@ -8,26 +8,33 @@ use std::ops::Range;
 
 type IdF<T> = fn(T) -> T;
 
+/// A utility mapping to associate behaviour with
+/// Tokens that are peeked
 #[derive(Debug, Default)]
 pub struct PeekMapping<T> {
+    // TODO: Why not a HashMap?
     list: Vec<(ExpToken, IdF<T>)>,
 }
 
 impl<T> PeekMapping<T> {
+    /// Create a new mapping
     pub fn new() -> Self {
         PeekMapping { list: Vec::new() }
     }
 
+    /// Add a function to be called on the token found
     pub fn add(mut self, tok: ExpToken, f: IdF<T>) -> Self {
         self.list.push((tok, f));
         self
     }
 
+    /// Add function to be used for all of the tokens above
     pub fn add_all(mut self, tok: TokenList, f: IdF<T>) -> Self {
         self.list.extend(tok.iter().map(|e| (*e, f)));
         self
     }
 
+    /// Apply the function to the builder
     pub fn apply<'a>(self, tok: &Token<'a>, builder: T) -> T {
         let f = self
             .list
@@ -39,6 +46,7 @@ impl<T> PeekMapping<T> {
     }
 }
 
+/// A struct that builds a node from a token stream
 pub struct NodeBuilder<'a, 'b, T> {
     start: Option<usize>,
     end: Option<usize>,
@@ -48,6 +56,7 @@ pub struct NodeBuilder<'a, 'b, T> {
 }
 
 impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
+    /// Create a new (typed) builder
     pub fn new(ty: NodeType<'a>, it: &'b mut T) -> Self {
         NodeBuilder {
             start: None,
@@ -58,6 +67,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         }
     }
 
+    /// Creates a builder where the type is later determined
     pub fn new_untyped(it: &'b mut T) -> Self {
         NodeBuilder {
             start: None,
@@ -68,11 +78,13 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         }
     }
 
+    /// Sets the type of the node
     pub fn ty(mut self, ty: NodeType<'a>) -> Self {
         self.ty = Some(ty);
         self
     }
 
+    /// Is the node set as error
     pub fn is_error_node(&self) -> bool {
         self.ty.as_ref().map(|t| t.is_error()).unwrap_or(false)
     }
@@ -87,6 +99,8 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self.end = Some(text_range.end);
     }
 
+    /// Create a children using the function provided,
+    /// and add it to this node's
     pub fn children<F>(mut self, f: F) -> Self
     where
         F: Fn(&mut T) -> Node<'a>,
@@ -105,6 +119,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self
     }
 
+    /// Advance the token stream, while also returning the found token (useful for int, bool)
     pub fn advance_expecting_and_get(mut self, tok: ExpToken) -> (Self, Token<'a>) {
         // This is just for convenience
         use crate::lexer::tokens::LexicalError;
@@ -137,10 +152,12 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         (self, inner)
     }
 
+    /// Advance expecting a token
     pub fn advance_expecting(self, tok: ExpToken) -> Self {
         self.advance_expecting_and_get(tok).0
     }
 
+    /// Advance expecting one of multiple tokens
     pub fn advance_expecting_one_of(mut self, toks: TokenList) -> Self {
         // We skip if we have a error
         if self.is_error_node() {
@@ -169,6 +186,8 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self
     }
 
+    /// Create children using the provided function until the required token is
+    /// found left in the token stream
     pub fn take_until<F>(mut self, tok: ExpToken, f: F) -> Self
     where
         F: Fn(&mut T) -> Node<'a>,
@@ -193,6 +212,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self
     }
 
+    /// Peek the next character, and depending on it call the provided function
     pub fn peek_and_type(mut self, tokens: TokenList, mapping: PeekMapping<Self>) -> Self {
         // We skip if we have a error
         if self.is_error_node() {
@@ -219,7 +239,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self
     }
 
-    // Version which does not error out in case the thing is not there
+    /// Version which does not error out in case the thing is not there
     pub fn peek_and_maybe_type(self, tokens: TokenList, mapping: PeekMapping<Self>) -> Self {
         // We skip if we have a error
         if self.is_error_node() {
@@ -235,7 +255,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self
     }
 
-    // Your classic do this if in set, do that otherwise
+    /// Your classic do this if in set, do that otherwise, but with tokens!
     pub fn peek_if_else<F, G>(self, tokens: TokenList, f: F, el: G) -> Self
     where
         F: FnOnce(Self) -> Self,
@@ -257,6 +277,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self
     }
 
+    /// Useful for expr and the likes
     pub fn add_tail<F>(self, tokens: TokenList, f: F) -> Self
     where
         F: Fn(&mut T) -> Node<'a>,
@@ -264,6 +285,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self.peek_if_else(tokens, |b| b.children(f), |b| b)
     }
 
+    /// Build the node from the builder, panics if the type is not set yet
     pub fn build(self) -> Node<'a> {
         // TODO: we might want to check for non null
         Node::new(
