@@ -98,7 +98,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
 
         let new_node = f(self.it);
 
-        self.update_given_range(&new_node.text_range);
+        self.update_given_range(new_node.range());
 
         self.children.push(new_node);
 
@@ -266,10 +266,10 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
 
     pub fn build(self) -> Node<'a> {
         // TODO: we might want to check for non null
-        Node {
-            ty: self.ty.expect("Type has not been set"),
-            children: self.children,
-            text_range: self.start.unwrap_or(0)..self.end.unwrap_or(0),
-        }
+        Node::new(
+            self.ty.expect("Type has not been set"),
+            self.start.unwrap_or(0)..self.end.unwrap_or(0),
+            self.children,
+        )
     }
 }

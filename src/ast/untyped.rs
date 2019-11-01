@@ -84,9 +84,27 @@ impl<'a> NodeType<'a> {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Node<'a> {
-    pub ty: NodeType<'a>,
-    pub text_range: Range<usize>,
-    pub children: Vec<Node<'a>>,
+    pub(super) ty: NodeType<'a>,
+    pub(super) text_range: Range<usize>,
+    pub(super) children: Vec<Node<'a>>,
+}
+
+impl<'a> Node<'a> {
+    pub fn new(ty: NodeType<'a>, range: Range<usize>, children: Vec<Node<'a>>) -> Self {
+        Node {
+            ty,
+            text_range: range,
+            children
+        }
+    }
+
+    pub fn ty(&self) -> &NodeType<'a> {
+        &self.ty
+    }
+
+    pub fn children(&self) -> impl Iterator<Item = &Node<'a>> {
+        self.children.iter()
+    }
 }
 
 impl<'a> Ranged for Node<'a> {

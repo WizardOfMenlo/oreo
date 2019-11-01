@@ -32,7 +32,7 @@ impl<'a, 'b> Iterator for DepthFirstNonOwningNodeIt<'a, 'b> {
     fn next(&mut self) -> Option<Self::Item> {
         let node = self.nodes.pop();
         node.map(|node| {
-            self.nodes.extend(node.children.iter());
+            self.nodes.extend(node.children());
             node
         })
     }
@@ -47,8 +47,7 @@ impl<'a> Iterator for DepthFirstNodeIt<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let node = self.nodes.pop();
         node.map(|node| {
-            let childrens = node.children.clone();
-            self.nodes.extend(childrens);
+            self.nodes.extend(node.children().cloned());
             node
         })
     }
@@ -63,7 +62,7 @@ impl<'a, 'b> Iterator for BreadthFirstNonOwningNodeIt<'a, 'b> {
     fn next(&mut self) -> Option<Self::Item> {
         let node = self.nodes.pop_front();
         node.map(|node| {
-            self.nodes.extend(node.children.iter());
+            self.nodes.extend(node.children());
             node
         })
     }
@@ -79,8 +78,7 @@ impl<'a> Iterator for BreadthFirstNodeIt<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let node = self.nodes.pop_front();
         node.map(|node| {
-            let childrens = node.children.clone();
-            self.nodes.extend(childrens);
+            self.nodes.extend(node.children().cloned());
             node
         })
     }
