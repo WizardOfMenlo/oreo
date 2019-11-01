@@ -1,5 +1,6 @@
 use super::untyped::{Node, NodeType};
 
+#[derive(Debug, Clone)]
 pub struct Program<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Program<'a, 'b> {
@@ -12,6 +13,7 @@ impl<'a, 'b> Program<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Compound<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Compound<'a, 'b> {
@@ -20,6 +22,7 @@ impl<'a, 'b> Compound<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Statement<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Statement<'a, 'b> {
@@ -39,6 +42,7 @@ impl<'a, 'b> Statement<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum StatementType<'a, 'b> {
     Decl(Decl<'a, 'b>),
     PrintStat(PrintStat<'a, 'b>),
@@ -50,6 +54,7 @@ pub enum StatementType<'a, 'b> {
     Return(Return<'a, 'b>),
 }
 
+#[derive(Debug, Clone)]
 pub struct Decl<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Decl<'a, 'b> {
@@ -62,6 +67,7 @@ impl<'a, 'b> Decl<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct PrintStat<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> PrintStat<'a, 'b> {
@@ -76,12 +82,14 @@ impl<'a, 'b> PrintStat<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum PrintTypes<'a, 'b> {
     Print(Print<'a, 'b>),
     Println(Println<'a, 'b>),
     Get(Get<'a, 'b>),
 }
 
+#[derive(Debug, Clone)]
 pub struct Print<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Print<'a, 'b> {
@@ -90,6 +98,7 @@ impl<'a, 'b> Print<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Println<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Println<'a, 'b> {
@@ -98,6 +107,7 @@ impl<'a, 'b> Println<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Get<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Get<'a, 'b> {
@@ -106,6 +116,7 @@ impl<'a, 'b> Get<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct While<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> While<'a, 'b> {
@@ -118,6 +129,7 @@ impl<'a, 'b> While<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct If<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> If<'a, 'b> {
@@ -134,6 +146,7 @@ impl<'a, 'b> If<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Assign<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Assign<'a, 'b> {
@@ -146,6 +159,7 @@ impl<'a, 'b> Assign<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct FunctionDecl<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> FunctionDecl<'a, 'b> {
@@ -165,6 +179,7 @@ impl<'a, 'b> FunctionDecl<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct FunctionDeclArgs<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> FunctionDeclArgs<'a, 'b> {
@@ -173,6 +188,7 @@ impl<'a, 'b> FunctionDeclArgs<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct FunctionCallArgs<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> FunctionCallArgs<'a, 'b> {
@@ -181,6 +197,7 @@ impl<'a, 'b> FunctionCallArgs<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Return<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Return<'a, 'b> {
@@ -189,6 +206,7 @@ impl<'a, 'b> Return<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct FunctionCall<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> FunctionCall<'a, 'b> {
@@ -201,6 +219,7 @@ impl<'a, 'b> FunctionCall<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Expr<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Expr<'a, 'b> {
@@ -213,6 +232,7 @@ impl<'a, 'b> Expr<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ExprPrime<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> ExprPrime<'a, 'b> {
@@ -229,6 +249,7 @@ impl<'a, 'b> ExprPrime<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Term<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Term<'a, 'b> {
@@ -241,6 +262,7 @@ impl<'a, 'b> Term<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct TermPrime<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> TermPrime<'a, 'b> {
@@ -257,6 +279,7 @@ impl<'a, 'b> TermPrime<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Factor<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Factor<'a, 'b> {
@@ -269,6 +292,7 @@ impl<'a, 'b> Factor<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct FactorPrime<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> FactorPrime<'a, 'b> {
@@ -285,6 +309,7 @@ impl<'a, 'b> FactorPrime<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Product<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Product<'a, 'b> {
@@ -297,6 +322,7 @@ impl<'a, 'b> Product<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ProductPrime<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> ProductPrime<'a, 'b> {
@@ -313,6 +339,7 @@ impl<'a, 'b> ProductPrime<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Atom<'a, 'b>(&'a Node<'b>);
 
 pub enum AtomType<'a, 'b> {
@@ -331,6 +358,7 @@ impl<'a, 'b> Atom<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Unit<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Unit<'a, 'b> {
@@ -347,6 +375,7 @@ impl<'a, 'b> Unit<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum UnitType<'a, 'b> {
     Int(isize),
     Str(&'a Node<'b>),
@@ -356,6 +385,7 @@ pub enum UnitType<'a, 'b> {
     BracketedExpr(Expr<'a, 'b>),
 }
 
+#[derive(Debug, Clone)]
 pub struct Identifier<'a, 'b>(&'a Node<'b>);
 
 impl<'a, 'b> Identifier<'a, 'b> {
@@ -364,16 +394,19 @@ impl<'a, 'b> Identifier<'a, 'b> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum AdditiveOp {
     Plus,
     Minus,
 }
 
+#[derive(Debug, Clone)]
 pub enum MultiplicativeOp {
     Times,
     Divide,
 }
 
+#[derive(Debug, Clone)]
 pub enum RelationalOp {
     LesserThan,
     GreaterThan,
@@ -382,11 +415,13 @@ pub enum RelationalOp {
     LesserOrEquals,
 }
 
+#[derive(Debug, Clone)]
 pub enum BooleanOp {
     And,
     Or,
 }
 
+#[derive(Debug, Clone)]
 pub enum SyntaxNode<'a, 'b> {
     Program(Program<'a, 'b>),
     Compound(Compound<'a, 'b>),
