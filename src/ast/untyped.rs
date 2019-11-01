@@ -4,7 +4,7 @@ use crate::range::Ranged;
 use serde::Serialize;
 use std::ops::Range;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, PartialEq)]
 pub enum NodeType<'a> {
     // Error node
     Error(SyntaxError<'a>),
@@ -94,7 +94,7 @@ impl<'a> Node<'a> {
         Node {
             ty,
             text_range: range,
-            children
+            children,
         }
     }
 
@@ -102,7 +102,7 @@ impl<'a> Node<'a> {
         &self.ty
     }
 
-    pub fn children(&self) -> impl Iterator<Item = &Node<'a>> {
+    pub fn children(&self) -> impl DoubleEndedIterator<Item = &Node<'a>> {
         self.children.iter()
     }
 }

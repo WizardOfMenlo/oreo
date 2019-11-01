@@ -2,6 +2,25 @@ use crate::ast::untyped::Node;
 use std::collections::VecDeque;
 
 impl<'a> Node<'a> {
+    /// Create an iterator that walks the tree depth first
+    /// ```
+    /// use oreo::ast::untyped::{Node, NodeType};
+    /// // Invalid but explicative example
+    /// let node = Node::new(NodeType::Program, 0..10, vec![
+    ///     Node::new(NodeType::Compound, 0..5, vec![
+    ///         Node::new(NodeType::If, 0..3, Vec::new()),
+    ///     ]),
+    ///     Node::new(NodeType::While, 5..10, Vec::new())
+    /// ]);
+    ///
+    /// let mut iter = node.iter_depth_first();
+    ///
+    /// assert_eq!(iter.next().unwrap().ty(), &NodeType::Program);
+    /// assert_eq!(iter.next().unwrap().ty(), &NodeType::Compound);
+    /// assert_eq!(iter.next().unwrap().ty(), &NodeType::If);
+    /// assert_eq!(iter.next().unwrap().ty(), &NodeType::While);
+    ///
+    /// ```
     pub fn iter_depth_first<'b>(&'b self) -> DepthFirstNonOwningNodeIt<'a, 'b> {
         DepthFirstNonOwningNodeIt { nodes: vec![self] }
     }
@@ -32,7 +51,7 @@ impl<'a, 'b> Iterator for DepthFirstNonOwningNodeIt<'a, 'b> {
     fn next(&mut self) -> Option<Self::Item> {
         let node = self.nodes.pop();
         node.map(|node| {
-            self.nodes.extend(node.children());
+            self.nodes.extend(node.children().rev());
             node
         })
     }
@@ -47,7 +66,7 @@ impl<'a> Iterator for DepthFirstNodeIt<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let node = self.nodes.pop();
         node.map(|node| {
-            self.nodes.extend(node.children().cloned());
+            self.nodes.extend(node.children().cloned().rev());
             node
         })
     }

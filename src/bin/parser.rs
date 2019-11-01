@@ -72,6 +72,21 @@ fn main() {
         return;
     }
 
+    use oreo::ast::untyped::*;
+
+    let node = Node::new(
+        NodeType::Program,
+        0..10,
+        vec![
+            Node::new(
+                NodeType::Compound,
+                0..5,
+                vec![Node::new(NodeType::If, 0..3, Vec::new())],
+            ),
+            Node::new(NodeType::While, 5..10, Vec::new()),
+        ],
+    );
+
     let out = match opt.mode {
         LexMode::Json => serde_json::to_string_pretty(&parse_tree).unwrap(),
         LexMode::Yaml => serde_yaml::to_string(&parse_tree).unwrap(),
