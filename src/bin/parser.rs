@@ -5,7 +5,6 @@ use oreo::lexer::tokens::Token;
 use oreo::parser::error::format_syntax_error;
 use oreo::parser::parse;
 use oreo::range::RangedObject;
-use oreo::tree_utils::for_each_depth_first;
 use std::str::FromStr;
 use structopt::StructOpt;
 
@@ -56,7 +55,7 @@ fn main() {
 
     let parse_tree = parse(tokens.into_iter());
 
-    for_each_depth_first(&parse_tree, |n| {
+    parse_tree.iter_breadth_first().for_each(|n| {
         if n.ty.is_error() {
             println!(
                 "{}",
@@ -67,6 +66,11 @@ fn main() {
             )
         }
     });
+
+    if parse_tree.iter_breadth_first().any(|n| n.ty.is_error()) {
+        println!("Fix the above errors");
+        return;
+    }
 
     let out = match opt.mode {
         LexMode::Json => serde_json::to_string_pretty(&parse_tree).unwrap(),
