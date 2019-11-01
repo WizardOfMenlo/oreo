@@ -3,6 +3,7 @@ use super::{ExpToken, TokenList};
 use crate::ast::untyped::{Node, NodeType};
 use crate::lexer::token_stream::TokenStream;
 use crate::lexer::tokens::Token;
+use crate::range::Ranged;
 use std::ops::Range;
 
 type IdF<T> = fn(T) -> T;

@@ -1,6 +1,6 @@
 use crate::lexer::tokens::Token;
 use crate::parser::{ExpToken, TokenList};
-use crate::range::RangedObject;
+use crate::range::*;
 
 use serde::Serialize;
 

@@ -1,5 +1,5 @@
 use super::tokens::LexicalError;
-use crate::range::RangedObject;
+use crate::range::*;
 
 pub fn format_lexical_error(error: RangedObject<&LexicalError>, input: &str) -> String {
     let span = error.span(input);

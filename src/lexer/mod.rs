@@ -3,7 +3,7 @@ pub mod scanner;
 pub mod token_stream;
 pub mod tokens;
 
-use crate::range::RangedObject;
+use crate::range::*;
 use scanner::ScannedItem;
 use tokens::{Keyword, LexicalError, Literal, Operator, Punctuation, Token};
 

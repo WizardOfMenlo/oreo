@@ -72,6 +72,11 @@ fn main() {
         return;
     }
 
+    parse_tree
+        .iter_breadth_first()
+        .map(|n| n.ty.clone())
+        .for_each(|n| println!("{:?}", n));
+
     let out = match opt.mode {
         LexMode::Json => serde_json::to_string_pretty(&parse_tree).unwrap(),
         LexMode::Yaml => serde_yaml::to_string(&parse_tree).unwrap(),
