@@ -1,7 +1,7 @@
-pub mod parser;
 pub mod ast;
-pub mod range;
 pub mod lexer;
+pub mod parser;
+pub mod range;
 pub mod tree_utils;
 
 use ast::untyped::Node;

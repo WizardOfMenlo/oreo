@@ -1,5 +1,5 @@
-use crate::range::RangedObject;
 use super::tokens::Token;
+use crate::range::RangedObject;
 use std::iter::Peekable;
 
 pub trait TokenStream<'a>: Iterator<Item = RangedObject<Token<'a>>> {

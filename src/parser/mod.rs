@@ -1,16 +1,15 @@
+pub mod consts;
 pub mod error;
 pub mod node_builder;
-pub mod consts;
 
+use crate::ast::untyped::*;
 use crate::lexer::token_stream::{ParserStream, TokenStream};
 use crate::lexer::tokens::*;
-use node_builder::{NodeBuilder, PeekMapping};
 use crate::range::RangedObject;
-use crate::ast::untyped::*;
+use node_builder::{NodeBuilder, PeekMapping};
 
 pub(crate) type ExpToken = Token<'static>;
 pub(crate) type TokenList = &'static [ExpToken];
-
 
 pub fn parse<'a>(it: impl Iterator<Item = RangedObject<Token<'a>>>) -> Node<'a> {
     // Note we skip comments completely

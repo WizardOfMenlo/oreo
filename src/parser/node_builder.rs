@@ -1,8 +1,8 @@
 use super::error::SyntaxError;
 use super::{ExpToken, TokenList};
+use crate::ast::untyped::{Node, NodeType};
 use crate::lexer::token_stream::TokenStream;
 use crate::lexer::tokens::Token;
-use crate::ast::untyped::{Node, NodeType};
 use std::ops::Range;
 
 type IdF<T> = fn(T) -> T;

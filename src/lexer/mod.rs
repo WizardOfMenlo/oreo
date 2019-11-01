@@ -1,7 +1,7 @@
+pub mod error;
 pub mod scanner;
 pub mod token_stream;
 pub mod tokens;
-pub mod error;
 
 use crate::range::RangedObject;
 use scanner::ScannedItem;
@@ -228,8 +228,8 @@ fn parse_identifier(input: &str) -> (Token, usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use scanner::scan;
     use insta::assert_debug_snapshot;
+    use scanner::scan;
 
     #[test]
     fn lex_empty() {

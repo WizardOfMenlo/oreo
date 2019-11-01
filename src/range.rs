@@ -1,8 +1,7 @@
 use serde::Serialize;
 use std::ops::Range;
 
-pub trait Ranged
-{
+pub trait Ranged {
     fn range(&self) -> &Range<usize>;
 }
 

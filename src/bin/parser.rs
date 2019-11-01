@@ -1,10 +1,10 @@
-use oreo::parser::error::format_syntax_error;
 use oreo::lexer::error::format_lexical_error;
 use oreo::lexer::lexicalize;
-use oreo::parser::parse;
-use oreo::range::RangedObject;
 use oreo::lexer::scanner::scan;
 use oreo::lexer::tokens::Token;
+use oreo::parser::error::format_syntax_error;
+use oreo::parser::parse;
+use oreo::range::RangedObject;
 use oreo::tree_utils::for_each_depth_first;
 use std::str::FromStr;
 use structopt::StructOpt;

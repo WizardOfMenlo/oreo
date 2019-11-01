@@ -1,7 +1,7 @@
 use oreo::lexer::lexicalize;
-use oreo::range::RangedObject;
 use oreo::lexer::scanner::scan;
 use oreo::lexer::tokens::{LexicalError, Token};
+use oreo::range::RangedObject;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]

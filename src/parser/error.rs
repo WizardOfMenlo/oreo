@@ -1,6 +1,6 @@
+use crate::lexer::tokens::Token;
 use crate::parser::{ExpToken, TokenList};
 use crate::range::RangedObject;
-use crate::lexer::tokens::Token;
 
 use serde::Serialize;
 
@@ -31,5 +31,3 @@ pub fn format_syntax_error<'a>(error: RangedObject<SyntaxError<'a>>, input: &'a 
 
     format!("Expected: {}, found {} in: \n {}", exp, found, span)
 }
-
-
