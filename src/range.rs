@@ -1,6 +1,11 @@
 use serde::Serialize;
 use std::ops::Range;
 
+pub trait Ranged
+{
+    fn range(&self) -> &Range<usize>;
+}
+
 /// An object that stores metadate about its source location
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize)]
 pub struct RangedObject<T> {
@@ -42,5 +47,11 @@ impl<T> RangedObject<T> {
 
     pub fn decompose(self) -> (T, Range<usize>) {
         (self.inner, self.range)
+    }
+}
+
+impl<T> Ranged for RangedObject<T> {
+    fn range(&self) -> &Range<usize> {
+        &self.range
     }
 }

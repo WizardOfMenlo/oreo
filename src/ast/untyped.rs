@@ -1,8 +1,8 @@
-use std::ops::Range;
-
-use crate::parser::error::SyntaxError;
 use super::syntax::{AdditiveOp, BooleanOp, MultiplicativeOp, RelationalOp};
+use crate::parser::error::SyntaxError;
+use crate::range::Ranged;
 use serde::Serialize;
+use std::ops::Range;
 
 #[derive(Debug, Clone, Serialize)]
 pub enum NodeType<'a> {
@@ -87,6 +87,12 @@ pub struct Node<'a> {
     pub ty: NodeType<'a>,
     pub text_range: Range<usize>,
     pub children: Vec<Node<'a>>,
+}
+
+impl<'a> Ranged for Node<'a> {
+    fn range(&self) -> &Range<usize> {
+        &self.text_range
+    }
 }
 
 impl<'a> From<NodeType<'a>> for AdditiveOp {
