@@ -72,8 +72,6 @@ fn main() {
         return;
     }
 
-    use oreo::ast::untyped::*;
-
     let out = match opt.mode {
         LexMode::Json => serde_json::to_string_pretty(&parse_tree).unwrap(),
         LexMode::Yaml => serde_yaml::to_string(&parse_tree).unwrap(),
