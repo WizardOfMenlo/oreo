@@ -31,6 +31,25 @@ impl<'a> Node<'a> {
         BreadthFirstNonOwningNodeIt { nodes }
     }
 
+    /// Create an iterator that walks the tree depth first
+    /// ```
+    /// use oreo::ast::untyped::{Node, NodeType};
+    /// // Invalid but explicative example
+    /// let node = Node::new(NodeType::Program, 0..10, vec![
+    ///     Node::new(NodeType::Compound, 0..5, vec![
+    ///         Node::new(NodeType::If, 0..3, Vec::new()),
+    ///     ]),
+    ///     Node::new(NodeType::While, 5..10, Vec::new())
+    /// ]);
+    ///
+    /// let mut iter = node.iter_depth_first();
+    ///
+    /// assert_eq!(iter.next().unwrap().ty(), &NodeType::Program);
+    /// assert_eq!(iter.next().unwrap().ty(), &NodeType::Compound);
+    /// assert_eq!(iter.next().unwrap().ty(), &NodeType::If);
+    /// assert_eq!(iter.next().unwrap().ty(), &NodeType::While);
+    ///
+    /// ```
     pub fn into_iter_depth_first(self) -> DepthFirstNodeIt<'a> {
         DepthFirstNodeIt { nodes: vec![self] }
     }
