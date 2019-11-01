@@ -1,4 +1,4 @@
-use crate::untyped::Node;
+use crate::ast::untyped::Node;
 
 pub fn for_each_depth_first<'a, F>(node: &Node<'a>, f: F)
 where

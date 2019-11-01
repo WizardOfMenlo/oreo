@@ -1,0 +1,15 @@
+---
+source: src/parser/mod.rs
+expression: parsed
+---
+Node {
+    ty: Error(
+        ExpectedFoundEOF(
+            Keyword(
+                Program,
+            ),
+        ),
+    ),
+    text_range: 0..0,
+    children: [],
+}

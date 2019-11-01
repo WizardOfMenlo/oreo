@@ -1,0 +1,81 @@
+---
+source: src/parser/mod.rs
+expression: parsed
+---
+Node {
+    ty: Program,
+    text_range: 0..58,
+    children: [
+        Node {
+            ty: Identifier,
+            text_range: 8..11,
+            children: [],
+        },
+        Node {
+            ty: Compound,
+            text_range: 12..58,
+            children: [
+                Node {
+                    ty: FunctionDecl,
+                    text_range: 18..54,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 28..32,
+                            children: [],
+                        },
+                        Node {
+                            ty: Compound,
+                            text_range: 35..54,
+                            children: [
+                                Node {
+                                    ty: Return,
+                                    text_range: 41..50,
+                                    children: [
+                                        Node {
+                                            ty: Expr,
+                                            text_range: 48..49,
+                                            children: [
+                                                Node {
+                                                    ty: Term,
+                                                    text_range: 48..49,
+                                                    children: [
+                                                        Node {
+                                                            ty: Factor,
+                                                            text_range: 48..49,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Product,
+                                                                    text_range: 48..49,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Unit,
+                                                                            text_range: 48..49,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Int(
+                                                                                        1,
+                                                                                    ),
+                                                                                    text_range: 48..49,
+                                                                                    children: [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+}

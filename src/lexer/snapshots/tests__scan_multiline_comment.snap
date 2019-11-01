@@ -1,0 +1,12 @@
+---
+source: src/lexer/scanner.rs
+expression: res
+---
+[
+    RangedObject {
+        inner: Comment(
+            "some comment\n which is long! ",
+        ),
+        range: 0..33,
+    },
+]

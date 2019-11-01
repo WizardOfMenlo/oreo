@@ -1,0 +1,18 @@
+---
+source: src/lexer/scanner.rs
+expression: res
+---
+[
+    RangedObject {
+        inner: Rest(
+            "x",
+        ),
+        range: 0..1,
+    },
+    RangedObject {
+        inner: Str(
+            "something",
+        ),
+        range: 1..12,
+    },
+]

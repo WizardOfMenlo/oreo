@@ -1,0 +1,12 @@
+---
+source: src/lexer/scanner.rs
+expression: res
+---
+[
+    RangedObject {
+        inner: Str(
+            "String \\\"inside\\\" a string",
+        ),
+        range: 0..28,
+    },
+]

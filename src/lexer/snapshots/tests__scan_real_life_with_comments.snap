@@ -1,0 +1,372 @@
+---
+source: src/lexer/scanner.rs
+expression: res
+---
+[
+    RangedObject {
+        inner: Rest(
+            "program",
+        ),
+        range: 0..7,
+    },
+    RangedObject {
+        inner: Rest(
+            "fib;",
+        ),
+        range: 8..12,
+    },
+    RangedObject {
+        inner: Rest(
+            "begin",
+        ),
+        range: 14..19,
+    },
+    RangedObject {
+        inner: Rest(
+            "var",
+        ),
+        range: 21..24,
+    },
+    RangedObject {
+        inner: Rest(
+            "n;",
+        ),
+        range: 25..27,
+    },
+    RangedObject {
+        inner: Comment(
+            "a comment here",
+        ),
+        range: 27..45,
+    },
+    RangedObject {
+        inner: Rest(
+            "var",
+        ),
+        range: 47..50,
+    },
+    RangedObject {
+        inner: Rest(
+            "first",
+        ),
+        range: 51..56,
+    },
+    RangedObject {
+        inner: Rest(
+            ":=",
+        ),
+        range: 57..59,
+    },
+    RangedObject {
+        inner: Rest(
+            "0;",
+        ),
+        range: 60..62,
+    },
+    RangedObject {
+        inner: Rest(
+            "var",
+        ),
+        range: 64..67,
+    },
+    RangedObject {
+        inner: Rest(
+            "second",
+        ),
+        range: 68..74,
+    },
+    RangedObject {
+        inner: Rest(
+            ":=1;",
+        ),
+        range: 75..79,
+    },
+    RangedObject {
+        inner: Rest(
+            "var",
+        ),
+        range: 81..84,
+    },
+    RangedObject {
+        inner: Rest(
+            "next;",
+        ),
+        range: 85..90,
+    },
+    RangedObject {
+        inner: Rest(
+            "var",
+        ),
+        range: 92..95,
+    },
+    RangedObject {
+        inner: Rest(
+            "c",
+        ),
+        range: 96..97,
+    },
+    RangedObject {
+        inner: Rest(
+            ":=0",
+        ),
+        range: 98..101,
+    },
+    RangedObject {
+        inner: Rest(
+            ";",
+        ),
+        range: 102..103,
+    },
+    RangedObject {
+        inner: Rest(
+            "print",
+        ),
+        range: 105..110,
+    },
+    RangedObject {
+        inner: Str(
+            "enter the number of terms",
+        ),
+        range: 111..138,
+    },
+    RangedObject {
+        inner: Rest(
+            ";",
+        ),
+        range: 138..139,
+    },
+    RangedObject {
+        inner: Rest(
+            "get",
+        ),
+        range: 141..144,
+    },
+    RangedObject {
+        inner: Rest(
+            "n;",
+        ),
+        range: 145..147,
+    },
+    RangedObject {
+        inner: Rest(
+            "while",
+        ),
+        range: 149..154,
+    },
+    RangedObject {
+        inner: Rest(
+            "(",
+        ),
+        range: 155..156,
+    },
+    RangedObject {
+        inner: Rest(
+            "c",
+        ),
+        range: 157..158,
+    },
+    RangedObject {
+        inner: Rest(
+            "<",
+        ),
+        range: 159..160,
+    },
+    RangedObject {
+        inner: Rest(
+            "n)",
+        ),
+        range: 161..163,
+    },
+    RangedObject {
+        inner: Rest(
+            "begin",
+        ),
+        range: 165..170,
+    },
+    RangedObject {
+        inner: Rest(
+            "if",
+        ),
+        range: 172..174,
+    },
+    RangedObject {
+        inner: Rest(
+            "(",
+        ),
+        range: 175..176,
+    },
+    RangedObject {
+        inner: Rest(
+            "c",
+        ),
+        range: 177..178,
+    },
+    RangedObject {
+        inner: Rest(
+            "<=",
+        ),
+        range: 179..181,
+    },
+    RangedObject {
+        inner: Rest(
+            "1)",
+        ),
+        range: 182..184,
+    },
+    RangedObject {
+        inner: Rest(
+            "then",
+        ),
+        range: 186..190,
+    },
+    RangedObject {
+        inner: Rest(
+            "begin",
+        ),
+        range: 191..196,
+    },
+    RangedObject {
+        inner: Rest(
+            "next",
+        ),
+        range: 197..201,
+    },
+    RangedObject {
+        inner: Rest(
+            ":=",
+        ),
+        range: 202..204,
+    },
+    RangedObject {
+        inner: Rest(
+            "c;",
+        ),
+        range: 205..207,
+    },
+    RangedObject {
+        inner: Rest(
+            "end",
+        ),
+        range: 208..211,
+    },
+    RangedObject {
+        inner: Rest(
+            "else",
+        ),
+        range: 213..217,
+    },
+    RangedObject {
+        inner: Rest(
+            "begin",
+        ),
+        range: 218..223,
+    },
+    RangedObject {
+        inner: Rest(
+            "next",
+        ),
+        range: 226..230,
+    },
+    RangedObject {
+        inner: Rest(
+            ":=",
+        ),
+        range: 231..233,
+    },
+    RangedObject {
+        inner: Rest(
+            "first",
+        ),
+        range: 234..239,
+    },
+    RangedObject {
+        inner: Rest(
+            "+",
+        ),
+        range: 240..241,
+    },
+    RangedObject {
+        inner: Rest(
+            "second;",
+        ),
+        range: 242..249,
+    },
+    RangedObject {
+        inner: Rest(
+            "second",
+        ),
+        range: 252..258,
+    },
+    RangedObject {
+        inner: Rest(
+            ":=",
+        ),
+        range: 259..261,
+    },
+    RangedObject {
+        inner: Rest(
+            "next;",
+        ),
+        range: 262..267,
+    },
+    RangedObject {
+        inner: Rest(
+            "end",
+        ),
+        range: 269..272,
+    },
+    RangedObject {
+        inner: Rest(
+            "print",
+        ),
+        range: 274..279,
+    },
+    RangedObject {
+        inner: Rest(
+            "next;",
+        ),
+        range: 280..285,
+    },
+    RangedObject {
+        inner: Rest(
+            "c",
+        ),
+        range: 287..288,
+    },
+    RangedObject {
+        inner: Rest(
+            ":=",
+        ),
+        range: 289..291,
+    },
+    RangedObject {
+        inner: Rest(
+            "c",
+        ),
+        range: 292..293,
+    },
+    RangedObject {
+        inner: Rest(
+            "+",
+        ),
+        range: 294..295,
+    },
+    RangedObject {
+        inner: Rest(
+            "1;",
+        ),
+        range: 296..298,
+    },
+    RangedObject {
+        inner: Rest(
+            "end",
+        ),
+        range: 300..303,
+    },
+    RangedObject {
+        inner: Rest(
+            "end",
+        ),
+        range: 305..308,
+    },
+]

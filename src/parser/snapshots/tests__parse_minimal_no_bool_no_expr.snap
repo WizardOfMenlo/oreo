@@ -1,0 +1,32 @@
+---
+source: src/parser/mod.rs
+expression: parsed
+---
+Node {
+    ty: Program,
+    text_range: 0..28,
+    children: [
+        Node {
+            ty: Identifier,
+            text_range: 8..11,
+            children: [],
+        },
+        Node {
+            ty: Compound,
+            text_range: 12..28,
+            children: [
+                Node {
+                    ty: Decl,
+                    text_range: 18..24,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 22..23,
+                            children: [],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+}

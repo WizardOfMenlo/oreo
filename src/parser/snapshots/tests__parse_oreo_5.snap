@@ -1,0 +1,626 @@
+---
+source: src/parser/mod.rs
+expression: parsed
+---
+Node {
+    ty: Program,
+    text_range: 27..82,
+    children: [
+        Node {
+            ty: Identifier,
+            text_range: 35..40,
+            children: [],
+        },
+        Node {
+            ty: Error(
+                ExpectedFoundEOF(
+                    Keyword(
+                        End,
+                    ),
+                ),
+            ),
+            text_range: 77..82,
+            children: [
+                Node {
+                    ty: Decl,
+                    text_range: 150..156,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 154..155,
+                            children: [],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Decl,
+                    text_range: 158..173,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 162..167,
+                            children: [],
+                        },
+                        Node {
+                            ty: Expr,
+                            text_range: 171..172,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 171..172,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 171..172,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 171..172,
+                                                    children: [
+                                                        Node {
+                                                            ty: Unit,
+                                                            text_range: 171..172,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Int(
+                                                                        0,
+                                                                    ),
+                                                                    text_range: 171..172,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Decl,
+                    text_range: 177..192,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 181..187,
+                            children: [],
+                        },
+                        Node {
+                            ty: Expr,
+                            text_range: 190..191,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 190..191,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 190..191,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 190..191,
+                                                    children: [
+                                                        Node {
+                                                            ty: Unit,
+                                                            text_range: 190..191,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Int(
+                                                                        1,
+                                                                    ),
+                                                                    text_range: 190..191,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Decl,
+                    text_range: 195..204,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 199..203,
+                            children: [],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Decl,
+                    text_range: 233..243,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 237..238,
+                            children: [],
+                        },
+                        Node {
+                            ty: Expr,
+                            text_range: 241..242,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 241..242,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 241..242,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 241..242,
+                                                    children: [
+                                                        Node {
+                                                            ty: Unit,
+                                                            text_range: 241..242,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Int(
+                                                                        0,
+                                                                    ),
+                                                                    text_range: 241..242,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: PrintStat,
+                    text_range: 250..284,
+                    children: [
+                        Node {
+                            ty: Print,
+                            text_range: 250..283,
+                            children: [
+                                Node {
+                                    ty: Expr,
+                                    text_range: 256..283,
+                                    children: [
+                                        Node {
+                                            ty: Term,
+                                            text_range: 256..283,
+                                            children: [
+                                                Node {
+                                                    ty: Factor,
+                                                    text_range: 256..283,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 256..283,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 256..283,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Str,
+                                                                            text_range: 256..283,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: PrintStat,
+                    text_range: 294..300,
+                    children: [
+                        Node {
+                            ty: Get,
+                            text_range: 294..299,
+                            children: [
+                                Node {
+                                    ty: Identifier,
+                                    text_range: 298..299,
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: Error(
+                        ExpectedFoundEOF(
+                            Punctuation(
+                                Semicolon,
+                            ),
+                        ),
+                    ),
+                    text_range: 312..524,
+                    children: [
+                        Node {
+                            ty: Expr,
+                            text_range: 320..341,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 320..341,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 320..325,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 320..325,
+                                                    children: [
+                                                        Node {
+                                                            ty: Unit,
+                                                            text_range: 320..325,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Identifier,
+                                                                    text_range: 320..325,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        Node {
+                                            ty: LesserThan,
+                                            text_range: 326..341,
+                                            children: [
+                                                Node {
+                                                    ty: Factor,
+                                                    text_range: 328..341,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 328..341,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 328..341,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: BracketedExpr,
+                                                                            text_range: 328..341,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Expr,
+                                                                                    text_range: 329..340,
+                                                                                    children: [
+                                                                                        Node {
+                                                                                            ty: Term,
+                                                                                            text_range: 329..340,
+                                                                                            children: [
+                                                                                                Node {
+                                                                                                    ty: Factor,
+                                                                                                    text_range: 329..335,
+                                                                                                    children: [
+                                                                                                        Node {
+                                                                                                            ty: Product,
+                                                                                                            text_range: 329..335,
+                                                                                                            children: [
+                                                                                                                Node {
+                                                                                                                    ty: Unit,
+                                                                                                                    text_range: 329..335,
+                                                                                                                    children: [
+                                                                                                                        Node {
+                                                                                                                            ty: Identifier,
+                                                                                                                            text_range: 329..335,
+                                                                                                                            children: [],
+                                                                                                                        },
+                                                                                                                    ],
+                                                                                                                },
+                                                                                                            ],
+                                                                                                        },
+                                                                                                    ],
+                                                                                                },
+                                                                                                Node {
+                                                                                                    ty: GreaterThan,
+                                                                                                    text_range: 336..340,
+                                                                                                    children: [
+                                                                                                        Node {
+                                                                                                            ty: Factor,
+                                                                                                            text_range: 338..340,
+                                                                                                            children: [
+                                                                                                                Node {
+                                                                                                                    ty: Product,
+                                                                                                                    text_range: 338..340,
+                                                                                                                    children: [
+                                                                                                                        Node {
+                                                                                                                            ty: Unit,
+                                                                                                                            text_range: 338..340,
+                                                                                                                            children: [
+                                                                                                                                Node {
+                                                                                                                                    ty: Int(
+                                                                                                                                        32,
+                                                                                                                                    ),
+                                                                                                                                    text_range: 338..340,
+                                                                                                                                    children: [],
+                                                                                                                                },
+                                                                                                                            ],
+                                                                                                                        },
+                                                                                                                    ],
+                                                                                                                },
+                                                                                                            ],
+                                                                                                        },
+                                                                                                    ],
+                                                                                                },
+                                                                                            ],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        Node {
+                            ty: Compound,
+                            text_range: 349..524,
+                            children: [
+                                Node {
+                                    ty: If,
+                                    text_range: 363..436,
+                                    children: [
+                                        Node {
+                                            ty: Expr,
+                                            text_range: 368..372,
+                                            children: [
+                                                Node {
+                                                    ty: Term,
+                                                    text_range: 368..372,
+                                                    children: [
+                                                        Node {
+                                                            ty: Factor,
+                                                            text_range: 368..372,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Product,
+                                                                    text_range: 368..372,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Unit,
+                                                                            text_range: 368..372,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Identifier,
+                                                                                    text_range: 368..372,
+                                                                                    children: [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        Node {
+                                            ty: Compound,
+                                            text_range: 380..398,
+                                            children: [
+                                                Node {
+                                                    ty: Assign,
+                                                    text_range: 386..393,
+                                                    children: [
+                                                        Node {
+                                                            ty: Identifier,
+                                                            text_range: 386..387,
+                                                            children: [],
+                                                        },
+                                                        Node {
+                                                            ty: Expr,
+                                                            text_range: 391..392,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Term,
+                                                                    text_range: 391..392,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Factor,
+                                                                            text_range: 391..392,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Product,
+                                                                                    text_range: 391..392,
+                                                                                    children: [
+                                                                                        Node {
+                                                                                            ty: Unit,
+                                                                                            text_range: 391..392,
+                                                                                            children: [
+                                                                                                Node {
+                                                                                                    ty: Int(
+                                                                                                        5,
+                                                                                                    ),
+                                                                                                    text_range: 391..392,
+                                                                                                    children: [],
+                                                                                                },
+                                                                                            ],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        Node {
+                                            ty: Compound,
+                                            text_range: 417..435,
+                                            children: [
+                                                Node {
+                                                    ty: Assign,
+                                                    text_range: 423..431,
+                                                    children: [
+                                                        Node {
+                                                            ty: Identifier,
+                                                            text_range: 423..424,
+                                                            children: [],
+                                                        },
+                                                        Node {
+                                                            ty: Expr,
+                                                            text_range: 428..430,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Term,
+                                                                    text_range: 428..430,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Factor,
+                                                                            text_range: 428..430,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Product,
+                                                                                    text_range: 428..430,
+                                                                                    children: [
+                                                                                        Node {
+                                                                                            ty: Unit,
+                                                                                            text_range: 428..430,
+                                                                                            children: [
+                                                                                                Node {
+                                                                                                    ty: Int(
+                                                                                                        46,
+                                                                                                    ),
+                                                                                                    text_range: 428..430,
+                                                                                                    children: [],
+                                                                                                },
+                                                                                            ],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                Node {
+                                    ty: Assign,
+                                    text_range: 502..513,
+                                    children: [
+                                        Node {
+                                            ty: Identifier,
+                                            text_range: 502..503,
+                                            children: [],
+                                        },
+                                        Node {
+                                            ty: Expr,
+                                            text_range: 507..512,
+                                            children: [
+                                                Node {
+                                                    ty: Term,
+                                                    text_range: 507..512,
+                                                    children: [
+                                                        Node {
+                                                            ty: Factor,
+                                                            text_range: 507..512,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Product,
+                                                                    text_range: 507..508,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Unit,
+                                                                            text_range: 507..508,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Identifier,
+                                                                                    text_range: 507..508,
+                                                                                    children: [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                Node {
+                                                                    ty: Plus,
+                                                                    text_range: 509..512,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Product,
+                                                                            text_range: 511..512,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Unit,
+                                                                                    text_range: 511..512,
+                                                                                    children: [
+                                                                                        Node {
+                                                                                            ty: Int(
+                                                                                                1,
+                                                                                            ),
+                                                                                            text_range: 511..512,
+                                                                                            children: [],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+}

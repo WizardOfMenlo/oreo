@@ -1,0 +1,90 @@
+---
+source: src/lexer/mod.rs
+expression: res
+---
+[
+    RangedObject {
+        inner: Keyword(
+            Procedure,
+        ),
+        range: 0..9,
+    },
+    RangedObject {
+        inner: Identifier(
+            "id",
+        ),
+        range: 10..12,
+    },
+    RangedObject {
+        inner: Punctuation(
+            BracketOpen,
+        ),
+        range: 12..13,
+    },
+    RangedObject {
+        inner: Keyword(
+            Var,
+        ),
+        range: 13..16,
+    },
+    RangedObject {
+        inner: Identifier(
+            "x",
+        ),
+        range: 17..18,
+    },
+    RangedObject {
+        inner: Punctuation(
+            Comma,
+        ),
+        range: 18..19,
+    },
+    RangedObject {
+        inner: Keyword(
+            Var,
+        ),
+        range: 20..23,
+    },
+    RangedObject {
+        inner: Identifier(
+            "y",
+        ),
+        range: 24..25,
+    },
+    RangedObject {
+        inner: Punctuation(
+            BracketClose,
+        ),
+        range: 25..26,
+    },
+    RangedObject {
+        inner: Keyword(
+            Begin,
+        ),
+        range: 27..32,
+    },
+    RangedObject {
+        inner: Keyword(
+            Return,
+        ),
+        range: 33..39,
+    },
+    RangedObject {
+        inner: Identifier(
+            "x",
+        ),
+        range: 40..41,
+    },
+    RangedObject {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        range: 41..42,
+    },
+    RangedObject {
+        inner: Keyword(
+            End,
+        ),
+        range: 43..46,
+    },
+]

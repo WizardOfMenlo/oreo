@@ -1,0 +1,21 @@
+---
+source: src/parser/mod.rs
+expression: parsed
+---
+Node {
+    ty: Error(
+        ExpectedFound(
+            Keyword(
+                Program,
+            ),
+            RangedObject {
+                inner: Punctuation(
+                    BracketOpen,
+                ),
+                range: 0..1,
+            },
+        ),
+    ),
+    text_range: 0..1,
+    children: [],
+}

@@ -1,7 +1,7 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use oreo::lexical::lexicalize;
+use oreo::lexer::lexicalize;
 use oreo::parser::parse;
-use oreo::scanner::scan;
+use oreo::lexer::scanner::scan;
 
 fn generate_program_from_size(s: usize) -> String {
     format!(

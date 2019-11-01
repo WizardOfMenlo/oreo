@@ -1,7 +1,0 @@
----
-source: src/validator.rs
-expression: res
----
-Ok(
-    (),
-)
