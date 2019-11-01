@@ -17,6 +17,13 @@ impl<T> RangedObject<T> {
         &src[self.range.clone()]
     }
 
+    pub fn map<K>(self, f: impl FnOnce(T) -> K) -> RangedObject<K> {
+        RangedObject {
+            inner: f(self.inner),
+            range: self.range,
+        }
+    }
+
     pub fn inner(&self) -> &T {
         &self.inner
     }

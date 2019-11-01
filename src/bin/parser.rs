@@ -1,8 +1,10 @@
+use oreo::error::{format_lexical_error, format_syntax_error};
 use oreo::lexical::lexicalize;
 use oreo::parser::parse;
 use oreo::range::RangedObject;
 use oreo::scanner::scan;
-use oreo::tokens::{LexicalError, Token};
+use oreo::tokens::Token;
+use oreo::tree_utils::for_each_depth_first;
 use std::str::FromStr;
 use structopt::StructOpt;
 
@@ -34,47 +36,6 @@ struct Args {
     mode: LexMode,
 }
 
-fn print_lexical_error(error: RangedObject<&LexicalError>, input: &str) {
-    let (exp, found) = match error.inner() {
-        LexicalError::ExpectedDoubleEqualsEOF => ('=', None),
-        LexicalError::ExpectedAssignementEOF => ('=', None),
-        LexicalError::ExpectedDoubleEquals(c) => ('=', Some(c)),
-        LexicalError::ExpectedAssignement(c) => ('=', Some(c)),
-        LexicalError::UnknownChar(c) => {
-            println!("Unknown char '{}' in {}.", c, error.span(input));
-            return;
-        }
-        LexicalError::UnclosedString(s) => {
-            println!("Unclosed string \"{}\" in {}.", s, error.span(input));
-            return;
-        }
-        LexicalError::UnclosedComment(s) => {
-            println!("Unclosed comment \"{}\" in {}.", s, error.span(input));
-            return;
-        }
-    };
-
-    println!(
-        "Expected '{}', found '{}' in {}",
-        exp,
-        found
-            .map(ToString::to_string)
-            .unwrap_or_else(|| String::from("EOF")),
-        error.span(input)
-    );
-}
-
-fn token_to_string<'a>(t: &Token<'a>) -> String {
-    format!("{:?}", t)
-}
-
-fn token_list_to_string(t: impl IntoIterator<Item = &'static Token<'static>>) -> String {
-    t.into_iter()
-        .map(token_to_string)
-        .collect::<Vec<_>>()
-        .join(",")
-}
-
 fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
     let opt = Args::from_args();
@@ -85,11 +46,26 @@ fn main() {
         .filter(|t| t.inner().is_error())
         .for_each(|error| {
             if let Token::Error(e) = error.inner() {
-                print_lexical_error(RangedObject::new(e, error.range().clone()), &opt.input)
+                println!(
+                    "{}",
+                    format_lexical_error(error.clone().map(|_| e), &opt.input)
+                );
             }
         });
 
     let parse_tree = parse(tokens.into_iter());
+
+    for_each_depth_first(&parse_tree, |n| {
+        if n.ty.is_error() {
+            println!(
+                "{}",
+                format_syntax_error(
+                    RangedObject::new(n.ty.unwrap_err(), n.text_range.clone()),
+                    &opt.input
+                )
+            )
+        }
+    });
 
     let out = match opt.mode {
         LexMode::Json => serde_json::to_string_pretty(&parse_tree).unwrap(),

@@ -1,3 +1,4 @@
+pub mod error;
 pub mod lexical;
 pub mod node_builder;
 pub mod parser;
@@ -6,8 +7,8 @@ pub mod scanner;
 pub mod syntax;
 pub mod token_stream;
 pub mod tokens;
+pub mod tree_utils;
 pub mod untyped;
-//pub mod validator;
 
 use untyped::Node;
 

@@ -1,19 +1,8 @@
 use std::ops::Range;
 
-use crate::parser::{ExpToken, TokenList};
-use crate::range::RangedObject;
+use crate::error::SyntaxError;
 use crate::syntax::{AdditiveOp, BooleanOp, MultiplicativeOp, RelationalOp};
-use crate::tokens::Token;
 use serde::Serialize;
-
-#[derive(Debug, Clone, Serialize)]
-pub enum SyntaxError<'a> {
-    ExpectedOneOfFoundEOF(TokenList),
-    ExpectedFoundEOF(ExpToken),
-    ExpectedOneOfFound(TokenList, RangedObject<Token<'a>>),
-    ExpectedFound(ExpToken, RangedObject<Token<'a>>),
-    LogicalError,
-}
 
 #[derive(Debug, Clone, Serialize)]
 pub enum NodeType<'a> {
@@ -82,6 +71,13 @@ impl<'a> NodeType<'a> {
         match self {
             NodeType::Error(_) => true,
             _ => false,
+        }
+    }
+
+    pub fn unwrap_err(&self) -> SyntaxError {
+        match self {
+            NodeType::Error(e) => e.clone(),
+            _ => panic!("Invalid conversion"),
         }
     }
 }

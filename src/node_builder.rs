@@ -1,7 +1,8 @@
+use crate::error::SyntaxError;
 use crate::parser::{ExpToken, TokenList};
-use crate::tokens::Token;
 use crate::token_stream::TokenStream;
-use crate::untyped::{Node, NodeType, SyntaxError};
+use crate::tokens::Token;
+use crate::untyped::{Node, NodeType};
 use std::ops::Range;
 
 type IdF<T> = fn(T) -> T;

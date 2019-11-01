@@ -456,10 +456,9 @@ impl<'a, 'b> From<&'b Node<'a>> for SyntaxNode<'a, 'b> {
 
             NodeType::Unit | NodeType::Not => SyntaxNode::Atom(Atom(input)),
 
-            NodeType::Int(_)
-            | NodeType::Str
-            | NodeType::Bool(_)
-            | NodeType::BracketedExpr => SyntaxNode::Unit(Unit(input)),
+            NodeType::Int(_) | NodeType::Str | NodeType::Bool(_) | NodeType::BracketedExpr => {
+                SyntaxNode::Unit(Unit(input))
+            }
 
             NodeType::Identifier => SyntaxNode::Identifier(Identifier(input)),
 
