@@ -1,6 +1,22 @@
-use super::tokens::LexicalError;
-use crate::range::*;
+//! Utilities for handling errors in the lexing part
 
+use crate::range::*;
+use serde::Serialize;
+
+/// Possible errors that we encounter parsing
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
+pub enum LexicalError<'a> {
+    ExpectedDoubleEqualsEOF,
+    ExpectedAssignementEOF,
+    UnclosedString(&'a str),
+    UnclosedComment(&'a str),
+    ExpectedDoubleEquals(char),
+    ExpectedAssignement(char),
+    UnknownChar(char),
+}
+
+
+/// Format a lexical error for output
 pub fn format_lexical_error(error: RangedObject<&LexicalError>, input: &str) -> String {
     let span = error.span(input);
     let (exp, found) = match error.inner() {

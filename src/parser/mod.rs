@@ -1,4 +1,6 @@
-pub mod consts;
+//! Parser and related utilites
+
+mod consts;
 pub mod error;
 pub mod node_builder;
 
@@ -11,6 +13,7 @@ use node_builder::{NodeBuilder, PeekMapping};
 pub(crate) type ExpToken = Token<'static>;
 pub(crate) type TokenList = &'static [ExpToken];
 
+/// Parses a node (as a program) from a stream
 pub fn parse<'a>(it: impl Iterator<Item = RangedObject<Token<'a>>>) -> Node<'a> {
     // Note we skip comments completely
     let mut it = ParserStream::new(it.filter(|s| !s.inner().is_comment()).peekable());

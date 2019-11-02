@@ -1,3 +1,5 @@
+//! Lexing facilities for building a token stream
+
 pub mod error;
 pub mod scanner;
 pub mod token_stream;
@@ -5,7 +7,8 @@ pub mod tokens;
 
 use crate::range::*;
 use scanner::ScannedItem;
-use tokens::{Keyword, LexicalError, Literal, Operator, Punctuation, Token};
+use tokens::*;
+use error::LexicalError;
 
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -48,16 +51,14 @@ lazy_static! {
     };
 }
 
+// From some scanned objects, creates an iterator that yields tokens
 pub fn lexicalize<'a>(
     it: impl Iterator<Item = RangedObject<ScannedItem<'a>>>,
 ) -> impl Iterator<Item = RangedObject<Token<'a>>> {
-    it.map(lexicalize_one).flatten()
+    it.map(LexicalIt::new).flatten()
 }
 
-fn lexicalize_one(scan: RangedObject<ScannedItem>) -> impl Iterator<Item = RangedObject<Token>> {
-    LexicalIt::new(scan)
-}
-
+// Struct that parses tokens from scanned items
 struct LexicalIt<'a> {
     s: RangedObject<ScannedItem<'a>>,
     curr_position: usize,

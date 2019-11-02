@@ -1,5 +1,9 @@
+//! Performs the scanning of the input string, in general trimming whitespace and
+//! collecting words
+
 use crate::range::RangedObject;
 
+/// The possible results from a scan
 #[derive(Debug, PartialEq, Clone)]
 pub enum ScannedItem<'a> {
     Str(&'a str),
@@ -9,11 +13,13 @@ pub enum ScannedItem<'a> {
     Rest(&'a str),
 }
 
+/// Scan the input string to create RangedObjects
 pub fn scan(input: &str) -> impl Iterator<Item = RangedObject<ScannedItem>> {
     LineScannerIt { input, pos: 0 }
 }
 
-pub struct LineScannerIt<'a> {
+/// Utility struct that parses the input (verrry slow)
+struct LineScannerIt<'a> {
     input: &'a str,
     pos: usize,
 }

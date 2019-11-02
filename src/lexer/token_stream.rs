@@ -1,16 +1,22 @@
+//! Traits for stream that yields tokens (and also is peekable)
+
 use super::tokens::Token;
 use crate::range::RangedObject;
 use std::iter::Peekable;
 
+/// A trait that yields tokens, and that can be peeked
 pub trait TokenStream<'a>: Iterator<Item = RangedObject<Token<'a>>> {
+    /// See what the next token in the stream (if any), is
     fn peek(&mut self) -> Option<&RangedObject<Token<'a>>>;
 }
 
+/// Impl struct
 pub struct ParserStream<T> {
     inner: T,
 }
 
 impl<T> ParserStream<T> {
+    /// Creates a new stream
     pub fn new(inner: T) -> Self {
         Self { inner }
     }

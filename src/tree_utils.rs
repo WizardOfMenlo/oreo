@@ -25,6 +25,7 @@ impl<'a> Node<'a> {
         DepthFirstNonOwningNodeIt { nodes: vec![self] }
     }
 
+    /// Create an iterator that walks the tree depth first
     pub fn iter_breadth_first<'b>(&'b self) -> BreadthFirstNonOwningNodeIt<'a, 'b> {
         let mut nodes = VecDeque::new();
         nodes.push_front(self);
@@ -54,6 +55,7 @@ impl<'a> Node<'a> {
         DepthFirstNodeIt { nodes: vec![self] }
     }
 
+    /// Create an iterator that walks the tree depth first
     pub fn into_iter_breadth_first(self) -> BreadthFirstNodeIt<'a> {
         let mut nodes = VecDeque::new();
         nodes.push_front(self);
@@ -100,7 +102,7 @@ impl<'a, 'b> Iterator for BreadthFirstNonOwningNodeIt<'a, 'b> {
     fn next(&mut self) -> Option<Self::Item> {
         let node = self.nodes.pop_front();
         node.map(|node| {
-            self.nodes.extend(node.children());
+            self.nodes.extend(node.children().rev());
             node
         })
     }

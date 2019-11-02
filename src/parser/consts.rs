@@ -1,3 +1,5 @@
+//! A lot of constants that we use in the parsing phase
+
 use super::{ExpToken, TokenList};
 use crate::lexer::tokens::*;
 

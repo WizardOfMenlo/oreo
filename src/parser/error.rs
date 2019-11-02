@@ -4,6 +4,7 @@ use crate::range::*;
 
 use serde::Serialize;
 
+/// Representing possible errors during parsing
 #[derive(Debug, Clone, Serialize, PartialEq)]
 pub enum SyntaxError<'a> {
     ExpectedOneOfFoundEOF(TokenList),
@@ -12,14 +13,15 @@ pub enum SyntaxError<'a> {
     ExpectedFound(ExpToken, RangedObject<Token<'a>>),
 }
 
-pub fn tl_to_str(t: TokenList) -> String {
+fn tl_to_str(t: TokenList) -> String {
     format!("{:?}", t)
 }
 
-pub fn tok_to_str<'a>(t: &Token<'a>) -> String {
+fn tok_to_str<'a>(t: &Token<'a>) -> String {
     format!("{:?}", t)
 }
 
+/// Format the syntax error for outputting
 pub fn format_syntax_error<'a>(error: RangedObject<SyntaxError<'a>>, input: &'a str) -> String {
     let span = error.span(input);
     let (exp, found) = match error.inner() {

@@ -1,5 +1,9 @@
-use serde::Serialize;
+//! Definition of all the tokens that we use
 
+use serde::Serialize;
+use super::error::LexicalError;
+
+/// The main token type that we work on
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Token<'a> {
     Keyword(Keyword),
@@ -12,6 +16,7 @@ pub enum Token<'a> {
 }
 
 impl<'a> Token<'a> {
+    /// Is the current token an error?
     pub fn is_error(&self) -> bool {
         match self {
             Token::Error(_) => true,
@@ -19,6 +24,7 @@ impl<'a> Token<'a> {
         }
     }
 
+    /// Is the current token a comment?
     pub fn is_comment(&self) -> bool {
         match self {
             Token::Comment(_) => true,
@@ -26,6 +32,7 @@ impl<'a> Token<'a> {
         }
     }
 
+    /// Is this token the same as an other (where Int(1) == Int(2))
     pub fn same_kind<'b>(&self, other: &Token<'b>) -> bool
     where
         'b: 'a,
@@ -47,6 +54,7 @@ impl<'a> Token<'a> {
     }
 }
 
+/// The Keywords we have
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Keyword {
     Program,
@@ -64,6 +72,7 @@ pub enum Keyword {
     Return,
 }
 
+/// Possible Punctuation marks
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Punctuation {
     Comma,
@@ -72,6 +81,7 @@ pub enum Punctuation {
     BracketClose,
 }
 
+/// All the operators (including boolean ones)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Operator {
     Assignement,
@@ -89,6 +99,7 @@ pub enum Operator {
     Not,
 }
 
+/// Constants
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Literal<'a> {
     Integer(isize),
@@ -96,13 +107,3 @@ pub enum Literal<'a> {
     String(&'a str),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
-pub enum LexicalError<'a> {
-    ExpectedDoubleEqualsEOF,
-    ExpectedAssignementEOF,
-    UnclosedString(&'a str),
-    UnclosedComment(&'a str),
-    ExpectedDoubleEquals(char),
-    ExpectedAssignement(char),
-    UnknownChar(char),
-}

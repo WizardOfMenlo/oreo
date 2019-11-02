@@ -1,3 +1,5 @@
+//! Utilities for working with ranges in text
+
 use serde::Serialize;
 use std::ops::Range;
 

@@ -1,3 +1,6 @@
+//! Utilites (which are really really cool in my opinion)
+//! to create nodes from token streams
+
 use super::error::SyntaxError;
 use super::{ExpToken, TokenList};
 use crate::ast::untyped::{Node, NodeType};
@@ -122,7 +125,7 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
     /// Advance the token stream, while also returning the found token (useful for int, bool)
     pub fn advance_expecting_and_get(mut self, tok: ExpToken) -> (Self, Token<'a>) {
         // This is just for convenience
-        use crate::lexer::tokens::LexicalError;
+        use crate::lexer::error::LexicalError;
 
         // We skip if we have a error
         if self.is_error_node() {
