@@ -6,10 +6,19 @@ use crate::range::RangedObject;
 /// The possible results from a scan
 #[derive(Debug, PartialEq, Clone)]
 pub enum ScannedItem<'a> {
+    /// String of the form "ajkldsf"
     Str(&'a str),
+
+    /// String of form "akj
     UnclosedStr(&'a str),
+
+    /// Comment of the form {- something -}
     Comment(&'a str),
+
+    /// Comment of the form {- something
     UnclosedComment(&'a str),
+
+    /// Anything else
     Rest(&'a str),
 }
 

@@ -1,5 +1,8 @@
 //! Crate containing a parser and (hopefully) compiler for the oreo programming languages
 
+// Since last time I forgot :)
+#![deny(missing_docs)]
+
 pub mod ast;
 pub mod lexer;
 pub mod parser;

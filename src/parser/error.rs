@@ -1,3 +1,5 @@
+//! Error the can be encountered in parsing
+
 use crate::lexer::tokens::Token;
 use crate::parser::{ExpToken, TokenList};
 use crate::range::*;
@@ -7,9 +9,15 @@ use serde::Serialize;
 /// Representing possible errors during parsing
 #[derive(Debug, Clone, Serialize, PartialEq)]
 pub enum SyntaxError<'a> {
+    /// Was looking for one of those, found EOF
     ExpectedOneOfFoundEOF(TokenList),
+    /// Was looking for this, found EOF
     ExpectedFoundEOF(ExpToken),
+
+    /// Was looking for one of those found that
     ExpectedOneOfFound(TokenList, RangedObject<Token<'a>>),
+
+    /// Was looking for this found that
     ExpectedFound(ExpToken, RangedObject<Token<'a>>),
 }
 

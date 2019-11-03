@@ -1,9 +1,13 @@
+//! The type we use to represent syntax nodes
+
 use super::syntax::{AdditiveOp, BooleanOp, MultiplicativeOp, RelationalOp};
 use crate::parser::error::SyntaxError;
 use crate::range::Ranged;
 use serde::Serialize;
 use std::ops::Range;
 
+/// We use this to figure out which kind of node we are
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Serialize, PartialEq)]
 pub enum NodeType<'a> {
     // Error node
@@ -67,6 +71,7 @@ pub enum NodeType<'a> {
 }
 
 impl<'a> NodeType<'a> {
+    /// Is this node an error
     pub fn is_error(&self) -> bool {
         match self {
             NodeType::Error(_) => true,
@@ -74,6 +79,7 @@ impl<'a> NodeType<'a> {
         }
     }
 
+    /// If it is an error, get it, else panic
     pub fn unwrap_err(&self) -> SyntaxError {
         match self {
             NodeType::Error(e) => e.clone(),
@@ -82,6 +88,7 @@ impl<'a> NodeType<'a> {
     }
 }
 
+/// The type that tracks type and range
 #[derive(Debug, Clone, Serialize)]
 pub struct Node<'a> {
     pub(super) ty: NodeType<'a>,
@@ -90,6 +97,7 @@ pub struct Node<'a> {
 }
 
 impl<'a> Node<'a> {
+    /// Creates  a new node
     pub fn new(ty: NodeType<'a>, range: Range<usize>, children: Vec<Node<'a>>) -> Self {
         Node {
             ty,
@@ -98,10 +106,12 @@ impl<'a> Node<'a> {
         }
     }
 
+    /// Get the node type
     pub fn ty(&self) -> &NodeType<'a> {
         &self.ty
     }
 
+    /// Get the node's children
     pub fn children(&self) -> impl DoubleEndedIterator<Item = &Node<'a>> {
         self.children.iter()
     }

@@ -6,9 +6,9 @@ pub mod token_stream;
 pub mod tokens;
 
 use crate::range::*;
+use error::LexicalError;
 use scanner::ScannedItem;
 use tokens::*;
-use error::LexicalError;
 
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -51,7 +51,7 @@ lazy_static! {
     };
 }
 
-// From some scanned objects, creates an iterator that yields tokens
+/// From some scanned objects, creates an iterator that yields tokens
 pub fn lexicalize<'a>(
     it: impl Iterator<Item = RangedObject<ScannedItem<'a>>>,
 ) -> impl Iterator<Item = RangedObject<Token<'a>>> {

@@ -1,3 +1,5 @@
+//! Mod with various utilities for walking the parse tree
+
 use crate::ast::untyped::Node;
 use std::collections::VecDeque;
 
@@ -63,6 +65,7 @@ impl<'a> Node<'a> {
     }
 }
 
+/// An iterator that walks the nodes depth first (no ownership)
 pub struct DepthFirstNonOwningNodeIt<'a, 'b> {
     nodes: Vec<&'b Node<'a>>,
 }
@@ -78,6 +81,7 @@ impl<'a, 'b> Iterator for DepthFirstNonOwningNodeIt<'a, 'b> {
     }
 }
 
+/// An iterator that walks the nodes depth first
 pub struct DepthFirstNodeIt<'a> {
     nodes: Vec<Node<'a>>,
 }
@@ -93,6 +97,7 @@ impl<'a> Iterator for DepthFirstNodeIt<'a> {
     }
 }
 
+/// An iterator that walks the nodes breadth first (no ownership)
 pub struct BreadthFirstNonOwningNodeIt<'a, 'b> {
     nodes: VecDeque<&'b Node<'a>>,
 }

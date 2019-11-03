@@ -1,17 +1,30 @@
 //! Definition of all the tokens that we use
 
-use serde::Serialize;
 use super::error::LexicalError;
+use serde::Serialize;
 
 /// The main token type that we work on
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Token<'a> {
+    /// Any of the keywords (apart from and and or)
     Keyword(Keyword),
+
+    /// (, ), ;, ,
     Punctuation(Punctuation),
+
+    /// Addition, mult, ...
     Operator(Operator),
+
+    /// A constant
     Literal(Literal<'a>),
+
+    /// An identifier
     Identifier(&'a str),
+
+    /// A comment
     Comment(&'a str),
+
+    /// Any kind of error we might encounter
     Error(LexicalError<'a>),
 }
 
@@ -55,6 +68,7 @@ impl<'a> Token<'a> {
 }
 
 /// The Keywords we have
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Keyword {
     Program,
@@ -73,6 +87,7 @@ pub enum Keyword {
 }
 
 /// Possible Punctuation marks
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Punctuation {
     Comma,
@@ -82,6 +97,7 @@ pub enum Punctuation {
 }
 
 /// All the operators (including boolean ones)
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Operator {
     Assignement,
@@ -100,10 +116,10 @@ pub enum Operator {
 }
 
 /// Constants
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum Literal<'a> {
     Integer(isize),
     Boolean(bool),
     String(&'a str),
 }
-

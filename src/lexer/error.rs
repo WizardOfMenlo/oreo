@@ -3,18 +3,29 @@
 use crate::range::*;
 use serde::Serialize;
 
-/// Possible errors that we encounter parsing
+/// Possible errors that we encounter lexing
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum LexicalError<'a> {
+    /// Expected ==
     ExpectedDoubleEqualsEOF,
+
+    /// Expected :=
     ExpectedAssignementEOF,
+
+    /// Unclosed string
     UnclosedString(&'a str),
+
+    /// Comment not closed
     UnclosedComment(&'a str),
+
+    /// Expected ==, found char
     ExpectedDoubleEquals(char),
+    /// Expected :=, found char
     ExpectedAssignement(char),
+
+    /// Something we have no idea how to handle
     UnknownChar(char),
 }
-
 
 /// Format a lexical error for output
 pub fn format_lexical_error(error: RangedObject<&LexicalError>, input: &str) -> String {
