@@ -2,9 +2,28 @@
 
 use super::untyped::{Node, NodeType};
 
-/// The main program node
-#[derive(Debug, Clone)]
-pub struct Program<'a, 'b>(&'a Node<'b>);
+/// Macro for simple definition of a syntax node
+macro_rules! syntax_node {
+    ($id:ident) => {
+        /// A syntax node for an $id
+        #[derive(Debug, Clone)]
+        pub struct $id<'a, 'b>(&'a Node<'b>);
+
+        impl<'a, 'b> $id<'a, 'b> {
+            /// Instantiate the syntax node
+            pub fn new(node: &'a Node<'b>) -> Self {
+                $id(node)
+            }
+
+            /// Get the raw node
+            pub fn get_node(&self) -> &'a Node<'b> {
+                self.0
+            }
+        }
+    };
+}
+
+syntax_node!(Program);
 
 impl<'a, 'b> Program<'a, 'b> {
     /// Get the program name
@@ -18,9 +37,7 @@ impl<'a, 'b> Program<'a, 'b> {
     }
 }
 
-/// Represent a collection of statements
-#[derive(Debug, Clone)]
-pub struct Compound<'a, 'b>(&'a Node<'b>);
+syntax_node!(Compound);
 
 impl<'a, 'b> Compound<'a, 'b> {
     /// Get the inner statements
@@ -29,9 +46,7 @@ impl<'a, 'b> Compound<'a, 'b> {
     }
 }
 
-/// A general statement
-#[derive(Debug, Clone)]
-pub struct Statement<'a, 'b>(&'a Node<'b>);
+syntax_node!(Statement);
 
 impl<'a, 'b> Statement<'a, 'b> {
     /// Convert the statement to a more specific one
@@ -65,9 +80,7 @@ pub enum StatementType<'a, 'b> {
     Return(Return<'a, 'b>),
 }
 
-/// A declartion
-#[derive(Debug, Clone)]
-pub struct Decl<'a, 'b>(&'a Node<'b>);
+syntax_node!(Decl);
 
 impl<'a, 'b> Decl<'a, 'b> {
     /// The identifier being declared
@@ -81,9 +94,7 @@ impl<'a, 'b> Decl<'a, 'b> {
     }
 }
 
-/// Either Print, Println, Get
-#[derive(Debug, Clone)]
-pub struct PrintStat<'a, 'b>(&'a Node<'b>);
+syntax_node!(PrintStat);
 
 impl<'a, 'b> PrintStat<'a, 'b> {
     /// Convert to the more specific print typ
@@ -107,9 +118,7 @@ pub enum PrintTypes<'a, 'b> {
     Get(Get<'a, 'b>),
 }
 
-/// A print statement
-#[derive(Debug, Clone)]
-pub struct Print<'a, 'b>(&'a Node<'b>);
+syntax_node!(Print);
 
 impl<'a, 'b> Print<'a, 'b> {
     /// The expression to print
@@ -118,9 +127,7 @@ impl<'a, 'b> Print<'a, 'b> {
     }
 }
 
-/// A println statement
-#[derive(Debug, Clone)]
-pub struct Println<'a, 'b>(&'a Node<'b>);
+syntax_node!(Println);
 
 impl<'a, 'b> Println<'a, 'b> {
     /// The expression to print
@@ -129,9 +136,7 @@ impl<'a, 'b> Println<'a, 'b> {
     }
 }
 
-/// Get statement
-#[derive(Debug, Clone)]
-pub struct Get<'a, 'b>(&'a Node<'b>);
+syntax_node!(Get);
 
 impl<'a, 'b> Get<'a, 'b> {
     /// The identifier to set
@@ -140,9 +145,7 @@ impl<'a, 'b> Get<'a, 'b> {
     }
 }
 
-/// A while statement
-#[derive(Debug, Clone)]
-pub struct While<'a, 'b>(&'a Node<'b>);
+syntax_node!(While);
 
 impl<'a, 'b> While<'a, 'b> {
     /// The condition to evaluate
@@ -156,9 +159,7 @@ impl<'a, 'b> While<'a, 'b> {
     }
 }
 
-/// A if statement
-#[derive(Debug, Clone)]
-pub struct If<'a, 'b>(&'a Node<'b>);
+syntax_node!(If);
 
 impl<'a, 'b> If<'a, 'b> {
     /// The condition to evaluate
@@ -177,9 +178,7 @@ impl<'a, 'b> If<'a, 'b> {
     }
 }
 
-/// An assign statement
-#[derive(Debug, Clone)]
-pub struct Assign<'a, 'b>(&'a Node<'b>);
+syntax_node!(Assign);
 
 impl<'a, 'b> Assign<'a, 'b> {
     /// The identifier to set
@@ -193,9 +192,7 @@ impl<'a, 'b> Assign<'a, 'b> {
     }
 }
 
-/// A function declaration statement
-#[derive(Debug, Clone)]
-pub struct FunctionDecl<'a, 'b>(&'a Node<'b>);
+syntax_node!(FunctionDecl);
 
 impl<'a, 'b> FunctionDecl<'a, 'b> {
     /// Function to declare
@@ -217,9 +214,7 @@ impl<'a, 'b> FunctionDecl<'a, 'b> {
     }
 }
 
-/// The arguments of a declaration
-#[derive(Debug, Clone)]
-pub struct FunctionDeclArgs<'a, 'b>(&'a Node<'b>);
+syntax_node!(FunctionDeclArgs);
 
 impl<'a, 'b> FunctionDeclArgs<'a, 'b> {
     /// The arg id
@@ -228,9 +223,7 @@ impl<'a, 'b> FunctionDeclArgs<'a, 'b> {
     }
 }
 
-/// The arguments of a call
-#[derive(Debug, Clone)]
-pub struct FunctionCallArgs<'a, 'b>(&'a Node<'b>);
+syntax_node!(FunctionCallArgs);
 
 impl<'a, 'b> FunctionCallArgs<'a, 'b> {
     /// The expression in the argument
@@ -239,9 +232,7 @@ impl<'a, 'b> FunctionCallArgs<'a, 'b> {
     }
 }
 
-/// A return statement
-#[derive(Debug, Clone)]
-pub struct Return<'a, 'b>(&'a Node<'b>);
+syntax_node!(Return);
 
 impl<'a, 'b> Return<'a, 'b> {
     /// The expression to return
@@ -250,9 +241,7 @@ impl<'a, 'b> Return<'a, 'b> {
     }
 }
 
-/// A function call (either in expr or statement)
-#[derive(Debug, Clone)]
-pub struct FunctionCall<'a, 'b>(&'a Node<'b>);
+syntax_node!(FunctionCall);
 
 impl<'a, 'b> FunctionCall<'a, 'b> {
     /// The function id to call
@@ -266,9 +255,7 @@ impl<'a, 'b> FunctionCall<'a, 'b> {
     }
 }
 
-/// An expression
-#[derive(Debug, Clone)]
-pub struct Expr<'a, 'b>(&'a Node<'b>);
+syntax_node!(Expr);
 
 impl<'a, 'b> Expr<'a, 'b> {
     /// The head of the expression
@@ -282,9 +269,7 @@ impl<'a, 'b> Expr<'a, 'b> {
     }
 }
 
-/// The tail of an expression (consists of and/or)
-#[derive(Debug, Clone)]
-pub struct ExprPrime<'a, 'b>(&'a Node<'b>);
+syntax_node!(ExprPrime);
 
 impl<'a, 'b> ExprPrime<'a, 'b> {
     /// The operation
@@ -303,9 +288,7 @@ impl<'a, 'b> ExprPrime<'a, 'b> {
     }
 }
 
-/// A term
-#[derive(Debug, Clone)]
-pub struct Term<'a, 'b>(&'a Node<'b>);
+syntax_node!(Term);
 
 impl<'a, 'b> Term<'a, 'b> {
     /// Head of the term
@@ -319,9 +302,7 @@ impl<'a, 'b> Term<'a, 'b> {
     }
 }
 
-/// The tail of a term (<, <=, >, >=, ==)
-#[derive(Debug, Clone)]
-pub struct TermPrime<'a, 'b>(&'a Node<'b>);
+syntax_node!(TermPrime);
 
 impl<'a, 'b> TermPrime<'a, 'b> {
     /// The operation
@@ -340,9 +321,7 @@ impl<'a, 'b> TermPrime<'a, 'b> {
     }
 }
 
-/// A factor
-#[derive(Debug, Clone)]
-pub struct Factor<'a, 'b>(&'a Node<'b>);
+syntax_node!(Factor);
 
 impl<'a, 'b> Factor<'a, 'b> {
     /// The head of a factor
@@ -356,9 +335,7 @@ impl<'a, 'b> Factor<'a, 'b> {
     }
 }
 
-/// Tail of a factor (+, -)
-#[derive(Debug, Clone)]
-pub struct FactorPrime<'a, 'b>(&'a Node<'b>);
+syntax_node!(FactorPrime);
 
 impl<'a, 'b> FactorPrime<'a, 'b> {
     /// The operation in the tail
@@ -377,9 +354,7 @@ impl<'a, 'b> FactorPrime<'a, 'b> {
     }
 }
 
-/// A product
-#[derive(Debug, Clone)]
-pub struct Product<'a, 'b>(&'a Node<'b>);
+syntax_node!(Product);
 
 impl<'a, 'b> Product<'a, 'b> {
     /// The head
@@ -393,9 +368,7 @@ impl<'a, 'b> Product<'a, 'b> {
     }
 }
 
-/// A product (*, /)
-#[derive(Debug, Clone)]
-pub struct ProductPrime<'a, 'b>(&'a Node<'b>);
+syntax_node!(ProductPrime);
 
 impl<'a, 'b> ProductPrime<'a, 'b> {
     /// The operation
@@ -414,9 +387,7 @@ impl<'a, 'b> ProductPrime<'a, 'b> {
     }
 }
 
-/// An atom
-#[derive(Debug, Clone)]
-pub struct Atom<'a, 'b>(&'a Node<'b>);
+syntax_node!(Atom);
 
 /// Possible types of an atom
 pub enum AtomType<'a, 'b> {
@@ -439,9 +410,7 @@ impl<'a, 'b> Atom<'a, 'b> {
     }
 }
 
-/// A literal, Identifier, func call or bracketed expr
-#[derive(Debug, Clone)]
-pub struct Unit<'a, 'b>(&'a Node<'b>);
+syntax_node!(Unit);
 
 impl<'a, 'b> Unit<'a, 'b> {
     /// Convert a unit into a more specific type
@@ -470,13 +439,11 @@ pub enum UnitType<'a, 'b> {
     BracketedExpr(Expr<'a, 'b>),
 }
 
-/// Node representing an identifier
-#[derive(Debug, Clone)]
-pub struct Identifier<'a, 'b>(&'a Node<'b>);
+syntax_node!(Identifier);
 
 impl<'a, 'b> Identifier<'a, 'b> {
     /// Get the string id
-    pub fn identifier<'c>(&self, text: &'c str) -> &'c str {
+    pub fn id<'c>(&self, text: &'c str) -> &'c str {
         &text[self.0.text_range.clone()]
     }
 }
