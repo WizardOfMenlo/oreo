@@ -15,7 +15,7 @@ type IdF<T> = fn(T) -> T;
 /// Tokens that are peeked
 #[derive(Debug, Default)]
 pub struct PeekMapping<T> {
-    // TODO: Why not a HashMap?
+    // Note, not an Hashmap as we compare by kind, not by eq
     list: Vec<(ExpToken, IdF<T>)>,
 }
 
@@ -290,7 +290,6 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
 
     /// Build the node from the builder, panics if the type is not set yet
     pub fn build(self) -> Node<'a> {
-        // TODO: we might want to check for non null
         Node::new(
             self.ty.expect("Type has not been set"),
             self.start.unwrap_or(0)..self.end.unwrap_or(0),
