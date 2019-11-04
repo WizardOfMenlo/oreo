@@ -1,0 +1,1124 @@
+---
+source: src/ast/node_db.rs
+expression: "(db, nodes)"
+---
+(
+    NodeDb {
+        node: Node {
+            ty: Program,
+            text_range: 0..56,
+            children: [
+                Node {
+                    ty: Identifier,
+                    text_range: 8..11,
+                    children: [],
+                },
+                Node {
+                    ty: Compound,
+                    text_range: 12..56,
+                    children: [
+                        Node {
+                            ty: PrintStat,
+                            text_range: 18..34,
+                            children: [
+                                Node {
+                                    ty: Print,
+                                    text_range: 18..33,
+                                    children: [
+                                        Node {
+                                            ty: Expr,
+                                            text_range: 24..33,
+                                            children: [
+                                                Node {
+                                                    ty: Term,
+                                                    text_range: 24..33,
+                                                    children: [
+                                                        Node {
+                                                            ty: Factor,
+                                                            text_range: 24..33,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Product,
+                                                                    text_range: 24..33,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Unit,
+                                                                            text_range: 24..33,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Str,
+                                                                                    text_range: 24..33,
+                                                                                    children: [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        Node {
+                            ty: PrintStat,
+                            text_range: 35..45,
+                            children: [
+                                Node {
+                                    ty: Println,
+                                    text_range: 35..44,
+                                    children: [
+                                        Node {
+                                            ty: Expr,
+                                            text_range: 43..44,
+                                            children: [
+                                                Node {
+                                                    ty: Term,
+                                                    text_range: 43..44,
+                                                    children: [
+                                                        Node {
+                                                            ty: Factor,
+                                                            text_range: 43..44,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Product,
+                                                                    text_range: 43..44,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Unit,
+                                                                            text_range: 43..44,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Int(
+                                                                                        2,
+                                                                                    ),
+                                                                                    text_range: 43..44,
+                                                                                    children: [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        Node {
+                            ty: PrintStat,
+                            text_range: 46..52,
+                            children: [
+                                Node {
+                                    ty: Get,
+                                    text_range: 46..51,
+                                    children: [
+                                        Node {
+                                            ty: Identifier,
+                                            text_range: 50..51,
+                                            children: [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        id_nodes: {
+            NodeId(
+                15,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        15,
+                    ),
+                ],
+            },
+            NodeId(
+                8,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        8,
+                    ),
+                ],
+            },
+            NodeId(
+                7,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        7,
+                    ),
+                ],
+            },
+            NodeId(
+                14,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        14,
+                    ),
+                ],
+            },
+            NodeId(
+                5,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        5,
+                    ),
+                ],
+            },
+            NodeId(
+                11,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        11,
+                    ),
+                ],
+            },
+            NodeId(
+                18,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        18,
+                    ),
+                ],
+            },
+            NodeId(
+                13,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        13,
+                    ),
+                ],
+            },
+            NodeId(
+                21,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        1,
+                    ),
+                    NodeId(
+                        21,
+                    ),
+                ],
+            },
+            NodeId(
+                3,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        3,
+                    ),
+                ],
+            },
+            NodeId(
+                2,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        2,
+                    ),
+                ],
+            },
+            NodeId(
+                9,
+            ): IdNode {
+                childrens: [],
+            },
+            NodeId(
+                12,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        12,
+                    ),
+                ],
+            },
+            NodeId(
+                1,
+            ): IdNode {
+                childrens: [],
+            },
+            NodeId(
+                4,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        4,
+                    ),
+                ],
+            },
+            NodeId(
+                16,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        16,
+                    ),
+                ],
+            },
+            NodeId(
+                10,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        10,
+                    ),
+                ],
+            },
+            NodeId(
+                17,
+            ): IdNode {
+                childrens: [],
+            },
+            NodeId(
+                20,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        9,
+                    ),
+                    NodeId(
+                        17,
+                    ),
+                    NodeId(
+                        20,
+                    ),
+                ],
+            },
+            NodeId(
+                6,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        6,
+                    ),
+                ],
+            },
+            NodeId(
+                0,
+            ): IdNode {
+                childrens: [],
+            },
+            NodeId(
+                19,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        19,
+                    ),
+                ],
+            },
+        },
+        nodes: {
+            NodeId(
+                16,
+            ): 0x000001cf8902bd38,
+            NodeId(
+                19,
+            ): 0x000001cf8902bdc0,
+            NodeId(
+                9,
+            ): 0x000001cf89025470,
+            NodeId(
+                17,
+            ): 0x000001cf89025e90,
+            NodeId(
+                14,
+            ): 0x000001cf89024db0,
+            NodeId(
+                18,
+            ): 0x000001cf89024030,
+            NodeId(
+                13,
+            ): 0x000001cf89025350,
+            NodeId(
+                3,
+            ): 0x000001cf8900af30,
+            NodeId(
+                6,
+            ): 0x000001cf8900b7a0,
+            NodeId(
+                8,
+            ): 0x000001cf8902bcb0,
+            NodeId(
+                1,
+            ): 0x000001cf8900acf0,
+            NodeId(
+                0,
+            ): 0x000001cf8902ab90,
+            NodeId(
+                2,
+            ): 0x000001cf8900b9e0,
+            NodeId(
+                4,
+            ): 0x000001cf8900b320,
+            NodeId(
+                7,
+            ): 0x000001cf8900afc0,
+            NodeId(
+                20,
+            ): 0x000001cf8902ac18,
+            NodeId(
+                12,
+            ): 0x000001cf89025110,
+            NodeId(
+                21,
+            ): 0x000001cf88fd62d0,
+            NodeId(
+                10,
+            ): 0x000001cf89024ed0,
+            NodeId(
+                15,
+            ): 0x000001cf89025ce0,
+            NodeId(
+                11,
+            ): 0x000001cf89023fa0,
+            NodeId(
+                5,
+            ): 0x000001cf8900ae10,
+        },
+        start_node_id: NodeId(
+            22,
+        ),
+        _phantom: PhantomPinned,
+    },
+    [
+        Node {
+            ty: Println,
+            text_range: 35..44,
+            children: [
+                Node {
+                    ty: Expr,
+                    text_range: 43..44,
+                    children: [
+                        Node {
+                            ty: Term,
+                            text_range: 43..44,
+                            children: [
+                                Node {
+                                    ty: Factor,
+                                    text_range: 43..44,
+                                    children: [
+                                        Node {
+                                            ty: Product,
+                                            text_range: 43..44,
+                                            children: [
+                                                Node {
+                                                    ty: Unit,
+                                                    text_range: 43..44,
+                                                    children: [
+                                                        Node {
+                                                            ty: Int(
+                                                                2,
+                                                            ),
+                                                            text_range: 43..44,
+                                                            children: [],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: PrintStat,
+            text_range: 18..34,
+            children: [
+                Node {
+                    ty: Print,
+                    text_range: 18..33,
+                    children: [
+                        Node {
+                            ty: Expr,
+                            text_range: 24..33,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 24..33,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 24..33,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 24..33,
+                                                    children: [
+                                                        Node {
+                                                            ty: Unit,
+                                                            text_range: 24..33,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Str,
+                                                                    text_range: 24..33,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Print,
+            text_range: 18..33,
+            children: [
+                Node {
+                    ty: Expr,
+                    text_range: 24..33,
+                    children: [
+                        Node {
+                            ty: Term,
+                            text_range: 24..33,
+                            children: [
+                                Node {
+                                    ty: Factor,
+                                    text_range: 24..33,
+                                    children: [
+                                        Node {
+                                            ty: Product,
+                                            text_range: 24..33,
+                                            children: [
+                                                Node {
+                                                    ty: Unit,
+                                                    text_range: 24..33,
+                                                    children: [
+                                                        Node {
+                                                            ty: Str,
+                                                            text_range: 24..33,
+                                                            children: [],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Expr,
+            text_range: 43..44,
+            children: [
+                Node {
+                    ty: Term,
+                    text_range: 43..44,
+                    children: [
+                        Node {
+                            ty: Factor,
+                            text_range: 43..44,
+                            children: [
+                                Node {
+                                    ty: Product,
+                                    text_range: 43..44,
+                                    children: [
+                                        Node {
+                                            ty: Unit,
+                                            text_range: 43..44,
+                                            children: [
+                                                Node {
+                                                    ty: Int(
+                                                        2,
+                                                    ),
+                                                    text_range: 43..44,
+                                                    children: [],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Term,
+            text_range: 24..33,
+            children: [
+                Node {
+                    ty: Factor,
+                    text_range: 24..33,
+                    children: [
+                        Node {
+                            ty: Product,
+                            text_range: 24..33,
+                            children: [
+                                Node {
+                                    ty: Unit,
+                                    text_range: 24..33,
+                                    children: [
+                                        Node {
+                                            ty: Str,
+                                            text_range: 24..33,
+                                            children: [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Product,
+            text_range: 43..44,
+            children: [
+                Node {
+                    ty: Unit,
+                    text_range: 43..44,
+                    children: [
+                        Node {
+                            ty: Int(
+                                2,
+                            ),
+                            text_range: 43..44,
+                            children: [],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Get,
+            text_range: 46..51,
+            children: [
+                Node {
+                    ty: Identifier,
+                    text_range: 50..51,
+                    children: [],
+                },
+            ],
+        },
+        Node {
+            ty: Term,
+            text_range: 43..44,
+            children: [
+                Node {
+                    ty: Factor,
+                    text_range: 43..44,
+                    children: [
+                        Node {
+                            ty: Product,
+                            text_range: 43..44,
+                            children: [
+                                Node {
+                                    ty: Unit,
+                                    text_range: 43..44,
+                                    children: [
+                                        Node {
+                                            ty: Int(
+                                                2,
+                                            ),
+                                            text_range: 43..44,
+                                            children: [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Program,
+            text_range: 0..56,
+            children: [
+                Node {
+                    ty: Identifier,
+                    text_range: 8..11,
+                    children: [],
+                },
+                Node {
+                    ty: Compound,
+                    text_range: 12..56,
+                    children: [
+                        Node {
+                            ty: PrintStat,
+                            text_range: 18..34,
+                            children: [
+                                Node {
+                                    ty: Print,
+                                    text_range: 18..33,
+                                    children: [
+                                        Node {
+                                            ty: Expr,
+                                            text_range: 24..33,
+                                            children: [
+                                                Node {
+                                                    ty: Term,
+                                                    text_range: 24..33,
+                                                    children: [
+                                                        Node {
+                                                            ty: Factor,
+                                                            text_range: 24..33,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Product,
+                                                                    text_range: 24..33,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Unit,
+                                                                            text_range: 24..33,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Str,
+                                                                                    text_range: 24..33,
+                                                                                    children: [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        Node {
+                            ty: PrintStat,
+                            text_range: 35..45,
+                            children: [
+                                Node {
+                                    ty: Println,
+                                    text_range: 35..44,
+                                    children: [
+                                        Node {
+                                            ty: Expr,
+                                            text_range: 43..44,
+                                            children: [
+                                                Node {
+                                                    ty: Term,
+                                                    text_range: 43..44,
+                                                    children: [
+                                                        Node {
+                                                            ty: Factor,
+                                                            text_range: 43..44,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Product,
+                                                                    text_range: 43..44,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Unit,
+                                                                            text_range: 43..44,
+                                                                            children: [
+                                                                                Node {
+                                                                                    ty: Int(
+                                                                                        2,
+                                                                                    ),
+                                                                                    text_range: 43..44,
+                                                                                    children: [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        Node {
+                            ty: PrintStat,
+                            text_range: 46..52,
+                            children: [
+                                Node {
+                                    ty: Get,
+                                    text_range: 46..51,
+                                    children: [
+                                        Node {
+                                            ty: Identifier,
+                                            text_range: 50..51,
+                                            children: [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Product,
+            text_range: 24..33,
+            children: [
+                Node {
+                    ty: Unit,
+                    text_range: 24..33,
+                    children: [
+                        Node {
+                            ty: Str,
+                            text_range: 24..33,
+                            children: [],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Unit,
+            text_range: 24..33,
+            children: [
+                Node {
+                    ty: Str,
+                    text_range: 24..33,
+                    children: [],
+                },
+            ],
+        },
+        Node {
+            ty: Int(
+                2,
+            ),
+            text_range: 43..44,
+            children: [],
+        },
+        Node {
+            ty: Factor,
+            text_range: 43..44,
+            children: [
+                Node {
+                    ty: Product,
+                    text_range: 43..44,
+                    children: [
+                        Node {
+                            ty: Unit,
+                            text_range: 43..44,
+                            children: [
+                                Node {
+                                    ty: Int(
+                                        2,
+                                    ),
+                                    text_range: 43..44,
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Str,
+            text_range: 24..33,
+            children: [],
+        },
+        Node {
+            ty: Factor,
+            text_range: 24..33,
+            children: [
+                Node {
+                    ty: Product,
+                    text_range: 24..33,
+                    children: [
+                        Node {
+                            ty: Unit,
+                            text_range: 24..33,
+                            children: [
+                                Node {
+                                    ty: Str,
+                                    text_range: 24..33,
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: PrintStat,
+            text_range: 35..45,
+            children: [
+                Node {
+                    ty: Println,
+                    text_range: 35..44,
+                    children: [
+                        Node {
+                            ty: Expr,
+                            text_range: 43..44,
+                            children: [
+                                Node {
+                                    ty: Term,
+                                    text_range: 43..44,
+                                    children: [
+                                        Node {
+                                            ty: Factor,
+                                            text_range: 43..44,
+                                            children: [
+                                                Node {
+                                                    ty: Product,
+                                                    text_range: 43..44,
+                                                    children: [
+                                                        Node {
+                                                            ty: Unit,
+                                                            text_range: 43..44,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Int(
+                                                                        2,
+                                                                    ),
+                                                                    text_range: 43..44,
+                                                                    children: [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Unit,
+            text_range: 43..44,
+            children: [
+                Node {
+                    ty: Int(
+                        2,
+                    ),
+                    text_range: 43..44,
+                    children: [],
+                },
+            ],
+        },
+        Node {
+            ty: Identifier,
+            text_range: 50..51,
+            children: [],
+        },
+        Node {
+            ty: Compound,
+            text_range: 12..56,
+            children: [
+                Node {
+                    ty: PrintStat,
+                    text_range: 18..34,
+                    children: [
+                        Node {
+                            ty: Print,
+                            text_range: 18..33,
+                            children: [
+                                Node {
+                                    ty: Expr,
+                                    text_range: 24..33,
+                                    children: [
+                                        Node {
+                                            ty: Term,
+                                            text_range: 24..33,
+                                            children: [
+                                                Node {
+                                                    ty: Factor,
+                                                    text_range: 24..33,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 24..33,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 24..33,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Str,
+                                                                            text_range: 24..33,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: PrintStat,
+                    text_range: 35..45,
+                    children: [
+                        Node {
+                            ty: Println,
+                            text_range: 35..44,
+                            children: [
+                                Node {
+                                    ty: Expr,
+                                    text_range: 43..44,
+                                    children: [
+                                        Node {
+                                            ty: Term,
+                                            text_range: 43..44,
+                                            children: [
+                                                Node {
+                                                    ty: Factor,
+                                                    text_range: 43..44,
+                                                    children: [
+                                                        Node {
+                                                            ty: Product,
+                                                            text_range: 43..44,
+                                                            children: [
+                                                                Node {
+                                                                    ty: Unit,
+                                                                    text_range: 43..44,
+                                                                    children: [
+                                                                        Node {
+                                                                            ty: Int(
+                                                                                2,
+                                                                            ),
+                                                                            text_range: 43..44,
+                                                                            children: [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node {
+                    ty: PrintStat,
+                    text_range: 46..52,
+                    children: [
+                        Node {
+                            ty: Get,
+                            text_range: 46..51,
+                            children: [
+                                Node {
+                                    ty: Identifier,
+                                    text_range: 50..51,
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Expr,
+            text_range: 24..33,
+            children: [
+                Node {
+                    ty: Term,
+                    text_range: 24..33,
+                    children: [
+                        Node {
+                            ty: Factor,
+                            text_range: 24..33,
+                            children: [
+                                Node {
+                                    ty: Product,
+                                    text_range: 24..33,
+                                    children: [
+                                        Node {
+                                            ty: Unit,
+                                            text_range: 24..33,
+                                            children: [
+                                                Node {
+                                                    ty: Str,
+                                                    text_range: 24..33,
+                                                    children: [],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Identifier,
+            text_range: 8..11,
+            children: [],
+        },
+        Node {
+            ty: PrintStat,
+            text_range: 46..52,
+            children: [
+                Node {
+                    ty: Get,
+                    text_range: 46..51,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 50..51,
+                            children: [],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+)

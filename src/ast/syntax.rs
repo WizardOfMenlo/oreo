@@ -1,23 +1,34 @@
 //! Typed syntax that is backed by Node
 
+use super::node_db::{NodeId, NodeDb};
 use super::untyped::{Node, NodeType};
 
 /// Macro for simple definition of a syntax node
 macro_rules! syntax_node {
     ($id:ident) => {
         /// A syntax node for an $id
-        #[derive(Debug, Clone)]
-        pub struct $id<'a, 'b>(&'a Node<'b>);
+        #[derive(Debug, Clone, Copy)]
+        pub struct $id(NodeId);
 
-        impl<'a, 'b> $id<'a, 'b> {
+        impl $id {
             /// Instantiate the syntax node
-            pub fn new(node: &'a Node<'b>) -> Self {
+            pub fn new(node: NodeId) -> Self {
                 $id(node)
             }
 
-            /// Get the raw node
-            pub fn get_node(&self) -> &'a Node<'b> {
+            /// Get node id
+            pub fn get_id(&self) -> NodeId {
                 self.0
+            }
+
+            /// Get the raw node
+            pub fn get_node<'a, 'b>(&self, db: &'b NodeDb<'a>) -> &'b Node<'a> {
+                db.get_node(self.0).expect("Invalid syntax node")
+            }
+
+            /// Get children
+            pub fn children<'a>(&self, db: &NodeDb<'a>) -> impl Iterator<Item = NodeId> {
+                db.get_flat_node(self.0).expect("Invalid syntax node").childrens.iter().cloned()
             }
         }
     };
@@ -25,7 +36,7 @@ macro_rules! syntax_node {
 
 syntax_node!(Program);
 
-impl<'a, 'b> Program<'a, 'b> {
+impl Program {
     /// Get the program name
     pub fn id(&self) -> Identifier {
         Identifier(&self.0.children[0])

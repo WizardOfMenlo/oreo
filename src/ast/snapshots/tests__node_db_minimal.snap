@@ -1,0 +1,167 @@
+---
+source: src/ast/node_db.rs
+expression: "(db, nodes)"
+---
+(
+    NodeDb {
+        node: Node {
+            ty: Program,
+            text_range: 0..28,
+            children: [
+                Node {
+                    ty: Identifier,
+                    text_range: 8..11,
+                    children: [],
+                },
+                Node {
+                    ty: Compound,
+                    text_range: 12..28,
+                    children: [
+                        Node {
+                            ty: Decl,
+                            text_range: 18..24,
+                            children: [
+                                Node {
+                                    ty: Identifier,
+                                    text_range: 22..23,
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        id_nodes: {
+            NodeId(
+                0,
+            ): IdNode {
+                childrens: [],
+            },
+            NodeId(
+                3,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        3,
+                    ),
+                ],
+            },
+            NodeId(
+                2,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        2,
+                    ),
+                ],
+            },
+            NodeId(
+                4,
+            ): IdNode {
+                childrens: [
+                    NodeId(
+                        1,
+                    ),
+                    NodeId(
+                        4,
+                    ),
+                ],
+            },
+            NodeId(
+                1,
+            ): IdNode {
+                childrens: [],
+            },
+        },
+        nodes: {
+            NodeId(
+                2,
+            ): 0x000001cf8900b0e0,
+            NodeId(
+                0,
+            ): 0x000001cf8901f210,
+            NodeId(
+                1,
+            ): 0x000001cf8900b050,
+            NodeId(
+                4,
+            ): 0x000001cf88fd6710,
+            NodeId(
+                3,
+            ): 0x000001cf8901f298,
+        },
+        start_node_id: NodeId(
+            5,
+        ),
+        _phantom: PhantomPinned,
+    },
+    [
+        Node {
+            ty: Identifier,
+            text_range: 8..11,
+            children: [],
+        },
+        Node {
+            ty: Compound,
+            text_range: 12..28,
+            children: [
+                Node {
+                    ty: Decl,
+                    text_range: 18..24,
+                    children: [
+                        Node {
+                            ty: Identifier,
+                            text_range: 22..23,
+                            children: [],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Decl,
+            text_range: 18..24,
+            children: [
+                Node {
+                    ty: Identifier,
+                    text_range: 22..23,
+                    children: [],
+                },
+            ],
+        },
+        Node {
+            ty: Program,
+            text_range: 0..28,
+            children: [
+                Node {
+                    ty: Identifier,
+                    text_range: 8..11,
+                    children: [],
+                },
+                Node {
+                    ty: Compound,
+                    text_range: 12..28,
+                    children: [
+                        Node {
+                            ty: Decl,
+                            text_range: 18..24,
+                            children: [
+                                Node {
+                                    ty: Identifier,
+                                    text_range: 22..23,
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        Node {
+            ty: Identifier,
+            text_range: 22..23,
+            children: [],
+        },
+    ],
+)
