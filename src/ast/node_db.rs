@@ -64,7 +64,7 @@ impl<'a> NodeDb<'a> {
         unsafe {
             let reference = Pin::as_mut(&mut boxed);
             let inner = Pin::get_unchecked_mut(reference);
-            inner.start_node_id = id;
+            inner.start_node_id = NodeId(id.0.saturating_sub(1));
             inner.id_nodes = id_nodes;
             inner.nodes = nodes;
         }
@@ -111,7 +111,7 @@ fn add_node<'a>(
         id = n_id;
         id_nodes.extend(n_id_nodes);
         nodes.extend(n_nodes);
-        ids.push(id);
+        ids.push(NodeId(id.0 - 1));
     }
 
     id_nodes.insert(id, IdNode { childrens: ids });

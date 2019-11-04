@@ -1,0 +1,29 @@
+---
+source: src/ast/symbol.rs
+expression: determinize(table)
+---
+[
+    (
+        ScopeId(
+            1,
+        ),
+        Scope {
+            parent: ScopeId(
+                0,
+            ),
+            variables: PartialSymbolTable {
+                vars: [
+                    VariableRecord {
+                        id: IdentId(
+                            0,
+                        ),
+                        text: "x",
+                        decl: NodeId(
+                            8,
+                        ),
+                    },
+                ],
+            },
+        },
+    ),
+]

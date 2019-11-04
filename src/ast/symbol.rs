@@ -4,96 +4,111 @@ use super::node_db::{NodeDb, NodeId};
 use super::syntax::*;
 use std::collections::HashMap;
 
+/// An id for an identifier
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
-struct IdentId(usize);
+pub struct IdentId(usize);
 
+/// A id for a scope
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
-struct ScopeId(usize);
+pub struct ScopeId(usize);
 
+/// A full symbol table
 #[derive(Debug, Default)]
-struct SymbolTable<'a> {
+pub struct SymbolTable<'a> {
     scopes: HashMap<ScopeId, Scope<'a>>,
 }
 
+/// A scope
 #[derive(Debug, Clone)]
-struct Scope<'a> {
+pub struct Scope<'a> {
     parent: ScopeId,
     variables: PartialSymbolTable<'a>,
 }
 
+/// A symbol table for a scope
 #[derive(Debug, Default, Clone)]
-struct PartialSymbolTable<'a> {
+pub struct PartialSymbolTable<'a> {
     vars: Vec<VariableRecord<'a>>,
 }
 
+/// A record for a variable (i.e. declaration and name)
 #[derive(Debug, Clone)]
-struct VariableRecord<'a> {
+pub struct VariableRecord<'a> {
     id: IdentId,
     text: &'a str,
     decl: NodeId,
 }
 
+/// Build the symbol table from a node
 #[derive(Debug)]
-struct SymbolTableBuilder<'a, 'b> {
+pub struct SymbolTableBuilder<'a, 'b> {
     current_id: IdentId,
     current_scope: ScopeId,
+    // Used to generate new ids
+    scope_count: usize,
     symb: SymbolTable<'a>,
     input: &'a str,
     db: &'b NodeDb<'a>,
 }
 
 impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
-    fn new(input: &'a str, db: &'b NodeDb<'a>) -> Self {
+    /// Starts building the symbol table
+    pub fn new(input: &'a str, db: &'b NodeDb<'a>) -> Self {
         SymbolTableBuilder {
             current_id: IdentId(0),
             current_scope: ScopeId(0),
+            scope_count: 0,
             symb: SymbolTable::default(),
             input,
             db,
         }
     }
 
-    fn build(mut self, program: Program) -> SymbolTable<'a> {
+    /// Build the full table
+    pub fn build(mut self, program: Program) -> SymbolTable<'a> {
         self.compound(program.compound(self.db));
 
         self.symb
     }
 
+    fn get_current_scope(&mut self) -> &mut Scope<'a> {
+        self.symb
+            .scopes
+            .get_mut(&self.current_scope)
+            .expect("Invalid scope")
+    }
+
     fn enter_new_scope(&mut self) {
-        let temp = self.current_scope;
-        self.current_scope = ScopeId(temp.0 + 1);
+        dbg!(&self.symb);
         let new_scope = Scope {
-            parent: temp,
+            parent: self.current_scope,
             variables: PartialSymbolTable::default(),
         };
 
+        self.scope_count += 1;
+        self.current_scope = ScopeId(self.scope_count);
         self.symb.scopes.insert(self.current_scope, new_scope);
+
+        dbg!(&self.symb);
     }
 
     fn exit_scope(&mut self) {
-        let current_sco = self
-            .symb
-            .scopes
-            .get(&self.current_scope)
-            .expect("Invalid scope");
-        self.current_scope = current_sco.parent;
+        self.current_scope = self.get_current_scope().parent;
     }
 
     fn add_var(&mut self, id: Identifier, node_id: NodeId) {
+        let curr_id = self.current_id;
         let id_str = id.id(self.db, self.input);
-        let mut current_scope = self
-            .symb
-            .scopes
-            .get(&self.current_scope)
-            .cloned()
-            .expect("Invalid scope");
-        current_scope.variables.vars.push(VariableRecord {
-            id: self.current_id,
-            decl: node_id,
-            text: id_str,
-        });
+        self.get_current_scope()
+            .variables
+            .vars
+            .push(VariableRecord {
+                id: curr_id,
+                decl: node_id,
+                text: id_str,
+            });
+
         self.current_id = IdentId(self.current_id.0 + 1);
-        self.symb.scopes.insert(self.current_scope, current_scope);
     }
 
     fn compound(&mut self, compound: Compound) {
@@ -142,11 +157,42 @@ mod tests {
         NodeDb::new(node)
     }
 
+    // We use this to have a determined order
+    fn determinize<'a>(table: SymbolTable<'a>) -> Vec<(ScopeId, Scope<'a>)> {
+        let mut v: Vec<_> = table.scopes.into_iter().collect();
+        v.sort_by(|a, b| (a.0).0.cmp(&(b.0).0));
+        v
+    }
+
     #[test]
     fn test_simple() {
         let input = "program x begin var x := 10; end";
         let db = db_from_str(input);
         let table = SymbolTableBuilder::new(input, &db).build(Program::new(db.start_id()));
-        assert_debug_snapshot!(table);
+        assert_debug_snapshot!(determinize(table));
+    }
+
+    #[test]
+    fn test_nested() {
+        let input = r#"program id begin
+                   if ( true ) then begin var n := 5;  end
+       			   else begin var k := 46; end; end"#;
+        let db = db_from_str(input);
+        let table = SymbolTableBuilder::new(input, &db).build(Program::new(db.start_id()));
+        assert_debug_snapshot!(determinize(table));
+    }
+
+    #[test]
+    fn test_fun_decl() {
+        let input = r#"
+        program id begin
+            procedure f(var x, var y) begin
+                var z;
+                var k;
+            end
+       	end"#;
+        let db = db_from_str(input);
+        let table = SymbolTableBuilder::new(input, &db).build(Program::new(db.start_id()));
+        assert_debug_snapshot!(determinize(table));
     }
 }
