@@ -17,8 +17,8 @@ pub struct IdNode {
 }
 
 impl IdNode {
-    pub fn children<'a>(&'a self) -> impl DoubleEndedIterator<Item = NodeId> + 'a {
-        self.childrens.iter().cloned()
+    pub fn children(&self) -> &[NodeId] {
+        &self.childrens
     }
 }
 

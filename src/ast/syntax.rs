@@ -27,8 +27,8 @@ macro_rules! syntax_node {
             }
 
             /// Get children
-            pub fn children<'a>(&self, db: &NodeDb<'a>) -> impl Iterator<Item = NodeId> {
-                db.get_flat_node(self.0).expect("Invalid syntax node").childrens.iter().cloned()
+            pub fn children<'a, 'b>(&self, db: &'b NodeDb<'a>) -> &'b [NodeId] {
+                db.get_flat_node(self.0).expect("Invalid syntax node").children()
             }
         }
     };
@@ -38,32 +38,32 @@ syntax_node!(Program);
 
 impl Program {
     /// Get the program name
-    pub fn id(&self) -> Identifier {
-        Identifier(&self.0.children[0])
+    pub fn id<'a>(&self, db: &NodeDb<'a>) -> Identifier {
+        Identifier(self.children(db)[0])
     }
 
     /// Program main body
-    pub fn compound(&self) -> Compound {
-        Compound(&self.0.children[1])
+    pub fn compound<'a>(&self, db: &NodeDb<'a>) -> Compound {
+        Compound(self.children(db)[1])
     }
 }
 
 syntax_node!(Compound);
 
-impl<'a, 'b> Compound<'a, 'b> {
+impl Compound {
     /// Get the inner statements
-    pub fn statements(&self) -> Vec<Statement> {
-        self.0.children.iter().map(|n| Statement(n)).collect()
+    pub fn statements<'a>(&self, db: &NodeDb<'a>) -> Vec<Statement> {
+        self.children(db).iter().map(|n| Statement(*n)).collect()
     }
 }
 
 syntax_node!(Statement);
 
-impl<'a, 'b> Statement<'a, 'b> {
+impl Statement {
     /// Convert the statement to a more specific one
-    pub fn downcast(&self) -> StatementType<'a, 'b> {
+    pub fn downcast<'a>(&self, db: &NodeDb<'a>) -> StatementType {
         let n = self.0;
-        match n.ty {
+        match self.get_node(db).ty() {
             NodeType::Decl => StatementType::Decl(Decl(n)),
             NodeType::PrintStat => StatementType::PrintStat(PrintStat(n)),
             NodeType::While => StatementType::While(While(n)),
@@ -80,38 +80,38 @@ impl<'a, 'b> Statement<'a, 'b> {
 #[allow(missing_docs)]
 #[derive(Debug, Clone)]
 /// The possible types that a statement can be
-pub enum StatementType<'a, 'b> {
-    Decl(Decl<'a, 'b>),
-    PrintStat(PrintStat<'a, 'b>),
-    While(While<'a, 'b>),
-    If(If<'a, 'b>),
-    Assign(Assign<'a, 'b>),
-    FunctionCall(FunctionCall<'a, 'b>),
-    FunctionDecl(FunctionDecl<'a, 'b>),
-    Return(Return<'a, 'b>),
+pub enum StatementType {
+    Decl(Decl),
+    PrintStat(PrintStat),
+    While(While),
+    If(If),
+    Assign(Assign),
+    FunctionCall(FunctionCall),
+    FunctionDecl(FunctionDecl),
+    Return(Return),
 }
 
 syntax_node!(Decl);
 
-impl<'a, 'b> Decl<'a, 'b> {
+impl Decl {
     /// The identifier being declared
-    pub fn id(&self) -> Identifier<'a, 'b> {
-        Identifier(&self.0.children[0])
+    pub fn id<'a>(&self, db: &NodeDb<'a>) -> Identifier {
+        Identifier(self.children(db)[0])
     }
 
     /// The expression to assign (if any)
-    pub fn expr(&self) -> Option<Expr<'a, 'b>> {
-        self.0.children.get(1).map(|n| Expr(n))
+    pub fn expr<'a>(&self, db: &NodeDb<'a>) -> Option<Expr> {
+        self.children(db).get(1).map(|n| Expr(*n))
     }
 }
 
 syntax_node!(PrintStat);
 
-impl<'a, 'b> PrintStat<'a, 'b> {
+impl PrintStat {
     /// Convert to the more specific print typ
-    pub fn downcast(&self) -> PrintTypes<'a, 'b> {
-        let node = &self.0.children[0];
-        match node.ty {
+    pub fn downcast<'a>(&self, db: &NodeDb<'a>) -> PrintTypes {
+        let node = self.children(db)[0];
+        match self.get_node(db).ty() {
             NodeType::Print => PrintTypes::Print(Print(node)),
             NodeType::Println => PrintTypes::Println(Println(node)),
             NodeType::Get => PrintTypes::Get(Get(node)),
@@ -123,297 +123,300 @@ impl<'a, 'b> PrintStat<'a, 'b> {
 /// Possible print types
 #[derive(Debug, Clone)]
 #[allow(missing_docs)]
-pub enum PrintTypes<'a, 'b> {
-    Print(Print<'a, 'b>),
-    Println(Println<'a, 'b>),
-    Get(Get<'a, 'b>),
+pub enum PrintTypes {
+    Print(Print),
+    Println(Println),
+    Get(Get),
 }
 
 syntax_node!(Print);
 
-impl<'a, 'b> Print<'a, 'b> {
+impl Print{
     /// The expression to print
-    pub fn expr(&self) -> Expr<'a, 'b> {
-        Expr(&self.0.children[0])
+    pub fn expr<'a>(&self, db: &NodeDb<'a>) -> Expr {
+        Expr(self.children(db)[0])
     }
 }
 
 syntax_node!(Println);
 
-impl<'a, 'b> Println<'a, 'b> {
+impl Println {
     /// The expression to print
-    pub fn expr(&self) -> Expr<'a, 'b> {
-        Expr(&self.0.children[0])
+    pub fn expr<'a>(&self, db: &NodeDb<'a>) -> Expr {
+        Expr(self.children(db)[0])
     }
 }
 
 syntax_node!(Get);
 
-impl<'a, 'b> Get<'a, 'b> {
+impl Get {
     /// The identifier to set
-    pub fn id(&self) -> Identifier<'a, 'b> {
-        Identifier(&self.0.children[0])
+    pub fn id<'a>(&self, db: &NodeDb<'a>) -> Identifier {
+        Identifier(self.children(db)[0])
     }
 }
 
 syntax_node!(While);
 
-impl<'a, 'b> While<'a, 'b> {
+impl While {
     /// The condition to evaluate
-    pub fn condition(&self) -> Expr<'a, 'b> {
-        Expr(&self.0.children[0])
+    pub fn condition<'a>(&self, db: &NodeDb<'a>) -> Expr {
+        Expr(self.children(db)[0])
     }
 
     /// The body to be executed
-    pub fn compound(&self) -> Compound<'a, 'b> {
-        Compound(&self.0.children[1])
+    pub fn compound<'a>(&self, db: &NodeDb<'a>) -> Compound {
+        Compound(self.children(db)[1])
     }
 }
 
 syntax_node!(If);
 
-impl<'a, 'b> If<'a, 'b> {
+impl If {
     /// The condition to evaluate
-    pub fn condition(&self) -> Expr<'a, 'b> {
-        Expr(&self.0.children[0])
+    pub fn condition<'a>(&self, db: &NodeDb<'a>) -> Expr {
+        Expr(self.children(db)[0])
     }
 
     /// If true
-    pub fn if_branch(&self) -> Compound<'a, 'b> {
-        Compound(&self.0.children[1])
+    pub fn if_branch<'a>(&self, db: &NodeDb<'a>) -> Compound {
+        Compound(self.children(db)[1])
     }
 
     /// If false (optional)
-    pub fn else_branch(&self) -> Option<Compound<'a, 'b>> {
-        self.0.children.get(2).map(|n| Compound(n))
+    pub fn else_branch<'a>(&self, db: &NodeDb<'a>) -> Option<Compound> {
+        self.children(db).get(2).map(|n| Compound(*n))
     }
 }
 
 syntax_node!(Assign);
 
-impl<'a, 'b> Assign<'a, 'b> {
+impl Assign {
     /// The identifier to set
-    pub fn id(&self) -> Identifier<'a, 'b> {
-        Identifier(&self.0.children[0])
+    pub fn id<'a>(&self, db: &NodeDb<'a>) -> Identifier {
+        Identifier(self.children(db)[0])
     }
 
-    /// The expression to set it as
-    pub fn expr(&self) -> Expr<'a, 'b> {
-        Expr(&self.0.children[1])
+
+    /// The expression to set it to 
+    pub fn expr<'a>(&self, db: &NodeDb<'a>) -> Expr {
+        Expr(self.children(db)[1])
     }
 }
 
 syntax_node!(FunctionDecl);
 
-impl<'a, 'b> FunctionDecl<'a, 'b> {
+impl FunctionDecl {
     /// Function to declare
-    pub fn id(&self) -> Identifier<'a, 'b> {
-        Identifier(&self.0.children[0])
+    pub fn id<'a>(&self, db: &NodeDb<'a>) -> Identifier {
+        Identifier(self.children(db)[0])
     }
 
     /// The arguments
-    pub fn args(&self) -> Vec<FunctionDeclArgs<'a, 'b>> {
-        self.0.children[1..self.0.children.len() - 1]
+    pub fn args<'a>(&self, db: &NodeDb<'a>) -> Vec<FunctionDeclArgs> {
+        let children  = self.children(db);
+        children[1..children.len() - 1]
             .iter()
-            .map(|n| FunctionDeclArgs(n))
+            .map(|n| FunctionDeclArgs(*n))
             .collect()
     }
 
-    /// The body to execute
-    pub fn inner(&self) -> Compound<'a, 'b> {
-        Compound(&self.0.children[self.0.children.len() - 1])
+    /// The body to be executed
+    pub fn compound<'a>(&self, db: &NodeDb<'a>) -> Compound {
+        let children = self.children(db);
+        Compound(children[children.len() - 1])
     }
 }
 
 syntax_node!(FunctionDeclArgs);
 
-impl<'a, 'b> FunctionDeclArgs<'a, 'b> {
+impl FunctionDeclArgs {
     /// The arg id
-    pub fn id(&self) -> Identifier<'a, 'b> {
-        Identifier(&self.0.children[0])
+    pub fn id<'a>(&self, db: &NodeDb<'a>) -> Identifier {
+        Identifier(self.children(db)[0])
     }
 }
 
 syntax_node!(FunctionCallArgs);
 
-impl<'a, 'b> FunctionCallArgs<'a, 'b> {
+impl FunctionCallArgs {
     /// The expression in the argument
-    pub fn expr(&self) -> Expr<'a, 'b> {
-        Expr(&self.0.children[0])
+    pub fn expr<'a>(&self, db: &NodeDb<'a>) -> Expr {
+        Expr(self.children(db)[0])
     }
 }
 
 syntax_node!(Return);
 
-impl<'a, 'b> Return<'a, 'b> {
+impl Return {
     /// The expression to return
-    pub fn expr(&self) -> Expr<'a, 'b> {
-        Expr(&self.0.children[0])
+    pub fn expr<'a>(&self, db: &NodeDb<'a>) -> Expr {
+        Expr(self.children(db)[0])
     }
 }
 
 syntax_node!(FunctionCall);
 
-impl<'a, 'b> FunctionCall<'a, 'b> {
+impl FunctionCall {
     /// The function id to call
-    pub fn id(&self) -> Identifier<'a, 'b> {
-        Identifier(&self.0.children[0])
+    pub fn id<'a>(&self, db: &NodeDb<'a>) -> Identifier {
+        Identifier(self.children(db)[0])
     }
 
     /// The arguments of the call
-    pub fn args(&self) -> Vec<FunctionCallArgs<'a, 'b>> {
-        self.0.children[1..].iter().map(FunctionCallArgs).collect()
+    pub fn args<'a>(&self, db: &NodeDb<'a>) -> Vec<FunctionCallArgs> {
+        self.children(db)[1..].iter().map(|n| FunctionCallArgs(*n)).collect()
     }
 }
 
 syntax_node!(Expr);
 
-impl<'a, 'b> Expr<'a, 'b> {
+impl Expr {
     /// The head of the expression
-    pub fn head(&self) -> Term<'a, 'b> {
-        Term(&self.0.children[0])
+    pub fn head<'a>(&self, db: &NodeDb<'a>) -> Term {
+        Term(self.children(db)[0])
     }
 
     /// Tail of the expression
-    pub fn tail(&self) -> Option<ExprPrime<'a, 'b>> {
-        self.0.children.get(1).map(ExprPrime)
+    pub fn tail<'a>(&self, db: &NodeDb<'a>) -> Option<ExprPrime> {
+        self.children(db).get(1).map(|e| ExprPrime(*e))
     }
 }
 
 syntax_node!(ExprPrime);
 
-impl<'a, 'b> ExprPrime<'a, 'b> {
+impl ExprPrime {
     /// The operation
-    pub fn op(&self) -> BooleanOp {
-        self.0.ty.clone().into()
+    pub fn op<'a>(&self, db: &NodeDb<'a>) -> BooleanOp {
+        self.get_node(db).ty().clone().into()
     }
 
     /// The right operand
-    pub fn rhs(&self) -> Term<'a, 'b> {
-        Term(&self.0.children[0])
+    pub fn rhs<'a>(&self, db: &NodeDb<'a>) -> Term {
+        Term(self.children(db)[0])
     }
 
     /// Possible tails
-    pub fn tail(&self) -> Option<ExprPrime<'a, 'b>> {
-        self.0.children.get(1).map(ExprPrime)
+    pub fn tail<'a>(&self, db: &NodeDb<'a>) -> Option<ExprPrime> {
+        self.children(db).get(1).map(|e| ExprPrime(*e))
     }
 }
 
 syntax_node!(Term);
 
-impl<'a, 'b> Term<'a, 'b> {
+impl Term {
     /// Head of the term
-    pub fn head(&self) -> Factor<'a, 'b> {
-        Factor(&self.0.children[0])
+    pub fn head<'a>(&self, db: &NodeDb<'a>) -> Factor {
+        Factor(self.children(db)[0])
     }
 
     /// Tail of the term
-    pub fn tail(&self) -> Option<TermPrime<'a, 'b>> {
-        self.0.children.get(1).map(TermPrime)
+    pub fn tail<'a>(&self, db: &NodeDb<'a>) -> Option<TermPrime> {
+        self.children(db).get(1).map(|n| TermPrime(*n))
     }
 }
 
 syntax_node!(TermPrime);
 
-impl<'a, 'b> TermPrime<'a, 'b> {
+impl TermPrime {
     /// The operation
-    pub fn op(&self) -> RelationalOp {
-        self.0.ty.clone().into()
+    pub fn op<'a>(&self, db: &NodeDb<'a>) -> RelationalOp {
+        self.get_node(db).ty().clone().into()
     }
 
     /// Rhs
-    pub fn rhs(&self) -> Factor<'a, 'b> {
-        Factor(&self.0.children[0])
+    pub fn rhs<'a>(&self, db: &NodeDb<'a>) -> Factor {
+        Factor(self.children(db)[0])
     }
 
     /// Optional tail
-    pub fn tail(&self) -> Option<TermPrime<'a, 'b>> {
-        self.0.children.get(1).map(TermPrime)
+    pub fn tail<'a>(&self, db: &NodeDb<'a>) -> Option<TermPrime> {
+        self.children(db).get(1).map(|n| TermPrime(*n))
     }
 }
 
 syntax_node!(Factor);
 
-impl<'a, 'b> Factor<'a, 'b> {
+impl Factor {
     /// The head of a factor
-    pub fn head(&self) -> Product<'a, 'b> {
-        Product(&self.0.children[0])
+    pub fn head<'a>(&self, db: &NodeDb<'a>) -> Product {
+        Product(self.children(db)[0])
     }
 
     /// Optional tail
-    pub fn tail(&self) -> Option<FactorPrime<'a, 'b>> {
-        self.0.children.get(1).map(FactorPrime)
+    pub fn tail<'a>(&self, db: &NodeDb<'a>) -> Option<FactorPrime> {
+        self.children(db).get(1).map(|n| FactorPrime(*n))
     }
 }
 
 syntax_node!(FactorPrime);
 
-impl<'a, 'b> FactorPrime<'a, 'b> {
+impl FactorPrime {
     /// The operation in the tail
-    pub fn op(&self) -> AdditiveOp {
-        self.0.ty.clone().into()
+    pub fn op<'a>(&self, db: &NodeDb<'a>) -> AdditiveOp {
+        self.get_node(db).ty().clone().into()
     }
 
     /// The rhs of the tail
-    pub fn rhs(&self) -> Product<'a, 'b> {
-        Product(&self.0.children[0])
+    pub fn rhs<'a>(&self, db: &NodeDb<'a>) -> Product {
+        Product(self.children(db)[0])
     }
 
     /// Optional tail
-    pub fn tail(&self) -> Option<FactorPrime<'a, 'b>> {
-        self.0.children.get(1).map(FactorPrime)
+    pub fn tail<'a>(&self, db: &NodeDb<'a>) -> Option<FactorPrime> {
+        self.children(db).get(1).map(|n| FactorPrime(*n))
     }
 }
 
 syntax_node!(Product);
 
-impl<'a, 'b> Product<'a, 'b> {
+impl Product {
     /// The head
-    pub fn head(&self) -> Atom<'a, 'b> {
-        Atom(&self.0.children[0])
+    pub fn head<'a>(&self, db: &NodeDb<'a>) -> Atom {
+        Atom(self.children(db)[0])
     }
 
     /// Opt tail
-    pub fn tail(&self) -> Option<ProductPrime<'a, 'b>> {
-        self.0.children.get(1).map(ProductPrime)
+    pub fn tail<'a>(&self, db: &NodeDb<'a>) -> Option<ProductPrime> {
+        self.children(db).get(1).map(|n| ProductPrime(*n))
     }
 }
 
 syntax_node!(ProductPrime);
 
-impl<'a, 'b> ProductPrime<'a, 'b> {
+impl ProductPrime {
     /// The operation
-    pub fn op(&self) -> MultiplicativeOp {
-        self.0.ty.clone().into()
+    pub fn op<'a>(&self, db: &NodeDb<'a>) -> MultiplicativeOp {
+        self.get_node(db).ty().clone().into()
     }
 
     /// The rhs of the product
-    pub fn rhs(&self) -> Atom<'a, 'b> {
-        Atom(&self.0.children[0])
+    pub fn rhs<'a>(&self, db: &NodeDb<'a>) -> Atom {
+        Atom(self.children(db)[0])
     }
 
     /// Optional tail
-    pub fn tail(&self) -> Option<ProductPrime<'a, 'b>> {
-        self.0.children.get(1).map(ProductPrime)
+    pub fn tail<'a>(&self, db: &NodeDb<'a>) -> Option<ProductPrime> {
+        self.children(db).get(1).map(|n| ProductPrime(*n))
     }
 }
 
 syntax_node!(Atom);
 
 /// Possible types of an atom
-pub enum AtomType<'a, 'b> {
+pub enum AtomType {
     /// Literal, function call or bracketed expr
-    Unit(Unit<'a, 'b>),
+    Unit(Unit),
 
     /// The not of an atom
-    Not(Atom<'a, 'b>),
+    Not(Atom),
 }
 
-impl<'a, 'b> Atom<'a, 'b> {
+impl Atom {
     /// Convert an atom to a more specific type
-    pub fn downcast(&self) -> AtomType<'a, 'b> {
-        let n = &self.0.children[0];
-        match self.0.ty {
+    pub fn downcast<'a>(&self, db: &NodeDb<'a>) -> AtomType {
+        let n = self.children(db)[0];
+        match self.get_node(db).ty() {
             NodeType::Not => AtomType::Not(Atom(n)),
             NodeType::Unit => AtomType::Unit(Unit(n)),
             _ => panic!("Invalid atom type"),
@@ -423,16 +426,16 @@ impl<'a, 'b> Atom<'a, 'b> {
 
 syntax_node!(Unit);
 
-impl<'a, 'b> Unit<'a, 'b> {
+impl Unit {
     /// Convert a unit into a more specific type
-    pub fn downcast(&self) -> UnitType<'a, 'b> {
-        match self.0.ty {
-            NodeType::Int(i) => UnitType::Int(i),
-            NodeType::Bool(b) => UnitType::Bool(b),
-            NodeType::Str => UnitType::Str(&self.0),
-            NodeType::Identifier => UnitType::Identifier(Identifier(&self.0.children[0])),
-            NodeType::FunctionCall => UnitType::FunctionCall(FunctionCall(&self.0.children[0])),
-            NodeType::BracketedExpr => UnitType::BracketedExpr(Expr(&self.0.children[0])),
+    pub fn downcast<'a>(&self, db: &NodeDb<'a>) -> UnitType {
+        match self.get_node(db).ty() {
+            NodeType::Int(i) => UnitType::Int(*i),
+            NodeType::Bool(b) => UnitType::Bool(*b),
+            NodeType::Str => UnitType::Str(self.0),
+            NodeType::Identifier => UnitType::Identifier(Identifier(self.children(db)[0])),
+            NodeType::FunctionCall => UnitType::FunctionCall(FunctionCall(self.children(db)[0])),
+            NodeType::BracketedExpr => UnitType::BracketedExpr(Expr(self.children(db)[0])),
             _ => panic!("Invalid atom type"),
         }
     }
@@ -441,21 +444,22 @@ impl<'a, 'b> Unit<'a, 'b> {
 /// Possible unit types
 #[derive(Debug, Clone)]
 #[allow(missing_docs)]
-pub enum UnitType<'a, 'b> {
+pub enum UnitType {
     Int(isize),
-    Str(&'a Node<'b>),
+    Str(NodeId),
     Bool(bool),
-    Identifier(Identifier<'a, 'b>),
-    FunctionCall(FunctionCall<'a, 'b>),
-    BracketedExpr(Expr<'a, 'b>),
+    Identifier(Identifier),
+    FunctionCall(FunctionCall),
+    BracketedExpr(Expr),
 }
 
 syntax_node!(Identifier);
 
-impl<'a, 'b> Identifier<'a, 'b> {
+impl Identifier {
     /// Get the string id
-    pub fn id<'c>(&self, text: &'c str) -> &'c str {
-        &text[self.0.text_range.clone()]
+    pub fn id<'a>(&self, db: &NodeDb<'a>, text: &'a str) -> &'a str {
+        use crate::range::Ranged;
+        &text[self.get_node(db).range().clone()]
     }
 }
 
@@ -493,39 +497,39 @@ pub enum BooleanOp {
 /// Enum to convert any node into a typed one
 #[allow(missing_docs)]
 #[derive(Debug, Clone)]
-pub enum SyntaxNode<'a, 'b> {
-    Program(Program<'a, 'b>),
-    Compound(Compound<'a, 'b>),
-    Statement(Statement<'a, 'b>),
-    Decl(Decl<'a, 'b>),
-    PrintStat(PrintStat<'a, 'b>),
-    Print(Print<'a, 'b>),
-    Println(Println<'a, 'b>),
-    Get(Get<'a, 'b>),
-    While(While<'a, 'b>),
-    If(If<'a, 'b>),
-    Assign(Assign<'a, 'b>),
-    FunctionDecl(FunctionDecl<'a, 'b>),
-    FunctionDeclArgs(FunctionDeclArgs<'a, 'b>),
-    FunctionCall(FunctionCall<'a, 'b>),
-    FunctionCallArgs(FunctionCallArgs<'a, 'b>),
-    Return(Return<'a, 'b>),
-    Expr(Expr<'a, 'b>),
-    ExprPrime(ExprPrime<'a, 'b>),
-    Term(Term<'a, 'b>),
-    TermPrime(TermPrime<'a, 'b>),
-    Factor(Factor<'a, 'b>),
-    FactorPrime(FactorPrime<'a, 'b>),
-    Product(Product<'a, 'b>),
-    ProductPrime(ProductPrime<'a, 'b>),
-    Atom(Atom<'a, 'b>),
-    Unit(Unit<'a, 'b>),
-    Identifier(Identifier<'a, 'b>),
+pub enum SyntaxNode {
+    Program(Program),
+    Compound(Compound),
+    Statement(Statement),
+    Decl(Decl),
+    PrintStat(PrintStat),
+    Print(Print),
+    Println(Println),
+    Get(Get),
+    While(While),
+    If(If),
+    Assign(Assign),
+    FunctionDecl(FunctionDecl),
+    FunctionDeclArgs(FunctionDeclArgs),
+    FunctionCall(FunctionCall),
+    FunctionCallArgs(FunctionCallArgs),
+    Return(Return),
+    Expr(Expr),
+    ExprPrime(ExprPrime),
+    Term(Term),
+    TermPrime(TermPrime),
+    Factor(Factor),
+    FactorPrime(FactorPrime),
+    Product(Product),
+    ProductPrime(ProductPrime),
+    Atom(Atom),
+    Unit(Unit),
+    Identifier(Identifier),
 }
 
-impl<'a, 'b> From<&'b Node<'a>> for SyntaxNode<'a, 'b> {
-    fn from(input: &'b Node<'a>) -> Self {
-        match input.ty {
+impl SyntaxNode {
+    fn from<'a>(input: NodeId, db: &NodeDb<'a>) -> Self {
+        match db.get_node(input).expect("Invalid id").ty() {
             NodeType::Program => SyntaxNode::Program(Program(input)),
             NodeType::Compound => SyntaxNode::Compound(Compound(input)),
             NodeType::Decl => SyntaxNode::Decl(Decl(input)),
