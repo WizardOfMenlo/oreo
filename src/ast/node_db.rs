@@ -17,6 +17,7 @@ pub struct IdNode {
 }
 
 impl IdNode {
+    /// Gets the children of this node
     pub fn children(&self) -> &[NodeId] {
         &self.childrens
     }
@@ -133,10 +134,13 @@ mod tests {
         parse(lexicalize(scan(input)))
     }
 
+    // We use this to test, as the Db does not serialize consistently
     fn get_all_nodes<'a>(db: &NodeDb<'a>) -> Vec<Node<'a>> {
-        let ids: Vec<_> = db.get_all_node_ids().collect();
+        let mut ids: Vec<_> = db.get_all_node_ids().collect();
+        ids.sort_by(|a, b| a.0.cmp(&b.0));
+
         ids.into_iter()
-            .map(|i| db.get_node(i).expect("This should be fail proof"))
+            .map(|i| db.get_node(i).expect("This should be failproof"))
             .cloned()
             .collect()
     }
@@ -146,7 +150,7 @@ mod tests {
         let input = "program fib begin var n; end";
         let db = NodeDb::new(node_from_str(input));
         let nodes = get_all_nodes(&db);
-        assert_debug_snapshot!((db, nodes));
+        assert_debug_snapshot!(nodes);
     }
 
     #[test]
@@ -154,7 +158,7 @@ mod tests {
         let input = "program fib begin var n := \"Hello\"; var m := 2; var s := (2); end";
         let db = NodeDb::new(node_from_str(input));
         let nodes = get_all_nodes(&db);
-        assert_debug_snapshot!((db, nodes));
+        assert_debug_snapshot!(nodes);
     }
 
     #[test]
@@ -162,6 +166,6 @@ mod tests {
         let input = "program fib begin print \"Hello\\n\"; println 2; get x; end";
         let db = NodeDb::new(node_from_str(input));
         let nodes = get_all_nodes(&db);
-        assert_debug_snapshot!((db, nodes));
+        assert_debug_snapshot!(nodes);
     }
 }
