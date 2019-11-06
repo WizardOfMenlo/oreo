@@ -5,11 +5,24 @@ expression: determinize(table)
 [
     (
         ScopeId(
+            0,
+        ),
+        Scope {
+            parent: None,
+            variables: PartialSymbolTable {
+                vars: [],
+            },
+        },
+    ),
+    (
+        ScopeId(
             1,
         ),
         Scope {
-            parent: ScopeId(
-                0,
+            parent: Some(
+                ScopeId(
+                    0,
+                ),
             ),
             variables: PartialSymbolTable {
                 vars: [],
@@ -21,8 +34,10 @@ expression: determinize(table)
             2,
         ),
         Scope {
-            parent: ScopeId(
-                1,
+            parent: Some(
+                ScopeId(
+                    1,
+                ),
             ),
             variables: PartialSymbolTable {
                 vars: [
@@ -48,8 +63,10 @@ expression: determinize(table)
             3,
         ),
         Scope {
-            parent: ScopeId(
-                1,
+            parent: Some(
+                ScopeId(
+                    1,
+                ),
             ),
             variables: PartialSymbolTable {
                 vars: [

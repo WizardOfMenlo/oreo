@@ -21,7 +21,7 @@ pub struct SymbolTable<'a> {
 /// A scope
 #[derive(Debug, Clone)]
 pub struct Scope<'a> {
-    parent: ScopeId,
+    parent: Option<ScopeId>,
     variables: PartialSymbolTable<'a>,
 }
 
@@ -63,11 +63,13 @@ pub struct SymbolTableBuilder<'a, 'b> {
 impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
     /// Starts building the symbol table
     pub fn new(input: &'a str, db: &'b NodeDb<'a>) -> Self {
+        let mut symb = SymbolTable::default();
+        symb.scopes.insert(ScopeId(0), Scope { parent: None, variables: PartialSymbolTable::default()});
         SymbolTableBuilder {
             current_id: IdentId(0),
             current_scope: ScopeId(0),
             scope_count: 0,
-            symb: SymbolTable::default(),
+            symb,
             input,
             db,
         }
@@ -88,9 +90,8 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
     }
 
     fn enter_new_scope(&mut self) {
-        dbg!(&self.symb);
         let new_scope = Scope {
-            parent: self.current_scope,
+            parent: Some(self.current_scope),
             variables: PartialSymbolTable::default(),
         };
 
@@ -102,7 +103,7 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
     }
 
     fn exit_scope(&mut self) {
-        self.current_scope = self.get_current_scope().parent;
+        self.current_scope = self.get_current_scope().parent.expect("Tried to exit global scope");
     }
 
     fn add_var(&mut self, id: Identifier, decl: DeclarationContext) {
