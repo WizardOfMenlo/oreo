@@ -1,6 +1,6 @@
 //! Utilities for figuring out symbols and scopes
 
-use super::node_db::{NodeDb, NodeId};
+use super::node_db::NodeDb;
 use super::syntax::*;
 use std::collections::HashMap;
 
@@ -31,12 +31,21 @@ pub struct PartialSymbolTable<'a> {
     vars: Vec<VariableRecord<'a>>,
 }
 
+/// A possible declaration
+#[derive(Debug, Clone)]
+pub enum DeclarationContext {
+    /// var x := 0
+    Decl(Decl),
+    /// procedure f(var f) ...
+    FunctionArg(FunctionDeclArgs),
+}
+
 /// A record for a variable (i.e. declaration and name)
 #[derive(Debug, Clone)]
 pub struct VariableRecord<'a> {
     id: IdentId,
     text: &'a str,
-    decl: NodeId,
+    decl: DeclarationContext,
 }
 
 /// Build the symbol table from a node
@@ -96,7 +105,7 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
         self.current_scope = self.get_current_scope().parent;
     }
 
-    fn add_var(&mut self, id: Identifier, node_id: NodeId) {
+    fn add_var(&mut self, id: Identifier, decl: DeclarationContext) {
         let curr_id = self.current_id;
         let id_str = id.id(self.db, self.input);
         self.get_current_scope()
@@ -104,8 +113,8 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
             .vars
             .push(VariableRecord {
                 id: curr_id,
-                decl: node_id,
                 text: id_str,
+                decl,
             });
 
         self.current_id = IdentId(self.current_id.0 + 1);
@@ -116,12 +125,12 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
         for statement in compound.statements(self.db) {
             match statement.downcast(self.db) {
                 StatementType::Decl(d) => {
-                    self.add_var(d.id(self.db), d.get_id());
+                    self.add_var(d.id(self.db), DeclarationContext::Decl(d));
                 }
                 StatementType::FunctionDecl(f) => {
                     self.enter_new_scope();
                     for arg in f.args(self.db) {
-                        self.add_var(arg.id(self.db), arg.get_id())
+                        self.add_var(arg.id(self.db), DeclarationContext::FunctionArg(arg));
                     }
                     self.compound(f.compound(self.db));
                     self.exit_scope();

@@ -31,8 +31,12 @@ expression: determinize(table)
                             0,
                         ),
                         text: "x",
-                        decl: NodeId(
-                            3,
+                        decl: FunctionArg(
+                            FunctionDeclArgs(
+                                NodeId(
+                                    3,
+                                ),
+                            ),
                         ),
                     },
                     VariableRecord {
@@ -40,8 +44,12 @@ expression: determinize(table)
                             1,
                         ),
                         text: "y",
-                        decl: NodeId(
-                            5,
+                        decl: FunctionArg(
+                            FunctionDeclArgs(
+                                NodeId(
+                                    5,
+                                ),
+                            ),
                         ),
                     },
                 ],
@@ -63,8 +71,12 @@ expression: determinize(table)
                             2,
                         ),
                         text: "z",
-                        decl: NodeId(
-                            7,
+                        decl: Decl(
+                            Decl(
+                                NodeId(
+                                    7,
+                                ),
+                            ),
                         ),
                     },
                     VariableRecord {
@@ -72,8 +84,12 @@ expression: determinize(table)
                             3,
                         ),
                         text: "k",
-                        decl: NodeId(
-                            9,
+                        decl: Decl(
+                            Decl(
+                                NodeId(
+                                    9,
+                                ),
+                            ),
                         ),
                     },
                 ],

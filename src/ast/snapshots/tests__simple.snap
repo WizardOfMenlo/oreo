@@ -18,8 +18,12 @@ expression: determinize(table)
                             0,
                         ),
                         text: "x",
-                        decl: NodeId(
-                            8,
+                        decl: Decl(
+                            Decl(
+                                NodeId(
+                                    8,
+                                ),
+                            ),
                         ),
                     },
                 ],

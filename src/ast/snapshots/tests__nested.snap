@@ -31,8 +31,12 @@ expression: determinize(table)
                             0,
                         ),
                         text: "n",
-                        decl: NodeId(
-                            14,
+                        decl: Decl(
+                            Decl(
+                                NodeId(
+                                    14,
+                                ),
+                            ),
                         ),
                     },
                 ],
@@ -54,8 +58,12 @@ expression: determinize(table)
                             1,
                         ),
                         text: "k",
-                        decl: NodeId(
-                            23,
+                        decl: Decl(
+                            Decl(
+                                NodeId(
+                                    23,
+                                ),
+                            ),
                         ),
                     },
                 ],

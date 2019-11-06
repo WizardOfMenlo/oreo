@@ -504,7 +504,6 @@ pub enum BooleanOp {
 pub enum SyntaxNode {
     Program(Program),
     Compound(Compound),
-    Statement(Statement),
     Decl(Decl),
     PrintStat(PrintStat),
     Print(Print),
