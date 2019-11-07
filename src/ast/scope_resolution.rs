@@ -5,11 +5,13 @@ use super::symbol::{IdentId, ScopeId, SymbolTable, GLOBAL_SCOPE};
 use super::syntax::*;
 use std::collections::HashMap;
 
+/// Struct that stores the mapping between identifier and actual vars
 #[derive(Debug)]
 pub struct VariableResolver {
     id_mapping: HashMap<Identifier, IdentId>,
 }
 
+/// We use this to build the resolver
 #[derive(Debug)]
 pub struct VariableResolverBuilder<'a, 'b, 'c> {
     current_scope: ScopeId,
@@ -20,7 +22,16 @@ pub struct VariableResolverBuilder<'a, 'b, 'c> {
     db: &'c NodeDb<'a>,
 }
 
+/// An error in resolution
+#[derive(Debug)]
+pub struct ResolutionError<'a> {
+    string: &'a str,
+    scope: ScopeId,
+    identifier: Identifier,
+}
+
 impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
+    /// Initializes the builder
     pub fn new(input: &'a str, symbols: &'b SymbolTable<'a>, node_db: &'c NodeDb<'a>) -> Self {
         VariableResolverBuilder {
             current_scope: GLOBAL_SCOPE,
@@ -32,12 +43,18 @@ impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
         }
     }
 
-    pub fn build(mut self, program: Program) -> VariableResolver {
+    /// Build from the program
+    pub fn build(mut self, program: Program) -> Result<VariableResolver, Vec<ResolutionError<'a>>> {
         let mut res = HashMap::new();
+        let mut errs = Vec::new();
 
-        self.compound(program.compound(self.db), &mut res);
+        self.compound(program.compound(self.db), &mut res, &mut errs);
 
-        VariableResolver { id_mapping: res }
+        if errs.is_empty() {
+            Ok(VariableResolver { id_mapping: res })
+        } else {
+            Err(errs)
+        }
     }
 
     fn enter_scope(&mut self) {
@@ -50,13 +67,14 @@ impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
         self.current_scope = self.parents.pop().expect("Tried to exit global scope");
     }
 
-    // TODO: Error handle
-    fn resolve_id(&mut self, id: Identifier, map: &mut HashMap<Identifier, IdentId>) {
+    fn resolve_id(
+        &mut self,
+        id: Identifier,
+        map: &mut HashMap<Identifier, IdentId>,
+        errs: &mut Vec<ResolutionError<'a>>,
+    ) {
         let parents = self.symbols.parent_scopes(self.current_scope);
         let id_str = id.id(self.db, self.input);
-
-        dbg!(id_str);
-        dbg!(&parents);
 
         let mut found = false;
         for scope in parents {
@@ -68,66 +86,80 @@ impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
         }
 
         if !found {
-            panic!("Variable resolution failed")
+            errs.push(ResolutionError {
+                string: id_str,
+                scope: self.current_scope,
+                identifier: id,
+            });
         }
     }
 
-    fn expr(&mut self, expr: Expr, map: &mut HashMap<Identifier, IdentId>) {
+    fn expr(
+        &mut self,
+        expr: Expr,
+        map: &mut HashMap<Identifier, IdentId>,
+        errs: &mut Vec<ResolutionError<'a>>,
+    ) {
         use super::untyped::NodeType;
         for children in self.db.all_children(expr.get_id()) {
             if let NodeType::Identifier = self.db.get_node(children).expect("Invalid node id").ty()
             {
-                self.resolve_id(Identifier::new(children), map);
+                self.resolve_id(Identifier::new(children), map, errs);
             }
         }
     }
 
-    fn compound(&mut self, compound: Compound, map: &mut HashMap<Identifier, IdentId>) {
+    fn compound(
+        &mut self,
+        compound: Compound,
+        map: &mut HashMap<Identifier, IdentId>,
+        errs: &mut Vec<ResolutionError<'a>>,
+    ) {
         self.enter_scope();
 
         for statement in compound.statements(self.db) {
             match statement.downcast(self.db) {
                 StatementType::Decl(d) => {
-                    self.resolve_id(d.id(self.db), map);
+                    self.resolve_id(d.id(self.db), map, errs);
                     if let Some(e) = d.expr(self.db) {
-                        self.expr(e, map);
+                        self.expr(e, map, errs);
                     }
                 }
                 StatementType::Assign(a) => {
-                    self.resolve_id(a.id(self.db), map);
-                    self.expr(a.expr(self.db), map);
+                    self.resolve_id(a.id(self.db), map, errs);
+                    self.expr(a.expr(self.db), map, errs);
                 }
                 StatementType::FunctionCall(f) => {
-                    self.resolve_id(f.id(self.db), map);
+                    self.resolve_id(f.id(self.db), map, errs);
                     for arg in f.args(self.db) {
-                        self.expr(arg.expr(self.db), map)
+                        self.expr(arg.expr(self.db), map, errs)
                     }
                 }
                 StatementType::FunctionDecl(f) => {
-                    self.resolve_id(f.id(self.db), map);
+                    self.resolve_id(f.id(self.db), map, errs);
                     self.enter_scope();
                     for arg in f.args(self.db) {
-                        self.resolve_id(arg.id(self.db), map);
+                        self.resolve_id(arg.id(self.db), map, errs);
                     }
-                    self.compound(f.compound(self.db), map);
+                    self.compound(f.compound(self.db), map, errs);
                     self.exit_scope();
                 }
                 StatementType::If(i) => {
-                    self.expr(i.condition(self.db), map);
-                    self.compound(i.if_branch(self.db), map);
+                    self.expr(i.condition(self.db), map, errs);
+                    self.compound(i.if_branch(self.db), map, errs);
                     if let Some(c) = i.else_branch(self.db) {
-                        self.compound(c, map);
+                        self.compound(c, map, errs);
                     }
                 }
                 StatementType::While(w) => {
-                    self.expr(w.condition(self.db), map);
-                    self.compound(w.compound(self.db), map);
+                    self.expr(w.condition(self.db), map, errs);
+                    self.compound(w.compound(self.db), map, errs);
                 }
-                StatementType::Return(r) => self.expr(r.expr(self.db), map),
+                StatementType::Return(r) => self.expr(r.expr(self.db), map, errs),
                 StatementType::PrintStat(p) => match p.downcast(self.db) {
-                    PrintTypes::Get(g) => self.resolve_id(g.id(self.db), map),
-                    PrintTypes::Print(p) => self.expr(p.expr(self.db), map),
-                    PrintTypes::Println(p) => self.expr(p.expr(self.db), map),
+                    PrintTypes::Get(g) => self.resolve_id(g.id(self.db), map, errs),
+                    PrintTypes::Print(p) => self.expr(p.expr(self.db), map, errs),
+                    PrintTypes::Println(p) => self.expr(p.expr(self.db), map, errs),
                 },
             }
         }
@@ -188,7 +220,7 @@ mod tests {
         let sym = sym_table_from(input, &db);
         let resolver =
             VariableResolverBuilder::new(input, &sym, &db).build(Program::new(db.start_id()));
-        assert_debug_snapshot!(determinize(resolver, &db, &sym));
+        assert_debug_snapshot!(resolver.map(|r| determinize(r, &db, &sym)));
     }
 
     #[test]
@@ -210,11 +242,10 @@ mod tests {
         let sym = sym_table_from(input, &db);
         let resolver =
             VariableResolverBuilder::new(input, &sym, &db).build(Program::new(db.start_id()));
-        assert_debug_snapshot!(determinize(resolver, &db, &sym));
+        assert_debug_snapshot!(resolver.map(|r| determinize(r, &db, &sym)));
     }
 
     #[test]
-    #[should_panic]
     fn scope_res_nested_invalid() {
         let input = r#"
         program id begin
@@ -229,8 +260,9 @@ mod tests {
         end"#;
         let db = db_from_str(input);
         let sym = sym_table_from(input, &db);
-        let _resolver =
+        let resolver =
             VariableResolverBuilder::new(input, &sym, &db).build(Program::new(db.start_id()));
+        assert_debug_snapshot!(resolver.map(|r| determinize(r, &db, &sym)));
     }
 
     #[test]
@@ -246,6 +278,6 @@ mod tests {
         let sym = sym_table_from(input, &db);
         let resolver =
             VariableResolverBuilder::new(input, &sym, &db).build(Program::new(db.start_id()));
-        assert_debug_snapshot!(determinize(resolver, &db, &sym));
+        assert_debug_snapshot!(resolver.map(|r| determinize(r, &db, &sym)));
     }
 }

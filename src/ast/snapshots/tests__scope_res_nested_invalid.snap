@@ -1,0 +1,19 @@
+---
+source: src/ast/scope_resolution.rs
+expression: "resolver.map(|r| determinize(r, &db, &sym))"
+---
+Err(
+    [
+        ResolutionError {
+            string: "n",
+            scope: ScopeId(
+                3,
+            ),
+            identifier: Identifier(
+                NodeId(
+                    17,
+                ),
+            ),
+        },
+    ],
+)
