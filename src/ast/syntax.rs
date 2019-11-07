@@ -7,7 +7,7 @@ use super::untyped::{Node, NodeType};
 macro_rules! syntax_node {
     ($id:ident) => {
         /// A syntax node for an $id
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
         pub struct $id(NodeId);
 
         impl $id {

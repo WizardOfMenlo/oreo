@@ -4,18 +4,58 @@ use super::node_db::NodeDb;
 use super::syntax::*;
 use std::collections::HashMap;
 
+/// Id for the global scope
+pub const GLOBAL_SCOPE: ScopeId = ScopeId(0);
+
 /// An id for an identifier
-#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, PartialOrd, Ord)]
 pub struct IdentId(usize);
 
 /// A id for a scope
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct ScopeId(usize);
 
+impl From<usize> for ScopeId {
+    fn from(i: usize) -> Self {
+        ScopeId(i)
+    }
+}
+
 /// A full symbol table
 #[derive(Debug, Default)]
 pub struct SymbolTable<'a> {
     scopes: HashMap<ScopeId, Scope<'a>>,
+}
+
+impl<'a> SymbolTable<'a> {
+    /// Get the parent of the scope (closest enclosing to furthest)
+    pub fn parent_scopes(&self, mut s: ScopeId) -> Vec<ScopeId> {
+        let mut v = vec![s];
+        while let Some(scope_id) = self.scopes.get(&s).expect("Invalid scope id").parent {
+            v.push(scope_id);
+            s = scope_id;
+        }
+
+        v
+    }
+
+    /// Get the identifier for an id in scope if any
+    pub fn get_id_scope(&self, identifier: &'a str, scope: ScopeId) -> Option<IdentId> {
+        self.scopes
+            .get(&scope)
+            .and_then(|s| s.variables.vars.iter().find(|s| s.text == identifier))
+            .map(|r| r.id)
+    }
+
+    /// Get information about the declaration of a id
+    pub fn get_variable_record(&self, id: IdentId) -> Option<VariableRecord> {
+        self.scopes
+            .iter()
+            .map(|(_, s)| s.variables.vars.iter())
+            .flatten()
+            .find(|r| r.id == id)
+            .cloned()
+    }
 }
 
 /// A scope
@@ -28,6 +68,7 @@ pub struct Scope<'a> {
 /// A symbol table for a scope
 #[derive(Debug, Default, Clone)]
 pub struct PartialSymbolTable<'a> {
+    // TODO: As always, should hashmap this
     vars: Vec<VariableRecord<'a>>,
 }
 
@@ -36,8 +77,11 @@ pub struct PartialSymbolTable<'a> {
 pub enum DeclarationContext {
     /// var x := 0
     Decl(Decl),
-    /// procedure f(var f) ...
+    /// procedure f(var x) ...
     FunctionArg(FunctionDeclArgs),
+
+    /// Defining a function
+    FunctionDecl(FunctionDecl),
 }
 
 /// A record for a variable (i.e. declaration and name)
@@ -46,6 +90,13 @@ pub struct VariableRecord<'a> {
     id: IdentId,
     text: &'a str,
     decl: DeclarationContext,
+}
+
+impl<'a> VariableRecord<'a> {
+    /// Get the id for this record
+    pub fn id(&self) -> IdentId {
+        self.id
+    }
 }
 
 /// Build the symbol table from a node
@@ -64,10 +115,16 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
     /// Starts building the symbol table
     pub fn new(input: &'a str, db: &'b NodeDb<'a>) -> Self {
         let mut symb = SymbolTable::default();
-        symb.scopes.insert(ScopeId(0), Scope { parent: None, variables: PartialSymbolTable::default()});
+        symb.scopes.insert(
+            GLOBAL_SCOPE,
+            Scope {
+                parent: None,
+                variables: PartialSymbolTable::default(),
+            },
+        );
         SymbolTableBuilder {
             current_id: IdentId(0),
-            current_scope: ScopeId(0),
+            current_scope: GLOBAL_SCOPE,
             scope_count: 0,
             symb,
             input,
@@ -98,12 +155,13 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
         self.scope_count += 1;
         self.current_scope = ScopeId(self.scope_count);
         self.symb.scopes.insert(self.current_scope, new_scope);
-
-        dbg!(&self.symb);
     }
 
     fn exit_scope(&mut self) {
-        self.current_scope = self.get_current_scope().parent.expect("Tried to exit global scope");
+        self.current_scope = self
+            .get_current_scope()
+            .parent
+            .expect("Tried to exit global scope");
     }
 
     fn add_var(&mut self, id: Identifier, decl: DeclarationContext) {
@@ -129,6 +187,9 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
                     self.add_var(d.id(self.db), DeclarationContext::Decl(d));
                 }
                 StatementType::FunctionDecl(f) => {
+                    // Note the id is declared in the parent scope
+                    self.add_var(f.id(self.db), DeclarationContext::FunctionDecl(f));
+                    // We introduce a new scope so the vars don't leak outside
                     self.enter_new_scope();
                     for arg in f.args(self.db) {
                         self.add_var(arg.id(self.db), DeclarationContext::FunctionArg(arg));
@@ -175,7 +236,7 @@ mod tests {
     }
 
     #[test]
-    fn test_simple() {
+    fn symbol_table_simple() {
         let input = "program x begin var x := 10; end";
         let db = db_from_str(input);
         let table = SymbolTableBuilder::new(input, &db).build(Program::new(db.start_id()));
@@ -183,7 +244,7 @@ mod tests {
     }
 
     #[test]
-    fn test_nested() {
+    fn symbol_table_nested() {
         let input = r#"program id begin
                    if ( true ) then begin var n := 5;  end
        			   else begin var k := 46; end; end"#;
@@ -193,7 +254,7 @@ mod tests {
     }
 
     #[test]
-    fn test_fun_decl() {
+    fn symbol_table_decl() {
         let input = r#"
         program id begin
             procedure f(var x, var y) begin

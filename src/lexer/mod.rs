@@ -47,6 +47,9 @@ lazy_static! {
         m.insert("or", Token::Operator(Operator::Or));
         m.insert("and", Token::Operator(Operator::And));
         m.insert("not", Token::Operator(Operator::Not));
+
+        m.insert("true", Token::Literal(Literal::Boolean(true)));
+        m.insert("false", Token::Literal(Literal::Boolean(false)));
         m
     };
 }
@@ -249,6 +252,13 @@ mod tests {
         let res: Vec<_> =
             lexicalize(scan("procedure id(var x, var y) begin return x; end")).collect();
         assert_debug_snapshot!(res);
+    }
+
+    #[test]
+    fn lex_bool() {
+        let input = "program fib begin var n := true; end";
+        let parsed: Vec<_> = lexicalize(scan(input)).collect();
+        assert_debug_snapshot!(parsed);
     }
 
     #[test]

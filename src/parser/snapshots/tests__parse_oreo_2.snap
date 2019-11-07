@@ -462,7 +462,9 @@ Node {
                                                                             text_range: 375..379,
                                                                             children: [
                                                                                 Node {
-                                                                                    ty: Identifier,
+                                                                                    ty: Bool(
+                                                                                        true,
+                                                                                    ),
                                                                                     text_range: 375..379,
                                                                                     children: [],
                                                                                 },

@@ -7,7 +7,7 @@ use std::pin::Pin;
 use std::ptr::NonNull;
 
 /// An id for a node
-#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub struct NodeId(usize);
 
 /// A node that is flat
@@ -92,6 +92,20 @@ impl<'a> NodeDb<'a> {
         // Note this should be safe as p always refer to a node in the
         // struct
         self.nodes.get(&id).map(|p| unsafe { p.as_ref() })
+    }
+
+    /// Get all the children that this node has
+    pub fn all_children(&self, id: NodeId) -> Vec<NodeId> {
+        let mut res = Vec::new();
+        for child in self
+            .get_flat_node(id)
+            .map(|n| n.children())
+            .unwrap_or_default()
+        {
+            res.push(*child);
+            res.extend(self.all_children(*child));
+        }
+        res
     }
 }
 

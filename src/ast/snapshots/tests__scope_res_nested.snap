@@ -1,0 +1,181 @@
+---
+source: src/ast/scope_resolution.rs
+expression: "determinize(resolver, &db, &sym)"
+---
+[
+    (
+        Node {
+            ty: Identifier,
+            text_range: 42..45,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                1,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                0,
+            ),
+            text: "top",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        8,
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        Node {
+            ty: Identifier,
+            text_range: 125..128,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                16,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                0,
+            ),
+            text: "top",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        8,
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        Node {
+            ty: Identifier,
+            text_range: 236..239,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                33,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                0,
+            ),
+            text: "top",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        8,
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        Node {
+            ty: Identifier,
+            text_range: 120..121,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                15,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                1,
+            ),
+            text: "n",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        22,
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        Node {
+            ty: Identifier,
+            text_range: 155..156,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                24,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                1,
+            ),
+            text: "n",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        22,
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        Node {
+            ty: Identifier,
+            text_range: 150..151,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                23,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                2,
+            ),
+            text: "l",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        30,
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        Node {
+            ty: Identifier,
+            text_range: 231..232,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                32,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                3,
+            ),
+            text: "k",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        39,
+                    ),
+                ),
+            ),
+        },
+    ),
+]

@@ -427,7 +427,9 @@ Node {
                                                                                     text_range: 407..412,
                                                                                     children: [
                                                                                         Node {
-                                                                                            ty: Identifier,
+                                                                                            ty: Bool(
+                                                                                                false,
+                                                                                            ),
                                                                                             text_range: 407..412,
                                                                                             children: [],
                                                                                         },

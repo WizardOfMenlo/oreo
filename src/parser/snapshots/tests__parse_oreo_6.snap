@@ -413,7 +413,9 @@ Node {
                                                                                     text_range: 387..392,
                                                                                     children: [
                                                                                         Node {
-                                                                                            ty: Identifier,
+                                                                                            ty: Bool(
+                                                                                                false,
+                                                                                            ),
                                                                                             text_range: 387..392,
                                                                                             children: [],
                                                                                         },
@@ -448,7 +450,9 @@ Node {
                                                                                     text_range: 396..400,
                                                                                     children: [
                                                                                         Node {
-                                                                                            ty: Identifier,
+                                                                                            ty: Bool(
+                                                                                                true,
+                                                                                            ),
                                                                                             text_range: 396..400,
                                                                                             children: [],
                                                                                         },

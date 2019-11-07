@@ -1,0 +1,81 @@
+---
+source: src/ast/scope_resolution.rs
+expression: "determinize(resolver, &db, &sym)"
+---
+[
+    (
+        Node {
+            ty: Identifier,
+            text_range: 20..21,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                1,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                0,
+            ),
+            text: "x",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        8,
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        Node {
+            ty: Identifier,
+            text_range: 38..39,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                10,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                0,
+            ),
+            text: "x",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        8,
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        Node {
+            ty: Identifier,
+            text_range: 33..34,
+            children: [],
+        },
+        Identifier(
+            NodeId(
+                9,
+            ),
+        ),
+        VariableRecord {
+            id: IdentId(
+                1,
+            ),
+            text: "y",
+            decl: Decl(
+                Decl(
+                    NodeId(
+                        20,
+                    ),
+                ),
+            ),
+        },
+    ),
+]

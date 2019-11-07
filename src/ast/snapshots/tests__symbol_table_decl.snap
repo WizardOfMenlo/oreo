@@ -25,7 +25,21 @@ expression: determinize(table)
                 ),
             ),
             variables: PartialSymbolTable {
-                vars: [],
+                vars: [
+                    VariableRecord {
+                        id: IdentId(
+                            0,
+                        ),
+                        text: "f",
+                        decl: FunctionDecl(
+                            FunctionDecl(
+                                NodeId(
+                                    11,
+                                ),
+                            ),
+                        ),
+                    },
+                ],
             },
         },
     ),
@@ -43,7 +57,7 @@ expression: determinize(table)
                 vars: [
                     VariableRecord {
                         id: IdentId(
-                            0,
+                            1,
                         ),
                         text: "x",
                         decl: FunctionArg(
@@ -56,7 +70,7 @@ expression: determinize(table)
                     },
                     VariableRecord {
                         id: IdentId(
-                            1,
+                            2,
                         ),
                         text: "y",
                         decl: FunctionArg(
@@ -85,7 +99,7 @@ expression: determinize(table)
                 vars: [
                     VariableRecord {
                         id: IdentId(
-                            2,
+                            3,
                         ),
                         text: "z",
                         decl: Decl(
@@ -98,7 +112,7 @@ expression: determinize(table)
                     },
                     VariableRecord {
                         id: IdentId(
-                            3,
+                            4,
                         ),
                         text: "k",
                         decl: Decl(

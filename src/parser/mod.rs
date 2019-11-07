@@ -412,6 +412,13 @@ mod tests {
     }
 
     #[test]
+    fn parse_bool() {
+        let input = "program fib begin var n := true; end";
+        let parsed = parse(make_tokens_from_str(input));
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
     fn parse_print_simple() {
         let input = "program fib begin print \"Hello\\n\"; println 2; get x; end";
         let parsed = parse(make_tokens_from_str(input));
