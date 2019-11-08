@@ -1,6 +1,6 @@
 //! The type we use to represent syntax nodes
 
-use super::syntax::{AdditiveOp, BooleanOp, MultiplicativeOp, RelationalOp};
+use crate::common::{AdditiveOp, BooleanOp, MultiplicativeOp, RelationalOp};
 use crate::parser::error::SyntaxError;
 use crate::range::Ranged;
 use serde::Serialize;

@@ -5,7 +5,10 @@ pub mod node_db;
 pub mod scope_resolution;
 pub mod symbol;
 pub mod syntax;
+pub mod types;
 pub mod untyped;
+
+pub use symbol::IdentId;
 
 /// The AST
 

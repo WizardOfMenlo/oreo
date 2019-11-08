@@ -2,6 +2,7 @@
 
 use super::node_db::{NodeDb, NodeId};
 use super::untyped::{Node, NodeType};
+use crate::common::{AdditiveOp, MultiplicativeOp, RelationalOp, BooleanOp};
 
 /// Macro for simple definition of a syntax node
 macro_rules! syntax_node {
@@ -467,36 +468,6 @@ impl Identifier {
     }
 }
 
-#[allow(missing_docs)]
-#[derive(Debug, Clone)]
-pub enum AdditiveOp {
-    Plus,
-    Minus,
-}
-
-#[allow(missing_docs)]
-#[derive(Debug, Clone)]
-pub enum MultiplicativeOp {
-    Times,
-    Divide,
-}
-
-#[allow(missing_docs)]
-#[derive(Debug, Clone)]
-pub enum RelationalOp {
-    LesserThan,
-    GreaterThan,
-    Equals,
-    GreaterOrEquals,
-    LesserOrEquals,
-}
-
-#[allow(missing_docs)]
-#[derive(Debug, Clone)]
-pub enum BooleanOp {
-    And,
-    Or,
-}
 
 /// Enum to convert any node into a typed one
 #[allow(missing_docs)]
