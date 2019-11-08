@@ -170,12 +170,12 @@ impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
 
 #[cfg(test)]
 mod tests {
+    use super::super::node_db::NodeDbWrap;
     use super::super::symbol::{SymbolTable, SymbolTableBuilder, VariableRecord};
     use super::*;
     use insta::assert_debug_snapshot;
-    use std::pin::Pin;
 
-    fn db_from_str(input: &str) -> Pin<Box<NodeDb>> {
+    fn db_from_str(input: &str) -> NodeDbWrap {
         use crate::lexer::lexicalize;
         use crate::lexer::scanner::scan;
         use crate::parser::parse;

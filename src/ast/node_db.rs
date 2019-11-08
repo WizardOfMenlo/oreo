@@ -33,9 +33,12 @@ pub struct NodeDb<'a> {
     _phantom: PhantomPinned,
 }
 
+///  The way to move around a node db
+pub type NodeDbWrap<'a> = Pin<Box<NodeDb<'a>>>;
+
 impl<'a> NodeDb<'a> {
     /// Creates a db from a node
-    pub fn new(node: Node<'a>) -> Pin<Box<Self>> {
+    pub fn new(node: Node<'a>) -> NodeDbWrap<'a> {
         // Ok this is complex and merit some discussion
         // In order to efficiently (aka not storing nodes and children twice)
         // store nodes, we aim to store a reference to the children of a stored not

@@ -1,6 +1,6 @@
 use oreo::ast::node_db::NodeDb;
-use oreo::ast::symbol::*;
 use oreo::ast::scope_resolution::*;
+use oreo::ast::symbol::*;
 use oreo::ast::syntax::Program;
 
 fn main() {
