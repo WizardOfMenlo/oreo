@@ -1,0 +1,36 @@
+---
+source: src/lexer/mod.rs
+expression: parsed
+---
+[
+    RangedObject {
+        inner: Types(
+            Boolean,
+        ),
+        range: 0..4,
+    },
+    RangedObject {
+        inner: Punctuation(
+            Tilde,
+        ),
+        range: 5..6,
+    },
+    RangedObject {
+        inner: Types(
+            Str,
+        ),
+        range: 7..10,
+    },
+    RangedObject {
+        inner: Punctuation(
+            Semicolon,
+        ),
+        range: 10..11,
+    },
+    RangedObject {
+        inner: Types(
+            Integer,
+        ),
+        range: 12..15,
+    },
+]

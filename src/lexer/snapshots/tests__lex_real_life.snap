@@ -167,7 +167,7 @@ expression: res
     },
     RangedObject {
         inner: Literal(
-            String(
+            Str(
                 "enter the number of terms",
             ),
         ),

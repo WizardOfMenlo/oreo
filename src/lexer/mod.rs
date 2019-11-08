@@ -20,6 +20,7 @@ lazy_static! {
         m.insert(')', Token::Punctuation(Punctuation::BracketClose));
         m.insert(';', Token::Punctuation(Punctuation::Semicolon));
         m.insert(',', Token::Punctuation(Punctuation::Comma));
+        m.insert('~', Token::Punctuation(Punctuation::Tilde));
 
         m.insert('+', Token::Operator(Operator::Plus));
         m.insert('-', Token::Operator(Operator::Minus));
@@ -50,6 +51,11 @@ lazy_static! {
 
         m.insert("true", Token::Literal(Literal::Boolean(true)));
         m.insert("false", Token::Literal(Literal::Boolean(false)));
+
+        m.insert("bool", Token::Types(Types::Boolean));
+        m.insert("int", Token::Types(Types::Integer));
+        m.insert("str", Token::Types(Types::Str));
+
         m
     };
 }
@@ -93,7 +99,7 @@ impl<'a> Iterator for LexicalIt<'a> {
             ScannedItem::Str(s) => {
                 self.terminate = true;
                 return Some(RangedObject::new(
-                    Token::Literal(Literal::String(s)),
+                    Token::Literal(Literal::Str(s)),
                     self.s.range().clone(),
                 ));
             }
@@ -257,6 +263,13 @@ mod tests {
     #[test]
     fn lex_bool() {
         let input = "program fib begin var n := true; end";
+        let parsed: Vec<_> = lexicalize(scan(input)).collect();
+        assert_debug_snapshot!(parsed);
+    }
+
+    #[test]
+    fn lex_types() {
+        let input = "bool ~ str; int";
         let parsed: Vec<_> = lexicalize(scan(input)).collect();
         assert_debug_snapshot!(parsed);
     }

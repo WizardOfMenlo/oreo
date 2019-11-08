@@ -3,8 +3,12 @@
 use super::IdentId;
 use std::collections::HashMap;
 
+struct Deductions {
+    ls: Vec<Type>,
+}
+
 enum Type {
-    Unspecified,
+    Unspecified(Deductions),
     Int,
     Bool,
     Str,

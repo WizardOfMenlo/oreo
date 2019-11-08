@@ -5,7 +5,7 @@ use crate::lexer::tokens::*;
 
 pub(crate) const ID: ExpToken = Token::Identifier("");
 pub(crate) const INT: ExpToken = Token::Literal(Literal::Integer(0));
-pub(crate) const STRING: ExpToken = Token::Literal(Literal::String(""));
+pub(crate) const STRING: ExpToken = Token::Literal(Literal::Str(""));
 pub(crate) const BOOL: ExpToken = Token::Literal(Literal::Boolean(false));
 
 pub(crate) const SEMICOLON: ExpToken = Token::Punctuation(Punctuation::Semicolon);

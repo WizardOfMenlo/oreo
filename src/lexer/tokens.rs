@@ -26,6 +26,9 @@ pub enum Token<'a> {
 
     /// Any kind of error we might encounter
     Error(LexicalError<'a>),
+
+    /// A type token
+    Types(Types),
 }
 
 impl<'a> Token<'a> {
@@ -58,7 +61,7 @@ impl<'a> Token<'a> {
             match (self, other) {
                 (Self::Literal(Literal::Integer(_)), Self::Literal(Literal::Integer(_))) => true,
                 (Self::Literal(Literal::Boolean(_)), Self::Literal(Literal::Boolean(_))) => true,
-                (Self::Literal(Literal::String(_)), Self::Literal(Literal::String(_))) => true,
+                (Self::Literal(Literal::Str(_)), Self::Literal(Literal::Str(_))) => true,
                 (Self::Identifier(_), Self::Identifier(_)) => true,
                 (Self::Comment(_), Self::Comment(_)) => true,
                 _ => false,
@@ -94,6 +97,7 @@ pub enum Punctuation {
     Semicolon,
     BracketOpen,
     BracketClose,
+    Tilde,
 }
 
 /// All the operators (including boolean ones)
@@ -121,5 +125,14 @@ pub enum Operator {
 pub enum Literal<'a> {
     Integer(isize),
     Boolean(bool),
-    String(&'a str),
+    Str(&'a str),
+}
+
+/// Constants
+#[allow(missing_docs)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
+pub enum Types {
+    Integer,
+    Boolean,
+    Str,
 }
