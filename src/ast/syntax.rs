@@ -2,7 +2,9 @@
 
 use super::node_db::{NodeDb, NodeId};
 use super::untyped::{Node, NodeType};
-use crate::common::{AdditiveOp, MultiplicativeOp, RelationalOp, BooleanOp};
+// TODO: Move to common
+use crate::common::{AdditiveOp, BooleanOp, MultiplicativeOp, RelationalOp};
+use crate::lexer::tokens;
 
 /// Macro for simple definition of a syntax node
 macro_rules! syntax_node {
@@ -237,6 +239,11 @@ impl FunctionDeclArgs {
     pub fn id<'a>(self, db: &NodeDb<'a>) -> Identifier {
         Identifier(self.children(db)[0])
     }
+
+    /// Get the type for this identifier
+    pub fn typed<'a>(self, db: &NodeDb<'a>) -> Type {
+        Type(self.children(db)[1])
+    }
 }
 
 syntax_node!(FunctionCallArgs);
@@ -468,6 +475,14 @@ impl Identifier {
     }
 }
 
+syntax_node!(Type);
+
+impl Type {
+    /// Get the type for this node
+    pub fn typed<'a>(self, db: &NodeDb<'a>) -> tokens::Type {
+        self.get_node(db).ty().clone().into()
+    }
+}
 
 /// Enum to convert any node into a typed one
 #[allow(missing_docs)]
@@ -499,6 +514,7 @@ pub enum SyntaxNode {
     Atom(Atom),
     Unit(Unit),
     Identifier(Identifier),
+    Type(Type),
 }
 
 impl SyntaxNode {
@@ -545,6 +561,8 @@ impl SyntaxNode {
             }
 
             NodeType::Identifier => SyntaxNode::Identifier(Identifier(input)),
+
+            NodeType::Type(_) => SyntaxNode::Type(Type(input)),
 
             NodeType::Error(_) => panic!("Called on error node"),
         }

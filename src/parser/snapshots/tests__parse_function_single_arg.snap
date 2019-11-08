@@ -4,7 +4,7 @@ expression: parsed
 ---
 Node {
     ty: Program,
-    text_range: 0..61,
+    text_range: 0..68,
     children: [
         Node {
             ty: Identifier,
@@ -13,11 +13,11 @@ Node {
         },
         Node {
             ty: Compound,
-            text_range: 12..61,
+            text_range: 12..68,
             children: [
                 Node {
                     ty: FunctionDecl,
-                    text_range: 18..57,
+                    text_range: 18..64,
                     children: [
                         Node {
                             ty: Identifier,
@@ -26,46 +26,53 @@ Node {
                         },
                         Node {
                             ty: FunctionDeclArgs,
-                            text_range: 31..36,
+                            text_range: 31..43,
                             children: [
                                 Node {
                                     ty: Identifier,
                                     text_range: 35..36,
                                     children: [],
                                 },
+                                Node {
+                                    ty: Type(
+                                        Boolean,
+                                    ),
+                                    text_range: 39..43,
+                                    children: [],
+                                },
                             ],
                         },
                         Node {
                             ty: Compound,
-                            text_range: 38..57,
+                            text_range: 45..64,
                             children: [
                                 Node {
                                     ty: Return,
-                                    text_range: 44..53,
+                                    text_range: 51..60,
                                     children: [
                                         Node {
                                             ty: Expr,
-                                            text_range: 51..52,
+                                            text_range: 58..59,
                                             children: [
                                                 Node {
                                                     ty: Term,
-                                                    text_range: 51..52,
+                                                    text_range: 58..59,
                                                     children: [
                                                         Node {
                                                             ty: Factor,
-                                                            text_range: 51..52,
+                                                            text_range: 58..59,
                                                             children: [
                                                                 Node {
                                                                     ty: Product,
-                                                                    text_range: 51..52,
+                                                                    text_range: 58..59,
                                                                     children: [
                                                                         Node {
                                                                             ty: Unit,
-                                                                            text_range: 51..52,
+                                                                            text_range: 58..59,
                                                                             children: [
                                                                                 Node {
                                                                                     ty: Identifier,
-                                                                                    text_range: 51..52,
+                                                                                    text_range: 58..59,
                                                                                     children: [],
                                                                                 },
                                                                             ],

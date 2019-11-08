@@ -8,6 +8,7 @@ pub(crate) const INT: ExpToken = Token::Literal(Literal::Integer(0));
 pub(crate) const STRING: ExpToken = Token::Literal(Literal::Str(""));
 pub(crate) const BOOL: ExpToken = Token::Literal(Literal::Boolean(false));
 
+pub(crate) const TILDE: ExpToken = Token::Punctuation(Punctuation::Tilde);
 pub(crate) const SEMICOLON: ExpToken = Token::Punctuation(Punctuation::Semicolon);
 pub(crate) const B_OPEN: ExpToken = Token::Punctuation(Punctuation::BracketOpen);
 pub(crate) const B_CLOSE: ExpToken = Token::Punctuation(Punctuation::BracketClose);
@@ -55,6 +56,12 @@ pub(crate) const POSSIBLE_STATEMENT_STARTS: TokenList =
     &[VAR, IF, PRINT, PRINTLN, GET, WHILE, PROCEDURE, RETURN, ID];
 
 pub(crate) const PRINT_STARTS: TokenList = &[PRINT, PRINTLN, GET];
+
+pub(crate) const POSSIBLE_TYPES: TokenList = &[
+    Token::Type(Type::Integer),
+    Token::Type(Type::Boolean),
+    Token::Type(Type::Str),
+];
 
 pub(crate) const POSSIBLE_UNIT_STARTS: TokenList = &[ID, B_OPEN, STRING, INT, BOOL];
 

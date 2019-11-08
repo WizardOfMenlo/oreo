@@ -4,7 +4,7 @@ expression: parsed
 ---
 [
     RangedObject {
-        inner: Types(
+        inner: Type(
             Boolean,
         ),
         range: 0..4,
@@ -16,7 +16,7 @@ expression: parsed
         range: 5..6,
     },
     RangedObject {
-        inner: Types(
+        inner: Type(
             Str,
         ),
         range: 7..10,
@@ -28,7 +28,7 @@ expression: parsed
         range: 10..11,
     },
     RangedObject {
-        inner: Types(
+        inner: Type(
             Integer,
         ),
         range: 12..15,

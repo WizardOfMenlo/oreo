@@ -24,11 +24,11 @@ pub enum Token<'a> {
     /// A comment
     Comment(&'a str),
 
+    /// A type token
+    Type(Type),
+
     /// Any kind of error we might encounter
     Error(LexicalError<'a>),
-
-    /// A type token
-    Types(Types),
 }
 
 impl<'a> Token<'a> {
@@ -131,7 +131,7 @@ pub enum Literal<'a> {
 /// Constants
 #[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
-pub enum Types {
+pub enum Type {
     Integer,
     Boolean,
     Str,

@@ -23,7 +23,7 @@ Ok(
                 decl: FunctionDecl(
                     FunctionDecl(
                         NodeId(
-                            17,
+                            19,
                         ),
                     ),
                 ),
@@ -48,7 +48,7 @@ Ok(
                 decl: FunctionArg(
                     FunctionDeclArgs(
                         NodeId(
-                            3,
+                            4,
                         ),
                     ),
                 ),
@@ -57,12 +57,12 @@ Ok(
         (
             Node {
                 ty: Identifier,
-                text_range: 61..62,
+                text_range: 68..69,
                 children: [],
             },
             Identifier(
                 NodeId(
-                    4,
+                    5,
                 ),
             ),
             VariableRecord {
@@ -73,31 +73,6 @@ Ok(
                 decl: FunctionArg(
                     FunctionDeclArgs(
                         NodeId(
-                            5,
-                        ),
-                    ),
-                ),
-            },
-        ),
-        (
-            Node {
-                ty: Identifier,
-                text_range: 90..91,
-                children: [],
-            },
-            Identifier(
-                NodeId(
-                    6,
-                ),
-            ),
-            VariableRecord {
-                id: IdentId(
-                    3,
-                ),
-                text: "z",
-                decl: Decl(
-                    Decl(
-                        NodeId(
                             7,
                         ),
                     ),
@@ -107,37 +82,62 @@ Ok(
         (
             Node {
                 ty: Identifier,
-                text_range: 118..119,
-                children: [],
-            },
-            Identifier(
-                NodeId(
-                    9,
-                ),
-            ),
-            VariableRecord {
-                id: IdentId(
-                    3,
-                ),
-                text: "z",
-                decl: Decl(
-                    Decl(
-                        NodeId(
-                            7,
-                        ),
-                    ),
-                ),
-            },
-        ),
-        (
-            Node {
-                ty: Identifier,
-                text_range: 113..114,
+                text_range: 103..104,
                 children: [],
             },
             Identifier(
                 NodeId(
                     8,
+                ),
+            ),
+            VariableRecord {
+                id: IdentId(
+                    3,
+                ),
+                text: "z",
+                decl: Decl(
+                    Decl(
+                        NodeId(
+                            9,
+                        ),
+                    ),
+                ),
+            },
+        ),
+        (
+            Node {
+                ty: Identifier,
+                text_range: 131..132,
+                children: [],
+            },
+            Identifier(
+                NodeId(
+                    11,
+                ),
+            ),
+            VariableRecord {
+                id: IdentId(
+                    3,
+                ),
+                text: "z",
+                decl: Decl(
+                    Decl(
+                        NodeId(
+                            9,
+                        ),
+                    ),
+                ),
+            },
+        ),
+        (
+            Node {
+                ty: Identifier,
+                text_range: 126..127,
+                children: [],
+            },
+            Identifier(
+                NodeId(
+                    10,
                 ),
             ),
             VariableRecord {
@@ -148,7 +148,7 @@ Ok(
                 decl: Decl(
                     Decl(
                         NodeId(
-                            15,
+                            17,
                         ),
                     ),
                 ),

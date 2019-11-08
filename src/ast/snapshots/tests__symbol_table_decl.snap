@@ -34,7 +34,7 @@ expression: determinize(table)
                         decl: FunctionDecl(
                             FunctionDecl(
                                 NodeId(
-                                    11,
+                                    13,
                                 ),
                             ),
                         ),
@@ -63,7 +63,7 @@ expression: determinize(table)
                         decl: FunctionArg(
                             FunctionDeclArgs(
                                 NodeId(
-                                    3,
+                                    4,
                                 ),
                             ),
                         ),
@@ -76,7 +76,7 @@ expression: determinize(table)
                         decl: FunctionArg(
                             FunctionDeclArgs(
                                 NodeId(
-                                    5,
+                                    7,
                                 ),
                             ),
                         ),
@@ -105,7 +105,7 @@ expression: determinize(table)
                         decl: Decl(
                             Decl(
                                 NodeId(
-                                    7,
+                                    9,
                                 ),
                             ),
                         ),
@@ -118,7 +118,7 @@ expression: determinize(table)
                         decl: Decl(
                             Decl(
                                 NodeId(
-                                    9,
+                                    11,
                                 ),
                             ),
                         ),

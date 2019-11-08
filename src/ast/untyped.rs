@@ -1,6 +1,7 @@
 //! The type we use to represent syntax nodes
 
 use crate::common::{AdditiveOp, BooleanOp, MultiplicativeOp, RelationalOp};
+use crate::lexer::tokens::Type;
 use crate::parser::error::SyntaxError;
 use crate::range::Ranged;
 use serde::Serialize;
@@ -68,6 +69,9 @@ pub enum NodeType<'a> {
     Bool(bool),
     Identifier,
     BracketedExpr,
+
+    // Types
+    Type(Type),
 }
 
 impl<'a> NodeType<'a> {
@@ -161,6 +165,15 @@ impl<'a> From<NodeType<'a>> for RelationalOp {
             NodeType::LesserOrEquals => RelationalOp::LesserOrEquals,
             NodeType::GreaterOrEquals => RelationalOp::GreaterOrEquals,
             NodeType::Equals => RelationalOp::Equals,
+            _ => panic!("Invalid node type"),
+        }
+    }
+}
+
+impl<'a> From<NodeType<'a>> for Type {
+    fn from(ty: NodeType) -> Self {
+        match ty {
+            NodeType::Type(t) => t,
             _ => panic!("Invalid node type"),
         }
     }

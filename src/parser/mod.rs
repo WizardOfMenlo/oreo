@@ -156,6 +156,8 @@ fn func_decl<'a, 'b, T: TokenStream<'a>>(
             NodeBuilder::new(NodeType::FunctionDeclArgs, it)
                 .advance_expecting(consts::VAR)
                 .children(identifier)
+                .advance_expecting(consts::TILDE)
+                .children(p_type)
                 .peek_and_type(
                     &[Token::Punctuation(Punctuation::Comma), consts::B_CLOSE],
                     PeekMapping::new()
@@ -168,6 +170,27 @@ fn func_decl<'a, 'b, T: TokenStream<'a>>(
         })
         .advance_expecting(consts::B_CLOSE)
         .children(compound)
+}
+
+fn p_type<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
+    NodeBuilder::new_untyped(it)
+        .peek_and_type(
+            consts::POSSIBLE_TYPES,
+            PeekMapping::new()
+                .add(Token::Type(Type::Integer), |b: NodeBuilder<'a, 'b, T>| {
+                    b.ty(NodeType::Type(Type::Integer))
+                        .advance_expecting(Token::Type(Type::Integer))
+                })
+                .add(Token::Type(Type::Boolean), |b| {
+                    b.ty(NodeType::Type(Type::Boolean))
+                        .advance_expecting(Token::Type(Type::Boolean))
+                })
+                .add(Token::Type(Type::Str), |b| {
+                    b.ty(NodeType::Type(Type::Str))
+                        .advance_expecting(Token::Type(Type::Str))
+                }),
+        )
+        .build()
 }
 
 fn p_return<'a, 'b, T: TokenStream<'a>>(builder: NodeBuilder<'a, 'b, T>) -> NodeBuilder<'a, 'b, T> {
@@ -434,14 +457,15 @@ mod tests {
 
     #[test]
     fn parse_function_single_arg() {
-        let input = "program fib begin procedure id(var x) begin return x; end end";
+        let input = "program fib begin procedure id(var x ~ bool) begin return x; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_function_mult_arg() {
-        let input = "program fib begin procedure sum(var x, var y) begin return x + y; end end";
+        let input =
+            "program fib begin procedure sum(var x ~ int, var y ~ str) begin return x + y; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }

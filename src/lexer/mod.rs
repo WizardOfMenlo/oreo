@@ -52,9 +52,9 @@ lazy_static! {
         m.insert("true", Token::Literal(Literal::Boolean(true)));
         m.insert("false", Token::Literal(Literal::Boolean(false)));
 
-        m.insert("bool", Token::Types(Types::Boolean));
-        m.insert("int", Token::Types(Types::Integer));
-        m.insert("str", Token::Types(Types::Str));
+        m.insert("bool", Token::Type(Type::Boolean));
+        m.insert("int", Token::Type(Type::Integer));
+        m.insert("str", Token::Type(Type::Str));
 
         m
     };
