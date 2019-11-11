@@ -257,7 +257,7 @@ mod tests {
     fn symbol_table_decl() {
         let input = r#"
         program id begin
-            procedure f(var x ~ int, var y ~ bool) begin
+            procedure void f(var x ~ int, var y ~ bool) begin
                 var z;
                 var k;
             end

@@ -61,6 +61,7 @@ pub(crate) const POSSIBLE_TYPES: TokenList = &[
     Token::Type(Type::Integer),
     Token::Type(Type::Boolean),
     Token::Type(Type::Str),
+    Token::Type(Type::Void),
 ];
 
 pub(crate) const POSSIBLE_UNIT_STARTS: TokenList = &[ID, B_OPEN, STRING, INT, BOOL];

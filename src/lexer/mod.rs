@@ -55,6 +55,7 @@ lazy_static! {
         m.insert("bool", Token::Type(Type::Boolean));
         m.insert("int", Token::Type(Type::Integer));
         m.insert("str", Token::Type(Type::Str));
+        m.insert("void", Token::Type(Type::Void));
 
         m
     };

@@ -269,7 +269,7 @@ mod tests {
     fn scope_res_test_fun_decl() {
         let input = r#"
         program id begin
-            procedure f(var x ~ bool, var y ~ int) begin
+            procedure void f(var x ~ bool, var y ~ int) begin
                 var z;
                 var k := z;
             end

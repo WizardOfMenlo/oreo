@@ -4,7 +4,7 @@ expression: parsed
 ---
 Node {
     ty: Program,
-    text_range: 0..85,
+    text_range: 0..90,
     children: [
         Node {
             ty: Identifier,
@@ -13,84 +13,91 @@ Node {
         },
         Node {
             ty: Compound,
-            text_range: 12..85,
+            text_range: 12..90,
             children: [
                 Node {
                     ty: FunctionDecl,
-                    text_range: 18..81,
+                    text_range: 18..86,
                     children: [
                         Node {
+                            ty: Type(
+                                Void,
+                            ),
+                            text_range: 28..32,
+                            children: [],
+                        },
+                        Node {
                             ty: Identifier,
-                            text_range: 28..31,
+                            text_range: 33..36,
                             children: [],
                         },
                         Node {
                             ty: FunctionDeclArgs,
-                            text_range: 32..44,
+                            text_range: 37..49,
                             children: [
                                 Node {
                                     ty: Identifier,
-                                    text_range: 36..37,
+                                    text_range: 41..42,
                                     children: [],
                                 },
                                 Node {
                                     ty: Type(
                                         Integer,
                                     ),
-                                    text_range: 40..43,
+                                    text_range: 45..48,
                                     children: [],
                                 },
                             ],
                         },
                         Node {
                             ty: FunctionDeclArgs,
-                            text_range: 45..56,
+                            text_range: 50..61,
                             children: [
                                 Node {
                                     ty: Identifier,
-                                    text_range: 49..50,
+                                    text_range: 54..55,
                                     children: [],
                                 },
                                 Node {
                                     ty: Type(
                                         Str,
                                     ),
-                                    text_range: 53..56,
+                                    text_range: 58..61,
                                     children: [],
                                 },
                             ],
                         },
                         Node {
                             ty: Compound,
-                            text_range: 58..81,
+                            text_range: 63..86,
                             children: [
                                 Node {
                                     ty: Return,
-                                    text_range: 64..77,
+                                    text_range: 69..82,
                                     children: [
                                         Node {
                                             ty: Expr,
-                                            text_range: 71..76,
+                                            text_range: 76..81,
                                             children: [
                                                 Node {
                                                     ty: Term,
-                                                    text_range: 71..76,
+                                                    text_range: 76..81,
                                                     children: [
                                                         Node {
                                                             ty: Factor,
-                                                            text_range: 71..76,
+                                                            text_range: 76..81,
                                                             children: [
                                                                 Node {
                                                                     ty: Product,
-                                                                    text_range: 71..72,
+                                                                    text_range: 76..77,
                                                                     children: [
                                                                         Node {
                                                                             ty: Unit,
-                                                                            text_range: 71..72,
+                                                                            text_range: 76..77,
                                                                             children: [
                                                                                 Node {
                                                                                     ty: Identifier,
-                                                                                    text_range: 71..72,
+                                                                                    text_range: 76..77,
                                                                                     children: [],
                                                                                 },
                                                                             ],
@@ -99,19 +106,19 @@ Node {
                                                                 },
                                                                 Node {
                                                                     ty: Plus,
-                                                                    text_range: 73..76,
+                                                                    text_range: 78..81,
                                                                     children: [
                                                                         Node {
                                                                             ty: Product,
-                                                                            text_range: 75..76,
+                                                                            text_range: 80..81,
                                                                             children: [
                                                                                 Node {
                                                                                     ty: Unit,
-                                                                                    text_range: 75..76,
+                                                                                    text_range: 80..81,
                                                                                     children: [
                                                                                         Node {
                                                                                             ty: Identifier,
-                                                                                            text_range: 75..76,
+                                                                                            text_range: 80..81,
                                                                                             children: [],
                                                                                         },
                                                                                     ],

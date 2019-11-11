@@ -135,4 +135,5 @@ pub enum Type {
     Integer,
     Boolean,
     Str,
+    Void,
 }

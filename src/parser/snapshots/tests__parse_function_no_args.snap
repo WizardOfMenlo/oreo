@@ -4,7 +4,7 @@ expression: parsed
 ---
 Node {
     ty: Program,
-    text_range: 0..58,
+    text_range: 0..62,
     children: [
         Node {
             ty: Identifier,
@@ -13,50 +13,57 @@ Node {
         },
         Node {
             ty: Compound,
-            text_range: 12..58,
+            text_range: 12..62,
             children: [
                 Node {
                     ty: FunctionDecl,
-                    text_range: 18..54,
+                    text_range: 18..58,
                     children: [
                         Node {
+                            ty: Type(
+                                Integer,
+                            ),
+                            text_range: 28..31,
+                            children: [],
+                        },
+                        Node {
                             ty: Identifier,
-                            text_range: 28..32,
+                            text_range: 32..36,
                             children: [],
                         },
                         Node {
                             ty: Compound,
-                            text_range: 35..54,
+                            text_range: 39..58,
                             children: [
                                 Node {
                                     ty: Return,
-                                    text_range: 41..50,
+                                    text_range: 45..54,
                                     children: [
                                         Node {
                                             ty: Expr,
-                                            text_range: 48..49,
+                                            text_range: 52..53,
                                             children: [
                                                 Node {
                                                     ty: Term,
-                                                    text_range: 48..49,
+                                                    text_range: 52..53,
                                                     children: [
                                                         Node {
                                                             ty: Factor,
-                                                            text_range: 48..49,
+                                                            text_range: 52..53,
                                                             children: [
                                                                 Node {
                                                                     ty: Product,
-                                                                    text_range: 48..49,
+                                                                    text_range: 52..53,
                                                                     children: [
                                                                         Node {
                                                                             ty: Unit,
-                                                                            text_range: 48..49,
+                                                                            text_range: 52..53,
                                                                             children: [
                                                                                 Node {
                                                                                     ty: Int(
                                                                                         1,
                                                                                     ),
-                                                                                    text_range: 48..49,
+                                                                                    text_range: 52..53,
                                                                                     children: [],
                                                                                 },
                                                                             ],

@@ -211,15 +211,20 @@ impl Assign {
 syntax_node!(FunctionDecl);
 
 impl FunctionDecl {
+    /// The return type for a function
+    pub fn return_ty<'a>(self, db: &NodeDb<'a>) -> Type {
+        Type(self.children(db)[0])
+    }
+
     /// Function to declare
     pub fn id<'a>(self, db: &NodeDb<'a>) -> Identifier {
-        Identifier(self.children(db)[0])
+        Identifier(self.children(db)[1])
     }
 
     /// The arguments
     pub fn args<'a>(self, db: &NodeDb<'a>) -> Vec<FunctionDeclArgs> {
         let children = self.children(db);
-        children[1..children.len() - 1]
+        children[2..children.len() - 1]
             .iter()
             .map(|n| FunctionDeclArgs(*n))
             .collect()

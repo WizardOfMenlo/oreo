@@ -149,6 +149,7 @@ fn func_decl<'a, 'b, T: TokenStream<'a>>(
     builder
         .ty(NodeType::FunctionDecl)
         .advance_expecting(consts::PROCEDURE)
+        .children(p_type)
         .children(identifier)
         .advance_expecting(consts::B_OPEN)
         // TODO: This also allows procedure a(var x,)
@@ -188,6 +189,11 @@ fn p_type<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
                 .add(Token::Type(Type::Str), |b| {
                     b.ty(NodeType::Type(Type::Str))
                         .advance_expecting(Token::Type(Type::Str))
+                })
+                // Note, we might want this to be default
+                .add(Token::Type(Type::Void), |b| {
+                    b.ty(NodeType::Type(Type::Void))
+                        .advance_expecting(Token::Type(Type::Void))
                 }),
         )
         .build()
@@ -450,14 +456,14 @@ mod tests {
 
     #[test]
     fn parse_function_no_args() {
-        let input = "program fib begin procedure main() begin return 1; end end";
+        let input = "program fib begin procedure int main() begin return 1; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
 
     #[test]
     fn parse_function_single_arg() {
-        let input = "program fib begin procedure id(var x ~ bool) begin return x; end end";
+        let input = "program fib begin procedure bool id(var x ~ bool) begin return x; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
@@ -465,7 +471,7 @@ mod tests {
     #[test]
     fn parse_function_mult_arg() {
         let input =
-            "program fib begin procedure sum(var x ~ int, var y ~ str) begin return x + y; end end";
+            "program fib begin procedure void sum(var x ~ int, var y ~ str) begin return x + y; end end";
         let parsed = parse(make_tokens_from_str(input));
         assert_debug_snapshot!(parsed);
     }
