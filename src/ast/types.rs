@@ -636,7 +636,10 @@ mod tests {
             .unwrap()
     }
 
-    fn determinize(ty: Typings) -> (Vec<(IdentId, super::Type)>, Vec<(IdentId, FuncType)>) {
+    type IdentVec = Vec<(IdentId, super::Type)>;
+    type FuncVec = Vec<(IdentId, FuncType)>;
+
+    fn determinize(ty: Typings) -> (IdentVec, FuncVec) {
         let mut types: Vec<_> = ty.types.into_iter().collect();
         let mut funcs: Vec<_> = ty.funcs.into_iter().collect();
         types.sort_by(|a, b| (a.0).0.cmp(&(b.0).0));
@@ -645,33 +648,29 @@ mod tests {
         (types, funcs)
     }
 
-    #[test]
-    fn type_valid_simple_int() {
-        let input = "program x begin var x := 1; end";
+    fn test_input(input: &str) -> Result<(IdentVec, FuncVec), Vec<TypeError>> {
         let db = db_from_str(input);
         let sym = sym_table_from(input, &db);
         let resolver = resolver(input, &db, &sym);
         let types = TypingsBuilder::new(&resolver, &sym, &db).build(Program::new(db.start_id()));
-        assert_debug_snapshot!(types.map(determinize));
+        types.map(determinize)
+    }
+
+    #[test]
+    fn type_valid_simple_int() {
+        let input = "program x begin var x := 1; end";
+        assert_debug_snapshot!(test_input(input));
     }
 
     #[test]
     fn type_valid_simple_bool() {
         let input = "program x begin var x := true; end";
-        let db = db_from_str(input);
-        let sym = sym_table_from(input, &db);
-        let resolver = resolver(input, &db, &sym);
-        let types = TypingsBuilder::new(&resolver, &sym, &db).build(Program::new(db.start_id()));
-        assert_debug_snapshot!(types.map(determinize));
+        assert_debug_snapshot!(test_input(input));
     }
 
     #[test]
     fn type_valid_simple_str() {
         let input = r#"program x begin var x := "Hello"; end"#;
-        let db = db_from_str(input);
-        let sym = sym_table_from(input, &db);
-        let resolver = resolver(input, &db, &sym);
-        let types = TypingsBuilder::new(&resolver, &sym, &db).build(Program::new(db.start_id()));
-        assert_debug_snapshot!(types.map(determinize));
+        assert_debug_snapshot!(test_input(input));
     }
 }
