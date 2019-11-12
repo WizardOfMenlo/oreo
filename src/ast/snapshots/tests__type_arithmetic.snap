@@ -1,0 +1,17 @@
+---
+source: src/ast/types.rs
+expression: test_input(input)
+---
+Ok(
+    (
+        [
+            (
+                IdentId(
+                    0,
+                ),
+                Int,
+            ),
+        ],
+        [],
+    ),
+)

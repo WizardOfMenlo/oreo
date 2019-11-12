@@ -389,7 +389,7 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
             ));
         }
 
-        Type::Int
+        Type::Bool
     }
 
     fn type_condition(&mut self, e: Expr) {
@@ -671,6 +671,30 @@ mod tests {
     #[test]
     fn type_valid_simple_str() {
         let input = r#"program x begin var x := "Hello"; end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_arithmetic() {
+        let input = r#"program x begin var x := 1 + 2 * 3 / 5; end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_bool_arithmetic() {
+        let input = r#"program x begin var x := not true and false or false; end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_bool_arithmetic_relation() {
+        let input = r#"program x begin var x := 1 < 2 or 3 < 4; end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_easy_variable_inf() {
+        let input = r#"program x begin var x := 1; var y := x; end"#;
         assert_debug_snapshot!(test_input(input));
     }
 }
