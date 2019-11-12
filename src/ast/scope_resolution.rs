@@ -11,6 +11,16 @@ pub struct VariableResolver {
     id_mapping: HashMap<Identifier, IdentId>,
 }
 
+impl VariableResolver {
+    /// Get the identifier id for this identifier node
+    pub fn get_id(&self, id: Identifier) -> IdentId {
+        *self
+            .id_mapping
+            .get(&id)
+            .expect("Identifier not previously set")
+    }
+}
+
 /// We use this to build the resolver
 #[derive(Debug)]
 pub struct VariableResolverBuilder<'a, 'b, 'c> {

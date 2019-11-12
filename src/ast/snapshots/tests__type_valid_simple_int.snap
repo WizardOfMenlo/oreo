@@ -1,0 +1,17 @@
+---
+source: src/ast/types.rs
+expression: types.map(determinize)
+---
+Ok(
+    (
+        [
+            (
+                IdentId(
+                    0,
+                ),
+                Int,
+            ),
+        ],
+        [],
+    ),
+)

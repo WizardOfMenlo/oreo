@@ -9,7 +9,7 @@ pub const GLOBAL_SCOPE: ScopeId = ScopeId(0);
 
 /// An id for an identifier
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, PartialOrd, Ord)]
-pub struct IdentId(usize);
+pub struct IdentId(pub usize);
 
 /// A id for a scope
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
@@ -96,6 +96,11 @@ impl<'a> VariableRecord<'a> {
     /// Get the id for this record
     pub fn id(&self) -> IdentId {
         self.id
+    }
+
+    /// Get the context for this variable decl
+    pub fn decl(&self) -> &DeclarationContext {
+        &self.decl
     }
 }
 
