@@ -289,11 +289,10 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
     }
 
     /// Get one of the built children (use sparingly)
-    pub fn from_children(self, index: usize) -> Self {
+    pub fn replace_child(self, index: usize) -> Self {
         let child = &self.children[index];
 
         let rng = child.range().clone();
-        
         NodeBuilder {
             start: Some(rng.start),
             end: Some(rng.end),

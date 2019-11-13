@@ -2,7 +2,7 @@ use oreo::ast::scope_resolution::*;
 use oreo::ast::node_db::*;
 use oreo::ast::symbol::*;
 use oreo::ast::syntax::*;
-use oreo::ast::types::{self, *};
+use oreo::ast::types::*;
 
 fn db_from_str(input: &str) -> NodeDbWrap {
     use oreo::lexer::lexicalize;
@@ -28,12 +28,7 @@ fn resolver<'a>(input: &'a str, db: &NodeDb<'a>, sym: &SymbolTable<'a>) -> Varia
 fn main() {
     let input = r#"program x
         begin
-            procedure int f(var x ~ int)
-            begin
-                return x;
-            end
-
-            var x := f(1);
+        print "Hello";
         end"#;
 
 

@@ -378,7 +378,7 @@ fn unit<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
                     b.children(identifier).peek_if_else(
                         &[consts::B_OPEN],
                         |b: NodeBuilder<'a, 'b, T>| fun_call_args(b.ty(NodeType::FunctionCall)),
-                        |b| b.from_children(0),
+                        |b| b.replace_child(0),
                     )
                 })
                 .add(consts::INT, |b| {

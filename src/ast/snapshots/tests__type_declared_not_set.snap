@@ -1,0 +1,13 @@
+---
+source: src/ast/types.rs
+expression: test_input(input)
+---
+Err(
+    [
+        NotResolved(
+            IdentId(
+                0,
+            ),
+        ),
+    ],
+)

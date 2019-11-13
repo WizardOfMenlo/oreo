@@ -6,6 +6,10 @@ use super::untyped::{Node, NodeType};
 use crate::common::{AdditiveOp, BooleanOp, MultiplicativeOp, RelationalOp};
 use crate::lexer::tokens;
 
+fn get_node<'a, 'b>(db: &'b NodeDb<'a>, id: NodeId) -> &'b Node<'a> {
+    db.get_node(id).expect("Invalid syntax node")
+}
+
 /// Macro for simple definition of a syntax node
 macro_rules! syntax_node {
     ($id:ident) => {
@@ -26,7 +30,7 @@ macro_rules! syntax_node {
 
             /// Get the raw node
             pub fn get_node<'a, 'b>(self, db: &'b NodeDb<'a>) -> &'b Node<'a> {
-                db.get_node(self.0).expect("Invalid syntax node")
+                get_node(db, self.0)
             }
 
             /// Get children
@@ -116,7 +120,7 @@ impl PrintStat {
     /// Convert to the more specific print typ
     pub fn downcast<'a>(self, db: &NodeDb<'a>) -> PrintTypes {
         let node = self.children(db)[0];
-        match self.get_node(db).ty() {
+        match dbg!(get_node(db, node)).ty() {
             NodeType::Print => PrintTypes::Print(Print(node)),
             NodeType::Println => PrintTypes::Println(Println(node)),
             NodeType::Get => PrintTypes::Get(Get(node)),

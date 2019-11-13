@@ -68,6 +68,9 @@ pub enum TypeError {
 
     /// The function needed to return void, but it doesn't
     VoidFunctionWithReturn(NodeId),
+
+    /// Could not resolve
+    NotResolved(IdentId),
 }
 
 /// A struct to build typings
@@ -103,6 +106,18 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
     /// Builds the typer
     pub fn build(mut self, progr: Program) -> Result<Typings, Vec<TypeError>> {
         self.compound(progr.compound(self.db));
+
+        let unspecified: Vec<_> = self
+            .types
+            .iter()
+            .filter(|(_, &t)| t == Type::Unspecified)
+            .map(|(i, _)| i)
+            .cloned()
+            .collect();
+
+        for u in unspecified {
+            self.errors.push(TypeError::NotResolved(u));
+        }
 
         if !self.errors.is_empty() {
             Err(self.errors)
@@ -815,6 +830,40 @@ mod tests {
             end
 
             var x := f(1, 2);
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_fun_call_before_decl_num() {
+        let input = r#"program x
+        begin
+            var x := f(1);
+            procedure int f(var x ~ int)
+            begin
+                return x;
+            end
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_get_var() {
+        let input = r#"program x
+        begin
+        var x;
+        get x;
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_declared_not_set() {
+        let input = r#"program x
+        begin
+        var x;
+        var y := 1;
+        var z := y;
         end"#;
         assert_debug_snapshot!(test_input(input));
     }
