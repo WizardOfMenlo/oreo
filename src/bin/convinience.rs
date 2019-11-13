@@ -1,42 +1,36 @@
-use oreo::ast::node_db::*;
-use oreo::ast::scope_resolution::*;
-use oreo::ast::symbol::*;
-use oreo::ast::syntax::*;
-use oreo::ast::types::*;
+use oreo::ast::AST;
+use oreo::lexer::lexicalize;
+use oreo::lexer::scanner::scan;
+use oreo::parser::parse;
+use oreo::ast::syntax::Program;
+use oreo::codegen::tac::TACBuilder;
 
-fn db_from_str(input: &str) -> NodeDbWrap {
-    use oreo::lexer::lexicalize;
-    use oreo::lexer::scanner::scan;
-    use oreo::parser::parse;
+use structopt::StructOpt;
 
-    let node = parse(lexicalize(scan(input)));
-    NodeDb::new(node)
-}
-
-fn sym_table_from<'a>(input: &'a str, db: &NodeDb<'a>) -> SymbolTable<'a> {
-    SymbolTableBuilder::new(input, db).build(Program::new(db.start_id()))
-}
-
-fn resolver<'a>(input: &'a str, db: &NodeDb<'a>, sym: &SymbolTable<'a>) -> VariableResolver {
-    VariableResolverBuilder::new(input, sym, db)
-        .build(Program::new(db.start_id()))
-        .unwrap()
+#[derive(Debug, StructOpt)]
+struct Args {
+    /// The input to parse
+    #[structopt(short, long)]
+    input: String,
 }
 
 fn main() {
-    let input = r#"program x
-        begin
-        print "Hello";
-        end"#;
+    std::env::set_var("RUST_BACKTRACE", "1");
+    let opt = Args::from_args();
 
-    let db = db_from_str(input);
-    dbg!(&db);
-    let sym = sym_table_from(input, &db);
-    dbg!(&sym);
-    let resolver = resolver(input, &db, &sym);
+    let input = &opt.input;
+    // Note, no error handling here
+    let node = parse(lexicalize(scan(input)));
 
-    dbg!(&resolver);
-    let types = TypingsBuilder::new(&resolver, &sym, &db).build(Program::new(db.start_id()));
+    dbg!(&node);
 
-    dbg!(&types);
+    let ast = AST::new(node, input);
+
+    dbg!(&ast);
+
+    let tac = TACBuilder::new(&ast).build(Program::new(ast.db().start_id()));
+
+    dbg!(&tac);
+
+    println!("{}", tac);
 }
