@@ -288,6 +288,21 @@ impl<'a, 'b, T: TokenStream<'a>> NodeBuilder<'a, 'b, T> {
         self.peek_if_else(tokens, |b| b.children(f), |b| b)
     }
 
+    /// Get one of the built children (use sparingly)
+    pub fn from_children(self, index: usize) -> Self {
+        let child = &self.children[index];
+
+        let rng = child.range().clone();
+        
+        NodeBuilder {
+            start: Some(rng.start),
+            end: Some(rng.end),
+            children: child.children().cloned().collect(),
+            ty: Some(child.ty().clone()),
+            it: self.it,
+        }
+    }
+
     /// Build the node from the builder, panics if the type is not set yet
     pub fn build(self) -> Node<'a> {
         Node::new(

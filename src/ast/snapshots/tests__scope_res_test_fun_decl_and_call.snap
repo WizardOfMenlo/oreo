@@ -1,0 +1,133 @@
+---
+source: src/ast/scope_resolution.rs
+expression: "resolver.map(|r| determinize(r, &db, &sym))"
+---
+Ok(
+    [
+        (
+            Node {
+                ty: Identifier,
+                text_range: 50..51,
+                children: [],
+            },
+            Identifier(
+                NodeId(
+                    2,
+                ),
+            ),
+            VariableRecord {
+                id: IdentId(
+                    0,
+                ),
+                text: "f",
+                decl: FunctionDecl(
+                    FunctionDecl(
+                        NodeId(
+                            14,
+                        ),
+                    ),
+                ),
+            },
+        ),
+        (
+            Node {
+                ty: Identifier,
+                text_range: 147..148,
+                children: [],
+            },
+            Identifier(
+                NodeId(
+                    16,
+                ),
+            ),
+            VariableRecord {
+                id: IdentId(
+                    0,
+                ),
+                text: "f",
+                decl: FunctionDecl(
+                    FunctionDecl(
+                        NodeId(
+                            14,
+                        ),
+                    ),
+                ),
+            },
+        ),
+        (
+            Node {
+                ty: Identifier,
+                text_range: 56..57,
+                children: [],
+            },
+            Identifier(
+                NodeId(
+                    3,
+                ),
+            ),
+            VariableRecord {
+                id: IdentId(
+                    1,
+                ),
+                text: "x",
+                decl: FunctionArg(
+                    FunctionDeclArgs(
+                        NodeId(
+                            5,
+                        ),
+                    ),
+                ),
+            },
+        ),
+        (
+            Node {
+                ty: Identifier,
+                text_range: 106..107,
+                children: [],
+            },
+            Identifier(
+                NodeId(
+                    6,
+                ),
+            ),
+            VariableRecord {
+                id: IdentId(
+                    1,
+                ),
+                text: "x",
+                decl: FunctionArg(
+                    FunctionDeclArgs(
+                        NodeId(
+                            5,
+                        ),
+                    ),
+                ),
+            },
+        ),
+        (
+            Node {
+                ty: Identifier,
+                text_range: 142..143,
+                children: [],
+            },
+            Identifier(
+                NodeId(
+                    15,
+                ),
+            ),
+            VariableRecord {
+                id: IdentId(
+                    2,
+                ),
+                text: "x",
+                decl: Decl(
+                    Decl(
+                        NodeId(
+                            30,
+                        ),
+                    ),
+                ),
+            },
+        ),
+    ],
+)

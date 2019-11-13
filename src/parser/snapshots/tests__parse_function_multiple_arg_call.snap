@@ -49,6 +49,11 @@ Node {
                                                                     text_range: 27..40,
                                                                     children: [
                                                                         Node {
+                                                                            ty: Identifier,
+                                                                            text_range: 27..30,
+                                                                            children: [],
+                                                                        },
+                                                                        Node {
                                                                             ty: FunctionCallArgs,
                                                                             text_range: 31..35,
                                                                             children: [

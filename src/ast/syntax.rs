@@ -451,7 +451,7 @@ impl Unit {
             NodeType::Bool(b) => UnitType::Bool(*b),
             NodeType::Str => UnitType::Str(self.0),
             NodeType::Identifier => UnitType::Identifier(Identifier(self.0)),
-            NodeType::FunctionCall => UnitType::FunctionCall(FunctionCall(self.children(db)[0])),
+            NodeType::FunctionCall => UnitType::FunctionCall(FunctionCall(self.0)),
             NodeType::BracketedExpr => UnitType::BracketedExpr(Expr(self.children(db)[0])),
             _ => panic!("Invalid atom type"),
         }

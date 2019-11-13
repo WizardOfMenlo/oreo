@@ -36,8 +36,10 @@ pub struct FuncType {
 /// All type information for a program
 #[derive(Debug)]
 pub struct Typings {
-    types: HashMap<IdentId, Type>,
-    funcs: HashMap<IdentId, FuncType>,
+    /// Temp
+    pub types: HashMap<IdentId, Type>,
+    ///Temp
+    pub funcs: HashMap<IdentId, FuncType>,
 }
 
 /// Possible errors in type res
@@ -63,6 +65,9 @@ pub enum TypeError {
 
     /// This should have been a function
     ExpectedFunctionFound(NodeId),
+
+    /// The function needed to return void, but it doesn't
+    VoidFunctionWithReturn(NodeId),
 }
 
 /// A struct to build typings
@@ -467,6 +472,7 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
         let args = f.args(self.db);
         let mut res_args = Vec::new();
         for arg in args {
+            let arg_id = self.resolver.get_id(arg.id(self.db));
             // Get the declared type
             let arg_ty = arg.typed(self.db).typed(self.db);
 
@@ -485,6 +491,8 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
             if res_ty == Type::Unspecified {
                 continue;
             }
+
+            self.types.insert(arg_id, res_ty);
 
             // Add to the signature
             res_args.push(res_ty);
@@ -510,6 +518,17 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
                     _ => continue,
                 }
             }
+        } else if body
+            .statements(self.db)
+            .iter()
+            .map(|s| s.downcast(self.db))
+            .any(|s| match s {
+                StatementType::Return(_) => true,
+                _ => false,
+            })
+        {
+            self.errors
+                .push(TypeError::VoidFunctionWithReturn(body.get_id()));
         }
 
         // Insert the signature
@@ -695,6 +714,108 @@ mod tests {
     #[test]
     fn type_easy_variable_inf() {
         let input = r#"program x begin var x := 1; var y := x; end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_invalid_operation() {
+        let input = r#"program x begin var x := 1 + "hello"; end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_invalid_operation_with_steps() {
+        let input = r#"program x begin var x := 1; var y := x + "hello"; end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_fun_decl() {
+        let input = r#"program x
+        begin
+            procedure int f(var x ~ int)
+            begin
+                return x;
+            end
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_fun_decl_invalid_return() {
+        let input = r#"program x
+        begin
+            procedure int f(var x ~ str)
+            begin
+                return x;
+            end
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_fun_decl_void_return() {
+        let input = r#"program x
+        begin
+            procedure void f(var x ~ str)
+            begin
+                var y := x;
+            end
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_fun_decl_void_invalid_return() {
+        let input = r#"program x
+        begin
+            procedure void f(var x ~ str)
+            begin
+                return x;
+            end
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_fun_decl_call_in_expr() {
+        let input = r#"program x
+        begin
+            procedure int f(var x ~ int)
+            begin
+                return x;
+            end
+
+            var x := f(1);
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_fun_call_in_expr_invalid_arg_ty() {
+        let input = r#"program x
+        begin
+            procedure int f(var x ~ int)
+            begin
+                return x;
+            end
+
+            var x := f("hello");
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_fun_call_in_expr_invalid_arg_num() {
+        let input = r#"program x
+        begin
+            procedure int f(var x ~ int)
+            begin
+                return x;
+            end
+
+            var x := f(1, 2);
+        end"#;
         assert_debug_snapshot!(test_input(input));
     }
 }

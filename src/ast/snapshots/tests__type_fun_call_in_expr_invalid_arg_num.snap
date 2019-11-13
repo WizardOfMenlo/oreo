@@ -1,0 +1,12 @@
+---
+source: src/ast/types.rs
+expression: test_input(input)
+---
+Err(
+    [
+        FunctionCallExpected(
+            1,
+            2,
+        ),
+    ],
+)

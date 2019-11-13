@@ -11,7 +11,6 @@ pub mod untyped;
 pub use symbol::IdentId;
 
 /// The AST
-
 pub struct AST<'a> {
     program: syntax::Program,
     db: node_db::NodeDbWrap<'a>,

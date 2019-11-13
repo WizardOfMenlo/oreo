@@ -375,11 +375,10 @@ fn unit<'a, 'b, T: TokenStream<'a>>(it: &'b mut T) -> Node<'a> {
                     b.ty(NodeType::Str).advance_expecting(consts::STRING)
                 })
                 .add(consts::ID, |b| {
-                    // If we find a bracket we have a fun call, else just identifier
-                    b.advance_expecting(consts::ID).peek_if_else(
+                    b.children(identifier).peek_if_else(
                         &[consts::B_OPEN],
-                        fun_call_args,
-                        |b| b.ty(NodeType::Identifier),
+                        |b: NodeBuilder<'a, 'b, T>| fun_call_args(b.ty(NodeType::FunctionCall)),
+                        |b| b.from_children(0),
                     )
                 })
                 .add(consts::INT, |b| {

@@ -290,4 +290,22 @@ mod tests {
             VariableResolverBuilder::new(input, &sym, &db).build(Program::new(db.start_id()));
         assert_debug_snapshot!(resolver.map(|r| determinize(r, &db, &sym)));
     }
+
+    #[test]
+    fn scope_res_test_fun_decl_and_call() {
+        let input = r#"program x
+        begin
+            procedure int f(var x ~ int)
+            begin
+                return x;
+            end
+
+            var x := f(1);
+        end"#;
+        let db = db_from_str(input);
+        let sym = sym_table_from(input, &db);
+        let resolver =
+            VariableResolverBuilder::new(input, &sym, &db).build(Program::new(db.start_id()));
+        assert_debug_snapshot!(resolver.map(|r| determinize(r, &db, &sym)));
+    }
 }
