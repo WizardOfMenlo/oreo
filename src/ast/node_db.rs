@@ -8,7 +8,7 @@ use std::ptr::NonNull;
 
 /// An id for a node
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Ord, PartialOrd)]
-pub struct NodeId(usize);
+pub struct NodeId(pub(crate) usize);
 
 /// A node that is flat
 #[derive(Debug, Clone)]

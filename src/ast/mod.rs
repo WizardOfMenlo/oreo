@@ -8,15 +8,20 @@ pub mod syntax;
 pub mod types;
 pub mod untyped;
 
+pub use node_db::NodeId;
 pub use symbol::IdentId;
 
+use std::collections::HashMap;
+
 /// The AST
+#[derive(Debug)]
 pub struct AST<'a> {
     program: syntax::Program,
     db: node_db::NodeDbWrap<'a>,
     symbols: symbol::SymbolTable<'a>,
     variables: scope_resolution::VariableResolver,
     types: types::Typings,
+    strings: HashMap<NodeId, &'a str>,
 }
 
 impl<'a> AST<'a> {
@@ -33,12 +38,25 @@ impl<'a> AST<'a> {
             .build(program)
             .expect("Typings errors");
 
+        let mut strings = HashMap::new();
+        use untyped::NodeType;
+        for id in db.all_children(db.start_id()) {
+            let node = db.get_node(id).unwrap();
+            match node.ty() {
+                NodeType::Str => {
+                    strings.insert(id, &input[node.text_range.clone()]);
+                },
+                _ => continue,
+            }
+        }
+
         AST {
             db,
             program,
             symbols,
             variables,
             types,
+            strings,
         }
     }
 

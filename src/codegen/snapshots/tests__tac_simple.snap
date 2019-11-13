@@ -1,0 +1,7 @@
+---
+source: src/codegen/tac.rs
+expression: tac
+---
+t2 := 0
+o0 := t2
+

@@ -1,5 +1,5 @@
-use oreo::ast::scope_resolution::*;
 use oreo::ast::node_db::*;
+use oreo::ast::scope_resolution::*;
 use oreo::ast::symbol::*;
 use oreo::ast::syntax::*;
 use oreo::ast::types::*;
@@ -23,14 +23,11 @@ fn resolver<'a>(input: &'a str, db: &NodeDb<'a>, sym: &SymbolTable<'a>) -> Varia
         .unwrap()
 }
 
-
-
 fn main() {
     let input = r#"program x
         begin
         print "Hello";
         end"#;
-
 
     let db = db_from_str(input);
     dbg!(&db);
