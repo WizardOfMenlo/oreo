@@ -16,6 +16,7 @@ pub struct AST<'a> {
     db: node_db::NodeDbWrap<'a>,
     symbols: symbol::SymbolTable<'a>,
     variables: scope_resolution::VariableResolver,
+    types: types::Typings,
 }
 
 impl<'a> AST<'a> {
@@ -28,11 +29,16 @@ impl<'a> AST<'a> {
             .build(program)
             .expect("Resolution error");
 
+        let types = types::TypingsBuilder::new(&variables, &symbols, &db)
+            .build(program)
+            .expect("Typings errors");
+
         AST {
             db,
             program,
             symbols,
             variables,
+            types,
         }
     }
 
@@ -54,5 +60,10 @@ impl<'a> AST<'a> {
     /// Get the variables resolved
     pub fn variables(&self) -> &scope_resolution::VariableResolver {
         &self.variables
+    }
+
+    /// Get the types resolved
+    pub fn types(&self) -> &types::Typings {
+        &self.types
     }
 }
