@@ -31,7 +31,7 @@ impl<'a> SymbolTable<'a> {
     /// Get the parent of the scope (closest enclosing to furthest)
     pub fn parent_scopes(&self, mut s: ScopeId) -> Vec<ScopeId> {
         let mut v = vec![s];
-        while let Some(scope_id) = self.scopes.get(&s).expect("Invalid scope id").parent {
+        while let Some(scope_id) = self.scopes.get(&s).expect("Invalid scope id").parent() {
             v.push(scope_id);
             s = scope_id;
         }
@@ -58,11 +58,31 @@ impl<'a> SymbolTable<'a> {
     }
 }
 
+/// The type this scope can be
+#[derive(Debug, Clone)]
+pub enum ScopeType {
+    /// A function scope (i.e. does not refer to prev stuff)
+    FunctionScope,
+
+    /// A normal scope (usual nesting)
+    NormalScope,
+}
+
 /// A scope
 #[derive(Debug, Clone)]
 pub struct Scope<'a> {
     parent: Option<ScopeId>,
+    ty: ScopeType,
     variables: PartialSymbolTable<'a>,
+}
+
+impl<'a> Scope<'a> {
+    fn parent(&self) -> Option<ScopeId> {
+        match self.ty {
+            ScopeType::FunctionScope => None,
+            ScopeType::NormalScope => self.parent,
+        }
+    }
 }
 
 /// A symbol table for a scope
@@ -124,6 +144,7 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
             GLOBAL_SCOPE,
             Scope {
                 parent: None,
+                ty: ScopeType::NormalScope,
                 variables: PartialSymbolTable::default(),
             },
         );
@@ -151,9 +172,10 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
             .expect("Invalid scope")
     }
 
-    fn enter_new_scope(&mut self) {
+    fn enter_new_scope(&mut self, ty: ScopeType) {
         let new_scope = Scope {
             parent: Some(self.current_scope),
+            ty,
             variables: PartialSymbolTable::default(),
         };
 
@@ -185,7 +207,7 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
     }
 
     fn compound(&mut self, compound: Compound) {
-        self.enter_new_scope();
+        self.enter_new_scope(ScopeType::NormalScope);
         for statement in compound.statements(self.db) {
             match statement.downcast(self.db) {
                 StatementType::Decl(d) => {
@@ -195,7 +217,7 @@ impl<'a, 'b> SymbolTableBuilder<'a, 'b> {
                     // Note the id is declared in the parent scope
                     self.add_var(f.id(self.db), DeclarationContext::FunctionDecl(f));
                     // We introduce a new scope so the vars don't leak outside
-                    self.enter_new_scope();
+                    self.enter_new_scope(ScopeType::FunctionScope);
                     for arg in f.args(self.db) {
                         self.add_var(arg.id(self.db), DeclarationContext::FunctionArg(arg));
                     }

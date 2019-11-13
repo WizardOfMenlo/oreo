@@ -9,6 +9,7 @@ expression: determinize(table)
         ),
         Scope {
             parent: None,
+            ty: NormalScope,
             variables: PartialSymbolTable {
                 vars: [],
             },
@@ -24,6 +25,7 @@ expression: determinize(table)
                     0,
                 ),
             ),
+            ty: NormalScope,
             variables: PartialSymbolTable {
                 vars: [
                     VariableRecord {
@@ -53,6 +55,7 @@ expression: determinize(table)
                     1,
                 ),
             ),
+            ty: FunctionScope,
             variables: PartialSymbolTable {
                 vars: [
                     VariableRecord {
@@ -95,6 +98,7 @@ expression: determinize(table)
                     2,
                 ),
             ),
+            ty: NormalScope,
             variables: PartialSymbolTable {
                 vars: [
                     VariableRecord {

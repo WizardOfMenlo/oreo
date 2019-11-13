@@ -869,32 +869,6 @@ mod tests {
     }
 
     #[test]
-    fn type_closure_not_set() {
-        let input = r#"program x
-        begin
-        var j := f(1);
-        var x := 0;
-        procedure int f(var y ~ int) begin
-        return x + y;
-        end
-        end"#;
-        assert_debug_snapshot!(test_input(input));
-    }
-
-    #[test]
-    fn type_closure_valid() {
-        let input = r#"program x
-        begin
-        var x := 0;
-        procedure int f(var y ~ int) begin
-        return x + y;
-        end
-        var j := f(1);
-        end"#;
-        assert_debug_snapshot!(test_input(input));
-    }
-
-    #[test]
     fn type_if_cond() {
         let input = r#"program x
         begin
