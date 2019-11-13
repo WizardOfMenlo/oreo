@@ -7,8 +7,9 @@ use crate::common;
 use std::collections::HashMap;
 use std::fmt;
 
+/// A type for a label
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
-struct Label(usize);
+pub struct Label(usize);
 
 impl fmt::Display for Label {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -16,9 +17,13 @@ impl fmt::Display for Label {
     }
 }
 
+/// Any kind of constant
 #[derive(Debug, Copy, Clone)]
-enum Const {
+pub enum Const {
+    /// Int
     Int(isize),
+
+    /// Str (referred by node id)
     Str(NodeId),
 }
 
@@ -31,8 +36,10 @@ impl fmt::Display for Const {
     }
 }
 
+/// One of the allowed operations
 #[derive(Debug, Clone, Copy)]
-enum SimpleOp {
+#[allow(missing_docs)]
+pub enum SimpleOp {
     Multiplicative(common::MultiplicativeOp),
     Additive(common::AdditiveOp),
     Boolean(common::BooleanOp),
@@ -63,9 +70,13 @@ impl fmt::Display for SimpleOp {
     }
 }
 
+/// A location in memory
 #[derive(Debug, Copy, Clone)]
-enum MemoryLocation {
+pub enum MemoryLocation {
+    /// An address
     Address(Address),
+
+    /// A static const
     Const(Const),
 }
 
@@ -78,11 +89,16 @@ impl fmt::Display for MemoryLocation {
     }
 }
 
+/// We use this for unary ops
 const THROWAWAY: MemoryLocation = MemoryLocation::Address(Address::Temp(0));
 
+/// An address in memory
 #[derive(Debug, Copy, Clone)]
-enum Address {
+pub enum Address {
+    /// A tempory transparent elem
     Temp(usize),
+
+    /// A id that refers to the same in source code
     Orig(IdentId),
 }
 
@@ -95,8 +111,10 @@ impl fmt::Display for Address {
     }
 }
 
+/// One of the complex builtin ops
 #[derive(Debug, Copy, Clone)]
-enum Builtin {
+#[allow(missing_docs)]
+pub enum Builtin {
     Print,
     Println,
     Get,
@@ -116,17 +134,37 @@ impl fmt::Display for Builtin {
     }
 }
 
+/// An executable instruction
 #[derive(Debug, Clone)]
-enum Instruction {
+pub enum Instruction {
+    /// Jump to label
     Jump(Label),
+
+    /// Return the value of the mem loc
     Return(MemoryLocation),
+
+    /// Jump to label if memory location is (bool)
     ConditionalJump(MemoryLocation, Label, bool),
+
+    /// A instruction like x := a + b
     Simple(SimpleInstruction),
+
+    /// Initialize an address
     Set(Address, MemoryLocation),
+
+    /// Push this to stack
     Push(MemoryLocation),
+
+    /// Pop to an address
     Pop(Address),
+
+    /// Call the function referred here
     Call(IdentId),
+
+    /// Call a builtin function with a ptr
     CallBuiltin(Builtin, Address),
+
+    /// A label
     Label(Label),
 }
 
@@ -149,8 +187,9 @@ impl fmt::Display for Instruction {
     }
 }
 
+/// An executable intstruction in TAC
 #[derive(Debug, Clone)]
-struct SimpleInstruction {
+pub struct SimpleInstruction {
     out: Address,
     left: MemoryLocation,
     right: MemoryLocation,
@@ -167,8 +206,9 @@ impl fmt::Display for SimpleInstruction {
     }
 }
 
+/// The global TAC scope
 #[derive(Debug)]
-struct GlobalTAC {
+pub struct GlobalTAC {
     functions: HashMap<IdentId, TAC>,
     global: TAC,
 }
@@ -187,8 +227,9 @@ impl fmt::Display for GlobalTAC {
     }
 }
 
+/// a list of instructions
 #[derive(Debug)]
-struct TAC {
+pub struct TAC {
     instructions: Vec<Instruction>,
 }
 
@@ -202,8 +243,9 @@ impl fmt::Display for TAC {
     }
 }
 
+/// Utility for building the TAC
 #[derive(Debug)]
-struct TACBuilder<'a, 'b> {
+pub struct TACBuilder<'a, 'b> {
     ast: &'b AST<'a>,
     current_id: usize,
     current_label: usize,
@@ -213,7 +255,8 @@ struct TACBuilder<'a, 'b> {
 
 use crate::ast::syntax::*;
 impl<'a, 'b> TACBuilder<'a, 'b> {
-    fn new(ast: &'b AST<'a>) -> Self {
+    /// Init this builder
+    pub fn new(ast: &'b AST<'a>) -> Self {
         Self::new_with_instructions(ast, Vec::new())
     }
 
@@ -227,7 +270,8 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
         }
     }
 
-    fn build(self, p: Program) -> GlobalTAC {
+    /// Build given a program
+    pub fn build(self, p: Program) -> GlobalTAC {
         let comp = p.compound(self.ast.db());
         let global = self.build_from_compound(comp);
         GlobalTAC {
