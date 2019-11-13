@@ -610,7 +610,7 @@ mod tests {
     use super::*;
     use insta::assert_display_snapshot;
 
-    fn create_ast<'a>(input: &'a str) -> AST<'a> {
+    fn create_ast(input: &str) -> AST {
         use crate::lexer::lexicalize;
         use crate::lexer::scanner::scan;
         use crate::parser::parse;
