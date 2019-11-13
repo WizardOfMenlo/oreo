@@ -1,3 +1,3 @@
 //! Codegen generation
 
-mod tac;
+pub mod tac;
