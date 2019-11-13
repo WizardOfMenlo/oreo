@@ -1,0 +1,32 @@
+---
+source: src/ast/types.rs
+expression: test_input(input)
+---
+Err(
+    [
+        AssignedBeforeDeclared(
+            IdentId(
+                1,
+            ),
+        ),
+        ExpectedFoundAt(
+            Int,
+            Unspecified,
+            NodeId(
+                32,
+            ),
+        ),
+        AssignedBeforeDeclared(
+            IdentId(
+                1,
+            ),
+        ),
+        ExpectedFoundAt(
+            Int,
+            Unspecified,
+            NodeId(
+                32,
+            ),
+        ),
+    ],
+)

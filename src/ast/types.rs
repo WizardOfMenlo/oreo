@@ -867,4 +867,68 @@ mod tests {
         end"#;
         assert_debug_snapshot!(test_input(input));
     }
+
+    #[test]
+    fn type_closure_not_set() {
+        let input = r#"program x
+        begin
+        var j := f(1);
+        var x := 0;
+        procedure int f(var y ~ int) begin
+        return x + y;
+        end
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_closure_valid() {
+        let input = r#"program x
+        begin
+        var x := 0;
+        procedure int f(var y ~ int) begin
+        return x + y;
+        end
+        var j := f(1);
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_if_cond() {
+        let input = r#"program x
+        begin
+        var y := false;
+        if (y and not true or 1 < 2) then begin
+            y := true;
+        end;
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_if_cond_invalid() {
+        let input = r#"program x
+        begin
+        var y := 1;
+        if (y) then begin
+            y := y + 1024;
+        end;
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_invalid_assign() {
+        let input = r#"program x
+        begin
+        var y;
+        if (true) then begin
+            y := 97;
+        end else begin
+            y := "Hello";
+        end;
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
 }
