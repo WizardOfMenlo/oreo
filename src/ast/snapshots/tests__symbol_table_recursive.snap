@@ -1,0 +1,80 @@
+---
+source: src/ast/symbol.rs
+expression: determinize(table)
+---
+[
+    (
+        ScopeId(
+            0,
+        ),
+        Scope {
+            parent: None,
+            ty: NormalScope,
+            variables: PartialSymbolTable {
+                vars: [],
+            },
+        },
+    ),
+    (
+        ScopeId(
+            1,
+        ),
+        Scope {
+            parent: Some(
+                ScopeId(
+                    0,
+                ),
+            ),
+            ty: NormalScope,
+            variables: PartialSymbolTable {
+                vars: [
+                    VariableRecord {
+                        id: IdentId(
+                            0,
+                        ),
+                        text: "f",
+                        decl: FunctionDecl(
+                            FunctionDecl(
+                                NodeId(
+                                    12,
+                                ),
+                            ),
+                        ),
+                    },
+                ],
+            },
+        },
+    ),
+    (
+        ScopeId(
+            2,
+        ),
+        Scope {
+            parent: Some(
+                ScopeId(
+                    1,
+                ),
+            ),
+            ty: FunctionScope,
+            variables: PartialSymbolTable {
+                vars: [],
+            },
+        },
+    ),
+    (
+        ScopeId(
+            3,
+        ),
+        Scope {
+            parent: Some(
+                ScopeId(
+                    2,
+                ),
+            ),
+            ty: NormalScope,
+            variables: PartialSymbolTable {
+                vars: [],
+            },
+        },
+    ),
+]

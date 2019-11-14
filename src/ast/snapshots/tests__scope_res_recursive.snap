@@ -7,23 +7,23 @@ Ok(
         (
             Node {
                 ty: Identifier,
-                text_range: 40..41,
+                text_range: 50..51,
                 children: [],
             },
             Identifier(
                 NodeId(
-                    1,
+                    2,
                 ),
             ),
             VariableRecord {
                 id: IdentId(
                     0,
                 ),
-                text: "y",
-                decl: Decl(
-                    Decl(
+                text: "f",
+                decl: FunctionDecl(
+                    FunctionDecl(
                         NodeId(
-                            8,
+                            12,
                         ),
                     ),
                 ),
@@ -32,48 +32,23 @@ Ok(
         (
             Node {
                 ty: Identifier,
-                text_range: 74..75,
+                text_range: 95..96,
                 children: [],
             },
             Identifier(
                 NodeId(
-                    10,
+                    3,
                 ),
             ),
             VariableRecord {
                 id: IdentId(
-                    1,
+                    0,
                 ),
                 text: "f",
                 decl: FunctionDecl(
                     FunctionDecl(
                         NodeId(
-                            20,
-                        ),
-                    ),
-                ),
-            },
-        ),
-        (
-            Node {
-                ty: Identifier,
-                text_range: 119..120,
-                children: [],
-            },
-            Identifier(
-                NodeId(
-                    11,
-                ),
-            ),
-            VariableRecord {
-                id: IdentId(
-                    1,
-                ),
-                text: "f",
-                decl: FunctionDecl(
-                    FunctionDecl(
-                        NodeId(
-                            20,
+                            12,
                         ),
                     ),
                 ),

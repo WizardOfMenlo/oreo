@@ -1,0 +1,22 @@
+---
+source: src/ast/types.rs
+expression: test_input(input)
+---
+Ok(
+    (
+        [],
+        [
+            (
+                IdentId(
+                    0,
+                ),
+                FuncType {
+                    args: [],
+                    out: Some(
+                        Int,
+                    ),
+                },
+            ),
+        ],
+    ),
+)

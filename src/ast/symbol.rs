@@ -53,15 +53,23 @@ impl<'a> SymbolTable<'a> {
     ) -> Option<IdentId> {
         self.scopes
             .get(&scope)
-            .and_then(|s| s.variables.vars.iter().filter(|s| if limit_to_func {
-                if let DeclarationContext::FunctionDecl(_) = s.decl {
-                    true
-                } else {
-                    false
-                }
-            } else {
-                true
-            }).find(|s| s.text == identifier))
+            .and_then(|s| {
+                s.variables
+                    .vars
+                    .iter()
+                    .filter(|s| {
+                        if limit_to_func {
+                            if let DeclarationContext::FunctionDecl(_) = s.decl {
+                                true
+                            } else {
+                                false
+                            }
+                        } else {
+                            true
+                        }
+                    })
+                    .find(|s| s.text == identifier)
+            })
             .map(|r| r.id)
     }
 
@@ -296,6 +304,19 @@ mod tests {
             procedure void f(var x ~ int, var y ~ bool) begin
                 var z;
                 var k;
+            end
+       	end"#;
+        let db = db_from_str(input);
+        let table = SymbolTableBuilder::new(input, &db).build(Program::new(db.start_id()));
+        assert_debug_snapshot!(determinize(table));
+    }
+
+    #[test]
+    fn symbol_table_recursive() {
+        let input = r#"
+        program id begin
+            procedure int f() begin
+                return f();
             end
        	end"#;
         let db = db_from_str(input);

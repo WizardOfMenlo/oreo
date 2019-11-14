@@ -513,12 +513,20 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
             res_args.push(res_ty);
         }
 
+        // Insert the signature
+        self.funcs.insert(
+            id,
+            FuncType {
+                out: final_ret_ty,
+                args: res_args,
+            },
+        );
+
         // Validate the body
         let body = f.compound(self.db);
         self.compound(body);
 
         // Check every return statement for well typed ness
-        // TODO: Handle none case
         if let Some(t) = final_ret_ty {
             for s in body.statements(self.db) {
                 match s.downcast(self.db) {
@@ -545,15 +553,6 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
             self.errors
                 .push(TypeError::VoidFunctionWithReturn(body.get_id()));
         }
-
-        // Insert the signature
-        self.funcs.insert(
-            id,
-            FuncType {
-                out: final_ret_ty,
-                args: res_args,
-            },
-        );
     }
 
     fn compound(&mut self, compound: Compound) {
@@ -902,6 +901,18 @@ mod tests {
         end else begin
             y := "Hello";
         end;
+        end"#;
+        assert_debug_snapshot!(test_input(input));
+    }
+
+    #[test]
+    fn type_recursive() {
+        let input = r#"program x
+        begin
+            procedure int f()
+            begin
+                return f();
+            end
         end"#;
         assert_debug_snapshot!(test_input(input));
     }

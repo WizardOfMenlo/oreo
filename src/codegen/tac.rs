@@ -726,9 +726,22 @@ mod tests {
     #[test]
     fn tac_fibonacci() {
         let input = r#"
-        program mult
+        program fib
         begin
+            procedure int fib(var n ~ int)
+            begin
+                if (n == 0) then
+                begin
+                    return 0;
+                end;
 
+                if (n == 1) then
+                begin
+                    return 1;
+                end;
+
+                return fib(n - 1) + fib(n - 2);
+            end
         end
         "#;
         let ast = create_ast(input);

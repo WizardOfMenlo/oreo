@@ -5,20 +5,17 @@ use oreo::lexer::lexicalize;
 use oreo::lexer::scanner::scan;
 use oreo::parser::parse;
 
-use structopt::StructOpt;
-
-#[derive(Debug, StructOpt)]
-struct Args {
-    /// The input to parse
-    #[structopt(short, long)]
-    input: String,
-}
 
 fn main() {
-    std::env::set_var("RUST_BACKTRACE", "1");
-    let opt = Args::from_args();
+    let input = r#"program x
+        begin
+            procedure int f()
+            begin
+                return f();
+            end 
+        end"#;
 
-    let input = &opt.input;
+
     // Note, no error handling here
     let node = parse(lexicalize(scan(input)));
 

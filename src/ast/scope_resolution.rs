@@ -340,7 +340,6 @@ mod tests {
     fn scope_res_recursive() {
         let input = r#"program x
         begin
-            var y := 0;
             procedure int f()
             begin
                 return f();
