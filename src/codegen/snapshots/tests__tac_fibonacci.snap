@@ -1,0 +1,8 @@
+---
+source: src/codegen/tac.rs
+expression: tac
+---
+program mult
+begin mult
+end mult
+

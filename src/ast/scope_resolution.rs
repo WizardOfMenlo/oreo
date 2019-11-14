@@ -83,15 +83,23 @@ impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
         map: &mut HashMap<Identifier, IdentId>,
         errs: &mut Vec<ResolutionError<'a>>,
     ) {
+        use super::symbol::ScopeType;
         let parents = self.symbols.parent_scopes(self.current_scope);
         let id_str = id.id(self.db, self.input);
 
         let mut found = false;
+        let mut in_function_scope = false;
         for scope in parents {
-            if let Some(id_id) = self.symbols.get_id_scope(id_str, scope) {
+            let scope_ty = self.symbols.scope_ty(scope);
+
+            if let Some(id_id) = self.symbols.get_id_scope(id_str, scope, in_function_scope) {
                 found = true;
                 map.insert(id, id_id);
                 break;
+            }
+
+            if scope_ty == ScopeType::FunctionScope {
+                in_function_scope = true;
             }
         }
 
@@ -320,6 +328,23 @@ mod tests {
             end
 
             var x := f();
+        end"#;
+        let db = db_from_str(input);
+        let sym = sym_table_from(input, &db);
+        let resolver =
+            VariableResolverBuilder::new(input, &sym, &db).build(Program::new(db.start_id()));
+        assert_debug_snapshot!(resolver.map(|r| determinize(r, &db, &sym)));
+    }
+
+    #[test]
+    fn scope_res_recursive() {
+        let input = r#"program x
+        begin
+            var y := 0;
+            procedure int f()
+            begin
+                return f();
+            end
         end"#;
         let db = db_from_str(input);
         let sym = sym_table_from(input, &db);

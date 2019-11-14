@@ -31,7 +31,7 @@ impl<'a> SymbolTable<'a> {
     /// Get the parent of the scope (closest enclosing to furthest)
     pub fn parent_scopes(&self, mut s: ScopeId) -> Vec<ScopeId> {
         let mut v = vec![s];
-        while let Some(scope_id) = self.scopes.get(&s).expect("Invalid scope id").parent() {
+        while let Some(scope_id) = self.scopes.get(&s).expect("Invalid scope id").parent {
             v.push(scope_id);
             s = scope_id;
         }
@@ -39,11 +39,29 @@ impl<'a> SymbolTable<'a> {
         v
     }
 
-    /// Get the identifier for an id in scope if any
-    pub fn get_id_scope(&self, identifier: &'a str, scope: ScopeId) -> Option<IdentId> {
+    /// Get the kind of scope we have
+    pub fn scope_ty(&self, s: ScopeId) -> ScopeType {
+        self.scopes.get(&s).expect("Invalid scope id").ty
+    }
+
+    /// Get the identifier for an id in scope if any (with a filter on funcs)
+    pub fn get_id_scope(
+        &self,
+        identifier: &'a str,
+        scope: ScopeId,
+        limit_to_func: bool,
+    ) -> Option<IdentId> {
         self.scopes
             .get(&scope)
-            .and_then(|s| s.variables.vars.iter().find(|s| s.text == identifier))
+            .and_then(|s| s.variables.vars.iter().filter(|s| if limit_to_func {
+                if let DeclarationContext::FunctionDecl(_) = s.decl {
+                    true
+                } else {
+                    false
+                }
+            } else {
+                true
+            }).find(|s| s.text == identifier))
             .map(|r| r.id)
     }
 
@@ -59,7 +77,7 @@ impl<'a> SymbolTable<'a> {
 }
 
 /// The type this scope can be
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum ScopeType {
     /// A function scope (i.e. does not refer to prev stuff)
     FunctionScope,
@@ -74,15 +92,6 @@ pub struct Scope<'a> {
     parent: Option<ScopeId>,
     ty: ScopeType,
     variables: PartialSymbolTable<'a>,
-}
-
-impl<'a> Scope<'a> {
-    fn parent(&self) -> Option<ScopeId> {
-        match self.ty {
-            ScopeType::FunctionScope => None,
-            ScopeType::NormalScope => self.parent,
-        }
-    }
 }
 
 /// A symbol table for a scope
