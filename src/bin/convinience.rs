@@ -1,9 +1,9 @@
+use oreo::ast::syntax::Program;
 use oreo::ast::AST;
+use oreo::codegen::tac::TACBuilder;
 use oreo::lexer::lexicalize;
 use oreo::lexer::scanner::scan;
 use oreo::parser::parse;
-use oreo::ast::syntax::Program;
-use oreo::codegen::tac::TACBuilder;
 
 use structopt::StructOpt;
 

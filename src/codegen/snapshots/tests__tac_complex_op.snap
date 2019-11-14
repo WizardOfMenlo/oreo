@@ -2,6 +2,8 @@
 source: src/codegen/tac.rs
 expression: tac
 ---
+program x
+begin x
 t2 := 1
 t3 := 2
 t4 := t2 + t3
@@ -16,4 +18,5 @@ t12 := 9
 t13 := t11 / t12
 t14 := t10 < t13
 o0 := t14
+end x
 

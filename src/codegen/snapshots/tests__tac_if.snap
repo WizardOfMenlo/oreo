@@ -1,0 +1,15 @@
+---
+source: src/codegen/tac.rs
+expression: tac
+---
+program mult
+begin mult
+t2 := 1
+o0 := t2
+t3 := 1
+jmp L1 !t3
+t4 := 2
+o0 := t4
+L1
+end mult
+

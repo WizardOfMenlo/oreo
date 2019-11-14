@@ -1,0 +1,21 @@
+---
+source: src/codegen/tac.rs
+expression: tac
+---
+program mult
+BeginFunc f0
+Pop o1
+Pop o2
+t2 := o1 * o2
+Return t2
+EndFunc
+begin mult
+t2 := 6
+t3 := 9
+Push t2
+Push t3
+Call f0
+Pop t4
+o3 := t4
+end mult
+

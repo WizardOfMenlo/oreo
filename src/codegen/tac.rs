@@ -209,19 +209,24 @@ impl fmt::Display for SimpleInstruction {
 /// The global TAC scope
 #[derive(Debug)]
 pub struct GlobalTAC {
+    program_name: String,
     functions: HashMap<IdentId, TAC>,
     global: TAC,
 }
 
 impl fmt::Display for GlobalTAC {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "program {}", self.program_name)?;
         for (func_id, code) in &self.functions {
             writeln!(f, "BeginFunc f{}", func_id.0)?;
             write!(f, "{}", code)?;
             writeln!(f, "EndFunc")?;
         }
+        writeln!(f, "begin {}", self.program_name)?;
 
         write!(f, "{}", self.global)?;
+
+        writeln!(f, "end {}", self.program_name)?;
 
         Ok(())
     }
@@ -251,6 +256,7 @@ pub struct TACBuilder<'a, 'b> {
     current_label: usize,
     instructions: Vec<Instruction>,
     functions: HashMap<IdentId, TAC>,
+    program_name: String,
 }
 
 use crate::ast::syntax::*;
@@ -267,6 +273,7 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
             current_label: 0,
             functions: HashMap::new(),
             instructions,
+            program_name: ast.program_name().to_string(),
         }
     }
 
@@ -277,6 +284,7 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
         GlobalTAC {
             functions: global.0.functions,
             global: global.1,
+            program_name: global.0.program_name,
         }
     }
 
@@ -634,4 +642,98 @@ mod tests {
         let tac = TACBuilder::new(&ast).build(Program::new(ast.db().start_id()));
         assert_display_snapshot!(tac);
     }
+
+    #[test]
+    fn tac_func_def() {
+        let input = r#"
+        program mult
+        begin
+
+        procedure int times(var x ~ int, var y ~ int) begin
+            return x * y;
+        end
+
+        var z := times(6, 9);
+        end
+        "#;
+        let ast = create_ast(input);
+        let tac = TACBuilder::new(&ast).build(Program::new(ast.db().start_id()));
+        assert_display_snapshot!(tac);
+    }
+
+    #[test]
+    fn tac_if_else() {
+        let input = r#"
+        program mult
+        begin
+
+        var x;
+        if (true) then
+        begin
+            x := 1;
+        end else
+        begin
+            x := 2;
+        end;
+
+        end
+        "#;
+        let ast = create_ast(input);
+        let tac = TACBuilder::new(&ast).build(Program::new(ast.db().start_id()));
+        assert_display_snapshot!(tac);
+    }
+
+    #[test]
+    fn tac_if() {
+        let input = r#"
+        program mult
+        begin
+
+        var x := 1;
+        if (true) then
+        begin
+            x := 2;
+        end;
+
+        end
+        "#;
+        let ast = create_ast(input);
+        let tac = TACBuilder::new(&ast).build(Program::new(ast.db().start_id()));
+        assert_display_snapshot!(tac);
+    }
+
+    #[test]
+    fn tac_while() {
+        let input = r#"
+        program mult
+        begin
+
+        var x := 10;
+        var acc := 1;
+        while (x > 0)
+        begin
+            acc := acc * x;
+            x := x - 1;
+        end;
+
+        end
+        "#;
+        let ast = create_ast(input);
+        let tac = TACBuilder::new(&ast).build(Program::new(ast.db().start_id()));
+        assert_display_snapshot!(tac);
+    }
+
+    #[test]
+    fn tac_fibonacci() {
+        let input = r#"
+        program mult
+        begin
+
+        end
+        "#;
+        let ast = create_ast(input);
+        let tac = TACBuilder::new(&ast).build(Program::new(ast.db().start_id()));
+        assert_display_snapshot!(tac);
+    }
+
 }

@@ -16,6 +16,7 @@ use std::collections::HashMap;
 /// The AST
 #[derive(Debug)]
 pub struct AST<'a> {
+    program_name: &'a str,
     program: syntax::Program,
     db: node_db::NodeDbWrap<'a>,
     symbols: symbol::SymbolTable<'a>,
@@ -45,12 +46,13 @@ impl<'a> AST<'a> {
             match node.ty() {
                 NodeType::Str => {
                     strings.insert(id, &input[node.text_range.clone()]);
-                },
+                }
                 _ => continue,
             }
         }
 
         AST {
+            program_name: program.id(&db).id(&db, input),
             db,
             program,
             symbols,
@@ -58,6 +60,11 @@ impl<'a> AST<'a> {
             types,
             strings,
         }
+    }
+
+    /// The name of the program
+    pub fn program_name(&self) -> &'a str {
+        self.program_name
     }
 
     /// Get the node db

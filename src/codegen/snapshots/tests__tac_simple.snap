@@ -2,6 +2,9 @@
 source: src/codegen/tac.rs
 expression: tac
 ---
+program x
+begin x
 t2 := 0
 o0 := t2
+end x
 
