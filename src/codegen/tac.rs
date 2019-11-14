@@ -309,7 +309,8 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
     fn declare_function(&mut self, f: FunctionDecl) {
         let id = self.ast.variables().get_id(f.id(self.ast.db()));
         let mut prov_instr = Vec::new();
-        for arg in f.args(self.ast.db()) {
+        // Note we reverse here the order
+        for arg in f.args(self.ast.db()).iter().rev() {
             let id = self.ast.variables().get_id(arg.id(self.ast.db()));
             prov_instr.push(Instruction::Pop(Address::Orig(id)));
         }

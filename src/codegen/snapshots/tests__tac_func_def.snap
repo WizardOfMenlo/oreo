@@ -4,8 +4,8 @@ expression: tac
 ---
 program mult
 BeginFunc f0
-Pop o1
 Pop o2
+Pop o1
 t2 := o1 * o2
 Return t2
 EndFunc
