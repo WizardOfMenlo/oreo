@@ -65,7 +65,6 @@ pub enum SimpleOp {
     Additive(common::AdditiveOp),
     Boolean(common::BooleanOp),
     Relational(common::RelationalOp),
-    Not,
 }
 
 impl fmt::Display for SimpleOp {
@@ -85,7 +84,6 @@ impl fmt::Display for SimpleOp {
                 SimpleOp::Relational(common::RelationalOp::LesserThan) => "<",
                 SimpleOp::Relational(common::RelationalOp::GreaterOrEquals) => ">=",
                 SimpleOp::Relational(common::RelationalOp::GreaterThan) => ">",
-                SimpleOp::Not => "not",
             }
         )
     }
@@ -110,11 +108,8 @@ impl fmt::Display for MemoryLocation {
     }
 }
 
-/// We use this for unary ops
-const THROWAWAY: MemoryLocation = MemoryLocation::Address(Address::Temp(0));
-
 /// An address in memory
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
 pub enum Address {
     /// A tempory transparent elem
     Temp(usize),
@@ -170,6 +165,9 @@ pub enum Instruction {
     /// A instruction like x := a + b
     Simple(SimpleInstruction),
 
+    /// a := not m
+    Not(Address, MemoryLocation, VettedTy),
+
     /// Initialize an address
     Set(Address, MemoryLocation, VettedTy),
 
@@ -207,6 +205,7 @@ impl fmt::Display for Instruction {
             Instruction::CallNoRet(i) => write!(f, "Call f{}", i.0),
             Instruction::CallBuiltin(b, a, _) => write!(f, "Call {} {}", b, a),
             Instruction::Simple(simple) => write!(f, "{}", simple),
+            Instruction::Not(a, m, _) => write!(f, "{} := not {}", a, m),
             Instruction::Label(l) => write!(f, "{}", l),
         }
     }
@@ -639,14 +638,11 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
             AtomType::Not(a) => {
                 let inner = self.atom(a);
                 let out = self.next_temp();
-                self.instructions
-                    .push(Instruction::Simple(SimpleInstruction {
-                        out,
-                        left: MemoryLocation::Address(inner),
-                        right: THROWAWAY,
-                        op: SimpleOp::Not,
-                        ty: VettedTy::Int,
-                    }));
+                self.instructions.push(Instruction::Not(
+                    out,
+                    MemoryLocation::Address(inner),
+                    VettedTy::Int,
+                ));
                 out
             }
         }
