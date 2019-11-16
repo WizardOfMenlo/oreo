@@ -28,18 +28,39 @@ pub enum Type {
 /// A function typing
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FuncType {
-    args: Vec<Type>,
+    pub(crate) args: Vec<Type>,
     // We use None for void
-    out: Option<Type>,
+    pub(crate) out: Option<Type>,
 }
 
 /// All type information for a program
 #[derive(Debug)]
 pub struct Typings {
-    /// Temp
+    /// The type of a given identifier
     pub types: HashMap<IdentId, Type>,
-    ///Temp
+    /// The type of a given function
     pub funcs: HashMap<IdentId, FuncType>,
+
+    /// Expression types
+    pub exprs: HashMap<Expr, Type>
+}
+
+impl Typings {
+    /// Get resolved type for identifier
+    pub fn id_ty(&self, id: IdentId) -> Type {
+        *self.types.get(&id).expect("Type not set")
+    }
+
+    /// Get resolved func type for identifier
+    pub fn func_ty(&self, id: IdentId) -> FuncType {
+        self.funcs.get(&id).expect("Type not set").clone()
+    }
+
+    /// Get resolved ty for expr
+    pub fn expr_ty(&self, id: Expr) -> Type {
+        *self.exprs.get(&id).expect("Type not set")
+    }
+
 }
 
 /// Possible errors in type res
@@ -80,11 +101,13 @@ pub struct TypingsBuilder<'a, 'b, 'c, 'd> {
     db: &'d NodeDb<'a>,
     types: TypeTable,
     funcs: FuncTable,
+    exprs: ExprTable,
     errors: Vec<TypeError>,
 }
 
 type TypeTable = HashMap<IdentId, Type>;
 type FuncTable = HashMap<IdentId, FuncType>;
+type ExprTable = HashMap<Expr, Type>;
 
 impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
     /// Creates a new builder
@@ -99,6 +122,7 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
             db,
             types: HashMap::new(),
             funcs: HashMap::new(),
+            exprs: HashMap::new(),
             errors: Vec::new(),
         }
     }
@@ -125,6 +149,7 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
             Ok(Typings {
                 types: self.types,
                 funcs: self.funcs,
+                exprs: self.exprs,
             })
         }
     }
@@ -387,6 +412,7 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
         let head_ty = self.term_type(head);
         let tail = e.tail(self.db);
         if tail.is_none() {
+            self.exprs.insert(e, head_ty);
             return head_ty;
         }
 
@@ -409,6 +435,7 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
             ));
         }
 
+        self.exprs.insert(e, Type::Bool);
         Type::Bool
     }
 

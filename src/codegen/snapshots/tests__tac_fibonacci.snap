@@ -20,13 +20,11 @@ L2
 t8 := 1
 t9 := o1 - t8
 Push t9
-Call f0
-Pop t10
+t10 := Call f0
 t11 := 2
 t12 := o1 - t11
 Push t12
-Call f0
-Pop t13
+t13 := Call f0
 t14 := t10 + t13
 Return t14
 EndFunc

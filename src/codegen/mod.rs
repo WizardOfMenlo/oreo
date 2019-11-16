@@ -1,61 +1,47 @@
 //! Codegen generation
 
 pub mod tac;
-
+use crate::ast::AST;
 use tac::*;
 
-#[derive(Clone, Copy)]
-enum AvailableRegister {
-    Eax,
-    Ecx,
-}
+use std::collections::HashMap;
 
-impl AvailableRegister {
-    fn iter() -> impl Iterator<Item = &'static AvailableRegister> {
-        let values = &[AvailableRegister::Eax, AvailableRegister::Ecx];
-        values.iter()
+fn hla(g: GlobalTAC, ast: &AST<'_>) {
+    println!("program {};", &g.program_name);
+    for (f_id, f_code) in g.functions {
+        println!("procedure f{}", f_id.0);
+        println!("begin f{}", f_id.0);
+        tac(f_code, ast);
+        println!("end f{}", f_id.0);
     }
+    println!("begin {};", &g.program_name);
+    tac(g.global, ast);
+    println!("end {};", &g.program_name);
 }
 
-struct Register {
-    register: AvailableRegister,
-    variable: Option<Address>,
-}
-
-impl Register {
-    fn can_be_reused(&self) -> bool {
-        match self.variable {
-            Some(Address::Orig(_)) => false,
-            _ => true,
+fn tac(g: TAC, ast: &AST<'_>) {
+    for instr in g.instructions {
+        /*
+        match instr {
+            Instruction::Jump(l) => println!("jmp {};", l),
+            Instruction::Label(l) => println!("{}:", l),
         }
-    }
-
-    fn assign_to_address(&mut self, a: Address) {
-        self.variable = Some(a);
+        */
     }
 }
 
-struct HLATranslator {
+enum Register {
+    EAX,
+}
+
+enum ValueLocation {
+    Register(Register),
+    Stack(usize),
+}
+
+struct HLABuilder<'a, 'b> {
+    ast: &'b AST<'a>,
     buf: String,
-    registers: Vec<Register>,
+    variables: HashMap<Address, ValueLocation>,
     stack: Vec<Address>,
-}
-
-impl HLATranslator {
-    fn new() -> Self {
-        HLATranslator {
-            buf: String::new(),
-            registers: AvailableRegister::iter()
-                .map(|r| Register {
-                    register: *r,
-                    variable: None,
-                })
-                .collect(),
-            stack: Vec::new(),
-        }
-    }
-
-    fn build(self, t: GlobalTAC) -> String {
-        self.buf
-    }
 }

@@ -1,11 +1,32 @@
 //! Module with facilities for Three Address Code gen
 
+use crate::ast::types::Type;
 use crate::ast::IdentId;
 use crate::ast::NodeId;
 use crate::ast::AST;
 use crate::common;
 use std::collections::HashMap;
 use std::fmt;
+
+/// A struct for any possible type we use here
+#[derive(Debug, Clone, Copy)]
+pub enum VettedTy {
+    /// Integer (or boolean since bool just a fancy int)
+    Int,
+
+    /// String
+    Str,
+}
+
+impl From<Type> for VettedTy {
+    fn from(t: Type) -> Self {
+        match t {
+            Type::Bool | Type::Int => VettedTy::Int,
+            Type::Str => VettedTy::Str,
+            Type::Unspecified => panic!("Type res has failed"),
+        }
+    }
+}
 
 /// A type for a label
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
@@ -141,28 +162,31 @@ pub enum Instruction {
     Jump(Label),
 
     /// Return the value of the mem loc
-    Return(MemoryLocation),
+    Return(MemoryLocation, VettedTy),
 
     /// Jump to label if memory location is (bool)
-    ConditionalJump(MemoryLocation, Label, bool),
+    ConditionalJump(MemoryLocation, Type, Label, bool),
 
     /// A instruction like x := a + b
     Simple(SimpleInstruction),
 
     /// Initialize an address
-    Set(Address, MemoryLocation),
+    Set(Address, MemoryLocation, VettedTy),
 
     /// Push this to stack
-    Push(MemoryLocation),
+    Push(MemoryLocation, VettedTy),
 
     /// Pop to an address
-    Pop(Address),
+    Pop(Address, VettedTy),
 
-    /// Call the function referred here
-    Call(IdentId),
+    /// Call the function referred here (and store result in Address)
+    Call(IdentId, Address, VettedTy),
+
+    /// Call the function referred here (and store result in Address)
+    CallNoRet(IdentId),
 
     /// Call a builtin function with a ptr
-    CallBuiltin(Builtin, Address),
+    CallBuiltin(Builtin, Address, VettedTy),
 
     /// A label
     Label(Label),
@@ -172,15 +196,16 @@ impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Instruction::Jump(l) => write!(f, "jmp {}", l),
-            Instruction::Return(m) => write!(f, "Return {}", m),
-            Instruction::ConditionalJump(m, l, b) => {
+            Instruction::Return(m, _) => write!(f, "Return {}", m),
+            Instruction::ConditionalJump(m, _, l, b) => {
                 write!(f, "jmp {} {}{}", l, if *b { "" } else { "!" }, m)
             }
-            Instruction::Set(a, m) => write!(f, "{} := {}", a, m),
-            Instruction::Push(m) => write!(f, "Push {}", m),
-            Instruction::Pop(a) => write!(f, "Pop {}", a),
-            Instruction::Call(i) => write!(f, "Call f{}", i.0),
-            Instruction::CallBuiltin(b, a) => write!(f, "Call {} {}", b, a),
+            Instruction::Set(a, m, _) => write!(f, "{} := {}", a, m),
+            Instruction::Push(m, _) => write!(f, "Push {}", m),
+            Instruction::Pop(a, _) => write!(f, "Pop {}", a),
+            Instruction::Call(i, a, _) => write!(f, "{} := Call f{}", a, i.0),
+            Instruction::CallNoRet(i) => write!(f, "Call f{}", i.0),
+            Instruction::CallBuiltin(b, a, _) => write!(f, "Call {} {}", b, a),
             Instruction::Simple(simple) => write!(f, "{}", simple),
             Instruction::Label(l) => write!(f, "{}", l),
         }
@@ -194,6 +219,7 @@ pub struct SimpleInstruction {
     left: MemoryLocation,
     right: MemoryLocation,
     op: SimpleOp,
+    ty: VettedTy,
 }
 
 impl fmt::Display for SimpleInstruction {
@@ -209,9 +235,9 @@ impl fmt::Display for SimpleInstruction {
 /// The global TAC scope
 #[derive(Debug)]
 pub struct GlobalTAC {
-    program_name: String,
-    functions: HashMap<IdentId, TAC>,
-    global: TAC,
+    pub(super) program_name: String,
+    pub(super) functions: HashMap<IdentId, TAC>,
+    pub(super) global: TAC,
 }
 
 impl fmt::Display for GlobalTAC {
@@ -235,7 +261,7 @@ impl fmt::Display for GlobalTAC {
 /// a list of instructions
 #[derive(Debug)]
 pub struct TAC {
-    instructions: Vec<Instruction>,
+    pub(super) instructions: Vec<Instruction>,
 }
 
 impl fmt::Display for TAC {
@@ -312,7 +338,8 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
         // Note we reverse here the order
         for arg in f.args(self.ast.db()).iter().rev() {
             let id = self.ast.variables().get_id(arg.id(self.ast.db()));
-            prov_instr.push(Instruction::Pop(Address::Orig(id)));
+            let ty = self.ast.types().id_ty(id).into();
+            prov_instr.push(Instruction::Pop(Address::Orig(id), ty));
         }
 
         let inner = TACBuilder::new_with_instructions(self.ast, prov_instr)
@@ -321,25 +348,35 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
         self.functions.insert(id, inner.1);
     }
 
-    fn func_call(&mut self, f: FunctionCall) -> Address {
+    fn func_call(&mut self, f: FunctionCall) -> Option<Address> {
         let id = self.ast.variables().get_id(f.id(self.ast.db()));
         let mut out = Vec::new();
         for arg in f.args(self.ast.db()) {
-            out.push(self.expr(arg.expr(self.ast.db())));
+            let expr = arg.expr(self.ast.db());
+            let output_var = self.expr(expr);
+            let expr_ty = self.ast.types().expr_ty(expr);
+            out.push((output_var, expr_ty));
         }
 
-        for id in out {
+        for (id, ty) in out {
             self.instructions
-                .push(Instruction::Push(MemoryLocation::Address(id)));
+                .push(Instruction::Push(MemoryLocation::Address(id), ty.into()));
         }
 
-        self.instructions.push(Instruction::Call(id));
+        let func_ty = self.ast.types().func_ty(id);
 
-        let out = self.next_temp();
-
-        self.instructions.push(Instruction::Pop(out));
-
-        out
+        match func_ty.out {
+            Some(ty) => {
+                let out = self.next_temp();
+                self.instructions
+                    .push(Instruction::Call(id, out, ty.into()));
+                Some(out)
+            }
+            None => {
+                self.instructions.push(Instruction::CallNoRet(id));
+                None
+            }
+        }
     }
 
     fn compound(&mut self, c: Compound) {
@@ -347,17 +384,22 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
             match statement.downcast(self.ast.db()) {
                 StatementType::Assign(a) => {
                     let id = self.ast.variables().get_id(a.id(self.ast.db()));
+                    let id_ty = self.ast.types().id_ty(id).into();
                     let expr_output = MemoryLocation::Address(self.expr(a.expr(self.ast.db())));
                     self.instructions
-                        .push(Instruction::Set(Address::Orig(id), expr_output));
+                        .push(Instruction::Set(Address::Orig(id), expr_output, id_ty));
                 }
                 StatementType::Decl(d) => {
                     let expr = d.expr(self.ast.db());
                     if let Some(e) = expr {
                         let id = self.ast.variables().get_id(d.id(self.ast.db()));
+                        let id_ty = self.ast.types().id_ty(id).into();
                         let expr_output = MemoryLocation::Address(self.expr(e));
-                        self.instructions
-                            .push(Instruction::Set(Address::Orig(id), expr_output));
+                        self.instructions.push(Instruction::Set(
+                            Address::Orig(id),
+                            expr_output,
+                            id_ty,
+                        ));
                     }
                 }
                 StatementType::FunctionDecl(f) => {
@@ -372,6 +414,7 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                     let end_label = self.next_label();
                     self.instructions.push(Instruction::ConditionalJump(
                         condition_var,
+                        Type::Bool,
                         end_label,
                         false,
                     ));
@@ -395,6 +438,7 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                         MemoryLocation::Address(self.expr(w.condition(self.ast.db())));
                     self.instructions.push(Instruction::ConditionalJump(
                         condition_var,
+                        Type::Bool,
                         end_label,
                         false,
                     ));
@@ -403,24 +447,41 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                     self.instructions.push(Instruction::Label(end_label));
                 }
                 StatementType::Return(r) => {
-                    let expr = MemoryLocation::Address(self.expr(r.expr(self.ast.db())));
-                    self.instructions.push(Instruction::Return(expr));
+                    let expr = r.expr(self.ast.db());
+                    let expr_output = MemoryLocation::Address(self.expr(expr));
+                    let expr_ty = self.ast.types().expr_ty(expr).into();
+
+                    self.instructions
+                        .push(Instruction::Return(expr_output, expr_ty));
                 }
                 StatementType::PrintStat(p) => match p.downcast(self.ast.db()) {
                     PrintTypes::Get(g) => {
                         let id = self.ast.variables().get_id(g.id(self.ast.db()));
-                        self.instructions
-                            .push(Instruction::CallBuiltin(Builtin::Get, Address::Orig(id)));
+                        self.instructions.push(Instruction::CallBuiltin(
+                            Builtin::Get,
+                            Address::Orig(id),
+                            VettedTy::Str,
+                        ));
                     }
                     PrintTypes::Print(p) => {
-                        let expr = self.expr(p.expr(self.ast.db()));
-                        self.instructions
-                            .push(Instruction::CallBuiltin(Builtin::Print, expr));
+                        let expr = p.expr(self.ast.db());
+                        let expr_out = self.expr(expr);
+                        let expr_ty = self.ast.types().expr_ty(expr).into();
+                        self.instructions.push(Instruction::CallBuiltin(
+                            Builtin::Print,
+                            expr_out,
+                            expr_ty,
+                        ));
                     }
                     PrintTypes::Println(p) => {
-                        let expr = self.expr(p.expr(self.ast.db()));
-                        self.instructions
-                            .push(Instruction::CallBuiltin(Builtin::Println, expr));
+                        let expr = p.expr(self.ast.db());
+                        let expr_out = self.expr(expr);
+                        let expr_ty = self.ast.types().expr_ty(expr).into();
+                        self.instructions.push(Instruction::CallBuiltin(
+                            Builtin::Println,
+                            expr_out,
+                            expr_ty,
+                        ));
                     }
                 },
             }
@@ -451,6 +512,7 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                 left: MemoryLocation::Address(lhs),
                 right: MemoryLocation::Address(rhs),
                 op: SimpleOp::Boolean(op),
+                ty: VettedTy::Int,
             }));
 
         let tail = e.tail(self.ast.db());
@@ -486,6 +548,8 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                 left: MemoryLocation::Address(lhs),
                 right: MemoryLocation::Address(rhs),
                 op: SimpleOp::Relational(op),
+                // Note that the two operands are ints
+                ty: VettedTy::Int,
             }));
 
         let tail = e.tail(self.ast.db());
@@ -521,6 +585,7 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                 left: MemoryLocation::Address(lhs),
                 right: MemoryLocation::Address(rhs),
                 op: SimpleOp::Additive(op),
+                ty: VettedTy::Int,
             }));
 
         let tail = e.tail(self.ast.db());
@@ -556,6 +621,7 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                 left: MemoryLocation::Address(lhs),
                 right: MemoryLocation::Address(rhs),
                 op: SimpleOp::Multiplicative(op),
+                ty: VettedTy::Int,
             }));
 
         let tail = e.tail(self.ast.db());
@@ -579,6 +645,7 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                         left: MemoryLocation::Address(inner),
                         right: THROWAWAY,
                         op: SimpleOp::Not,
+                        ty: VettedTy::Int,
                     }));
                 out
             }
@@ -592,24 +659,31 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                 self.instructions.push(Instruction::Set(
                     out,
                     MemoryLocation::Const(Const::Int(b as isize)),
+                    VettedTy::Int,
                 ));
                 out
             }
             UnitType::Int(i) => {
                 let out = self.next_temp();
-                self.instructions
-                    .push(Instruction::Set(out, MemoryLocation::Const(Const::Int(i))));
+                self.instructions.push(Instruction::Set(
+                    out,
+                    MemoryLocation::Const(Const::Int(i)),
+                    VettedTy::Int,
+                ));
                 out
             }
             UnitType::Str(s) => {
                 let out = self.next_temp();
-                self.instructions
-                    .push(Instruction::Set(out, MemoryLocation::Const(Const::Str(s))));
+                self.instructions.push(Instruction::Set(
+                    out,
+                    MemoryLocation::Const(Const::Str(s)),
+                    VettedTy::Str,
+                ));
                 out
             }
             UnitType::BracketedExpr(e) => self.expr(e),
             UnitType::Identifier(i) => Address::Orig(self.ast.variables().get_id(i)),
-            UnitType::FunctionCall(f) => self.func_call(f),
+            UnitType::FunctionCall(f) => self.func_call(f).expect("Type checking must have failed"),
         }
     }
 }

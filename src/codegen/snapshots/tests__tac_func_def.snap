@@ -14,8 +14,7 @@ t2 := 6
 t3 := 9
 Push t2
 Push t3
-Call f0
-Pop t4
+t4 := Call f0
 o3 := t4
 end mult
 
