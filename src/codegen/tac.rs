@@ -127,6 +127,16 @@ impl fmt::Display for Address {
     }
 }
 
+impl Address {
+    /// Is this a temporary
+    pub fn is_temp(&self) -> bool {
+        match self {
+            Address::Temp(_) => true,
+            _ => false,
+        }
+    }
+}
+
 /// One of the complex builtin ops
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
@@ -261,10 +271,25 @@ impl fmt::Display for GlobalTAC {
 #[derive(Debug)]
 pub struct TAC {
     pub(super) instructions: Vec<Instruction>,
+    pub(super) stack: HashMap<IdentId, VettedTy>,
 }
 
 impl fmt::Display for TAC {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut s: Vec<_> = self.stack.iter().collect();
+        s.sort_by(|a, b| (a.0).0.cmp(&(b.0).0));
+        for (var, ty) in &s {
+            writeln!(
+                f,
+                "o{} : {}",
+                var.0,
+                match ty {
+                    VettedTy::Int => "i32",
+                    VettedTy::Str => "str",
+                }
+            )?;
+        }
+
         for instr in &self.instructions {
             writeln!(f, "{}", instr)?;
         }
@@ -281,6 +306,7 @@ pub struct TACBuilder<'a, 'b> {
     current_label: usize,
     instructions: Vec<Instruction>,
     functions: HashMap<IdentId, TAC>,
+    stack: HashMap<IdentId, VettedTy>,
     program_name: String,
 }
 
@@ -298,6 +324,7 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
             current_label: 0,
             functions: HashMap::new(),
             instructions,
+            stack: HashMap::new(),
             program_name: ast.program_name().to_string(),
         }
     }
@@ -317,8 +344,16 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
         self.compound(p);
 
         let instructions = self.instructions.clone();
+        let stack = self.stack.clone();
+        self.stack.clear();
 
-        (self, TAC { instructions })
+        (
+            self,
+            TAC {
+                instructions,
+                stack,
+            },
+        )
     }
 
     fn next_label(&mut self) -> Label {
@@ -390,9 +425,10 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
                 }
                 StatementType::Decl(d) => {
                     let expr = d.expr(self.ast.db());
+                    let id = self.ast.variables().get_id(d.id(self.ast.db()));
+                    let id_ty = self.ast.types().id_ty(id).into();
+                    self.stack.insert(id, id_ty);
                     if let Some(e) = expr {
-                        let id = self.ast.variables().get_id(d.id(self.ast.db()));
-                        let id_ty = self.ast.types().id_ty(id).into();
                         let expr_output = MemoryLocation::Address(self.expr(e));
                         self.instructions.push(Instruction::Set(
                             Address::Orig(id),

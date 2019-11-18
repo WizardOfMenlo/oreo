@@ -10,6 +10,7 @@ t2 := o1 * o2
 Return t2
 EndFunc
 begin mult
+o3 : i32
 t2 := 6
 t3 := 9
 Push t2

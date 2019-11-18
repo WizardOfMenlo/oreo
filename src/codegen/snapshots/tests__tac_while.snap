@@ -4,6 +4,8 @@ expression: tac
 ---
 program mult
 begin mult
+o0 : i32
+o1 : i32
 t2 := 10
 o0 := t2
 t3 := 1

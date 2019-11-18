@@ -4,6 +4,7 @@ expression: tac
 ---
 program x
 begin x
+o0 : i32
 t2 := 1
 t3 := 2
 t4 := t2 + t3

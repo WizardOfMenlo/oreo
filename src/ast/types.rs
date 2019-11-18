@@ -42,7 +42,7 @@ pub struct Typings {
     pub funcs: HashMap<IdentId, FuncType>,
 
     /// Expression types
-    pub exprs: HashMap<Expr, Type>
+    pub exprs: HashMap<Expr, Type>,
 }
 
 impl Typings {
@@ -60,7 +60,6 @@ impl Typings {
     pub fn expr_ty(&self, id: Expr) -> Type {
         *self.exprs.get(&id).expect("Type not set")
     }
-
 }
 
 /// Possible errors in type res

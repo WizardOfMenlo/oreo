@@ -1,20 +1,18 @@
 use oreo::ast::syntax::Program;
 use oreo::ast::AST;
 use oreo::codegen::tac::TACBuilder;
+use oreo::codegen::*;
 use oreo::lexer::lexicalize;
 use oreo::lexer::scanner::scan;
 use oreo::parser::parse;
 
-
 fn main() {
     let input = r#"program x
         begin
-            procedure int f()
-            begin
-                return f();
-            end 
+            var x := 1;
+            var y := x;
+            var z := y;
         end"#;
-
 
     // Note, no error handling here
     let node = parse(lexicalize(scan(input)));
@@ -27,7 +25,9 @@ fn main() {
 
     let tac = TACBuilder::new(&ast).build(Program::new(ast.db().start_id()));
 
-    dbg!(&tac);
-
     println!("{}", tac);
+
+    let hla = HLABuilder::new().build(&tac);
+
+    dbg!(hla);
 }
