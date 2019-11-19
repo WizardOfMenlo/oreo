@@ -3,8 +3,7 @@ source: src/codegen/tac.rs
 expression: tac
 ---
 program fib
-BeginFunc f0
-Pop o1
+BeginFunc f0(o1 ~ Int,)
 t2 := 0
 t3 := o1 == t2
 jmp L1 !t3
@@ -19,12 +18,10 @@ Return t7
 L2
 t8 := 1
 t9 := o1 - t8
-Push t9
-t10 := Call f0
+t10 := Call f0(t9,)
 t11 := 2
 t12 := o1 - t11
-Push t12
-t13 := Call f0
+t13 := Call f0(t12,)
 t14 := t10 + t13
 Return t14
 EndFunc

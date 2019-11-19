@@ -181,23 +181,26 @@ pub enum Instruction {
     /// Initialize an address
     Set(Address, MemoryLocation, VettedTy),
 
-    /// Push this to stack
-    Push(MemoryLocation, VettedTy),
-
-    /// Pop to an address
-    Pop(Address, VettedTy),
+    /// Call the function referred here (and store result in Address)
+    Call(IdentId, Address, VettedTy, Vec<Address>),
 
     /// Call the function referred here (and store result in Address)
-    Call(IdentId, Address, VettedTy),
-
-    /// Call the function referred here (and store result in Address)
-    CallNoRet(IdentId),
+    CallNoRet(IdentId, Vec<Address>),
 
     /// Call a builtin function with a ptr
     CallBuiltin(Builtin, Address, VettedTy),
 
     /// A label
     Label(Label),
+}
+
+fn fmt_args(addrs: &[Address]) -> String {
+    let mut buf = String::new();
+    for addr in addrs {
+        buf.push_str(&format!("{},", addr));
+    }
+
+    buf
 }
 
 impl fmt::Display for Instruction {
@@ -209,10 +212,10 @@ impl fmt::Display for Instruction {
                 write!(f, "jmp {} {}{}", l, if *b { "" } else { "!" }, m)
             }
             Instruction::Set(a, m, _) => write!(f, "{} := {}", a, m),
-            Instruction::Push(m, _) => write!(f, "Push {}", m),
-            Instruction::Pop(a, _) => write!(f, "Pop {}", a),
-            Instruction::Call(i, a, _) => write!(f, "{} := Call f{}", a, i.0),
-            Instruction::CallNoRet(i) => write!(f, "Call f{}", i.0),
+            Instruction::Call(i, a, _, addrs) => {
+                write!(f, "{} := Call f{}({})", a, i.0, fmt_args(addrs))
+            }
+            Instruction::CallNoRet(i, addrs) => write!(f, "Call f{}({})", i.0, fmt_args(addrs)),
             Instruction::CallBuiltin(b, a, _) => write!(f, "Call {} {}", b, a),
             Instruction::Simple(simple) => write!(f, "{}", simple),
             Instruction::Not(a, m, _) => write!(f, "{} := not {}", a, m),
@@ -241,19 +244,30 @@ impl fmt::Display for SimpleInstruction {
     }
 }
 
+type ArgDecl = (IdentId, VettedTy);
+
 /// The global TAC scope
 #[derive(Debug)]
 pub struct GlobalTAC {
     pub(super) program_name: String,
-    pub(super) functions: HashMap<IdentId, TAC>,
+    pub(super) functions: HashMap<IdentId, (TAC, Vec<ArgDecl>)>,
     pub(super) global: TAC,
+}
+
+fn fmt_decl_args(addrs: &[ArgDecl]) -> String {
+    let mut buf = String::new();
+    for (addr, ty) in addrs {
+        buf.push_str(&format!("o{} ~ {:?},", addr.0, ty));
+    }
+
+    buf
 }
 
 impl fmt::Display for GlobalTAC {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "program {}", self.program_name)?;
-        for (func_id, code) in &self.functions {
-            writeln!(f, "BeginFunc f{}", func_id.0)?;
+        for (func_id, (code, args)) in &self.functions {
+            writeln!(f, "BeginFunc f{}({})", func_id.0, fmt_decl_args(args))?;
             write!(f, "{}", code)?;
             writeln!(f, "EndFunc")?;
         }
@@ -305,7 +319,7 @@ pub struct TACBuilder<'a, 'b> {
     current_id: usize,
     current_label: usize,
     instructions: Vec<Instruction>,
-    functions: HashMap<IdentId, TAC>,
+    functions: HashMap<IdentId, (TAC, Vec<ArgDecl>)>,
     stack: HashMap<IdentId, VettedTy>,
     program_name: String,
 }
@@ -368,18 +382,19 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
 
     fn declare_function(&mut self, f: FunctionDecl) {
         let id = self.ast.variables().get_id(f.id(self.ast.db()));
-        let mut prov_instr = Vec::new();
-        // Note we reverse here the order
-        for arg in f.args(self.ast.db()).iter().rev() {
-            let id = self.ast.variables().get_id(arg.id(self.ast.db()));
-            let ty = self.ast.types().id_ty(id).into();
-            prov_instr.push(Instruction::Pop(Address::Orig(id), ty));
-        }
+        let args = f
+            .args(self.ast.db())
+            .iter()
+            .map(|arg| {
+                let id = self.ast.variables().get_id(arg.id(self.ast.db()));
+                let ty = self.ast.types().id_ty(id).into();
+                (id, ty)
+            })
+            .collect();
 
-        let inner = TACBuilder::new_with_instructions(self.ast, prov_instr)
-            .build_from_compound(f.compound(self.ast.db()));
+        let inner = TACBuilder::new(self.ast).build_from_compound(f.compound(self.ast.db()));
 
-        self.functions.insert(id, inner.1);
+        self.functions.insert(id, (inner.1, args));
     }
 
     fn func_call(&mut self, f: FunctionCall) -> Option<Address> {
@@ -392,9 +407,9 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
             out.push((output_var, expr_ty));
         }
 
-        for (id, ty) in out {
-            self.instructions
-                .push(Instruction::Push(MemoryLocation::Address(id), ty.into()));
+        let mut args = Vec::new();
+        for (id, _) in out {
+            args.push(id);
         }
 
         let func_ty = self.ast.types().func_ty(id);
@@ -403,11 +418,11 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
             Some(ty) => {
                 let out = self.next_temp();
                 self.instructions
-                    .push(Instruction::Call(id, out, ty.into()));
+                    .push(Instruction::Call(id, out, ty.into(), args));
                 Some(out)
             }
             None => {
-                self.instructions.push(Instruction::CallNoRet(id));
+                self.instructions.push(Instruction::CallNoRet(id, args));
                 None
             }
         }

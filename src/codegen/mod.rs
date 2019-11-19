@@ -34,7 +34,7 @@ pub enum HLAInstruction<'a> {
     BeginProgram(&'a str),
     EndProgram(&'a str),
     Procedure(usize),
-    BeginProcedure(usize),
+    BeginProcedure(usize, Vec<(IdentId, VettedTy)>),
     EndProcedure(usize),
     DeclInt(ValueLocation),
     DeclStr(ValueLocation),
@@ -51,7 +51,7 @@ pub enum HLAInstruction<'a> {
     Label(Label),
     Jump(Label),
     CondJump(Label, bool),
-    Call(IdentId),
+    Call(IdentId, Vec<ValueLocation>),
 }
 
 #[derive(Debug)]
@@ -75,9 +75,10 @@ impl<'a> HLABuilder<'a> {
     pub fn build(mut self, global: &'a GlobalTAC) -> Vec<HLAInstruction<'a>> {
         // TODO: String definition
         self.buf.push(HLAInstruction::Program(&global.program_name));
-        for (f_id, f_code) in &global.functions {
+        for (f_id, (f_code, args)) in &global.functions {
             self.buf.push(HLAInstruction::Procedure(f_id.0));
-            self.buf.push(HLAInstruction::BeginProcedure(f_id.0));
+            self.buf
+                .push(HLAInstruction::BeginProcedure(f_id.0, args.clone()));
             self.tac(f_code);
             self.buf.push(HLAInstruction::EndProcedure(f_id.0));
         }
@@ -155,9 +156,10 @@ impl<'a> HLABuilder<'a> {
                         },
                     }
                 }
-                Instruction::Call(id, ret, _) => {
+                Instruction::Call(id, ret, _, args) => {
                     self.free_register(Register::EAX);
-                    self.buf.push(HLAInstruction::Call(*id));
+                    let args = args.iter().map(|i| self.get_location(*i)).collect();
+                    self.buf.push(HLAInstruction::Call(*id, args));
                     self.point_addr_to_register(*ret, Register::EAX);
                 }
                 _ => panic!("Not implemented yet"),
@@ -274,11 +276,7 @@ impl<'a> HLABuilder<'a> {
             return;
         }
 
-        let temp = self
-            .temps
-            .iter()
-            .find(|(_, &r)| r == reg)
-            .map(|(t, _)| *t);
+        let temp = self.temps.iter().find(|(_, &r)| r == reg).map(|(t, _)| *t);
         if let Some(temp) = temp {
             let new_reg = self.next_available_register();
             self.buf.push(HLAInstruction::MovFromMem(
