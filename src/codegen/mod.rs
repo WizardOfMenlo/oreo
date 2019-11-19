@@ -99,15 +99,9 @@ impl<'a> HLABuilder<'a> {
             match instruction {
                 Instruction::Jump(l) => self.buf.push(HLAInstruction::Jump(*l)),
                 Instruction::Label(l) => self.buf.push(HLAInstruction::Label(*l)),
-                Instruction::Set(addr, mem, _) => match mem {
-                    MemoryLocation::Address(a) => match a {
-                        Address::Orig(orig) => {
-                            self.copy_to_new_dest(*orig, *addr);
-                        }
-                        Address::Temp(t) => self.rename(*t, *addr),
-                    },
-                    MemoryLocation::Const(c) => self.set_const(*addr, *c),
-                },
+                Instruction::Set(addr, mem, _) => {
+                    self.load_memory_location(*addr, *mem);
+                }
                 Instruction::ConditionalJump(mem, _, label, b) => {
                     match mem {
                         // Optimize constants
@@ -126,7 +120,10 @@ impl<'a> HLABuilder<'a> {
                         }
                     }
                 }
-                Instruction::Not(out, mem, _) => {}
+                Instruction::Not(out, mem, _) => {
+                    let out = self.load_memory_location(*out, *mem);
+                    self.buf.push(HLAInstruction::Negate(ValueLocation::Register(out)));
+                }
                 Instruction::Simple(instr) => {}
                 _ => panic!("Not implemented yet"),
             };
@@ -148,7 +145,7 @@ impl<'a> HLABuilder<'a> {
     }
 
     // Take ownership of a temporary to put into a identifier
-    fn rename(&mut self, temp: usize, res: Address) {
+    fn rename(&mut self, temp: usize, res: Address) -> Register {
         let temp_reg = self.get_temp_register(temp);
 
         match res {
@@ -158,7 +155,9 @@ impl<'a> HLABuilder<'a> {
             Address::Temp(t) => {
                 self.temps.insert(t, temp_reg);
             }
-        }
+        };
+
+        temp_reg
     }
 
     fn copy_to_new_dest(&mut self, id: IdentId, dest: Address) -> Register {
@@ -190,18 +189,32 @@ impl<'a> HLABuilder<'a> {
         r
     }
 
-    fn set_const(&mut self, addr: Address, c: Const) {
+    fn set_const(&mut self, addr: Address, c: Const) -> Register {
         let reg = self.init_address(addr);
         self.buf.push(match c {
             Const::Int(i) => HLAInstruction::SetInt(reg, i),
             Const::Str(i) => HLAInstruction::SetStr(reg, i),
-        })
+        });
+
+        reg
     }
 
     fn load_into_register(&mut self, addr: Address) -> Register {
         match addr {
             Address::Temp(i) => self.get_temp_register(i),
             Address::Orig(i) => self.copy_to_new_dest(i, addr),
+        }
+    }
+
+    fn load_memory_location(&mut self, addr: Address, mem: MemoryLocation) -> Register {
+        match mem {
+            MemoryLocation::Address(a) => match a {
+                Address::Orig(orig) => {
+                    self.copy_to_new_dest(orig, addr)
+                }
+                Address::Temp(t) => self.rename(t, addr),
+            },
+            MemoryLocation::Const(c) => self.set_const(addr, c),
         }
     }
 

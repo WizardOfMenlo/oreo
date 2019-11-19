@@ -9,9 +9,8 @@ use oreo::parser::parse;
 fn main() {
     let input = r#"program x
         begin
-            var x := 1;
-            var y := x;
-            var z := y;
+            var x := false;
+            var y := not x;
         end"#;
 
     // Note, no error handling here
