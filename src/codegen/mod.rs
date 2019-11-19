@@ -55,7 +55,8 @@ pub enum HLAInstruction<'a> {
 #[derive(Debug)]
 pub struct HLABuilder<'a> {
     buf: Vec<HLAInstruction<'a>>,
-    variables: HashMap<Address, ValueLocation>,
+    variables: HashMap<IdentId, ValueLocation>,
+    temps: HashMap<usize, Register>,
     free_registers: Vec<Register>,
 }
 
@@ -64,7 +65,7 @@ impl<'a> HLABuilder<'a> {
         HLABuilder {
             buf: Vec::new(),
             variables: HashMap::new(),
-            // Note, I think there is a corner case with one register
+            temps: HashMap::new(),
             free_registers: vec![Register::EAX, Register::EBX, Register::ECX],
         }
     }
@@ -95,128 +96,132 @@ impl<'a> HLABuilder<'a> {
         }
 
         for instruction in &tac.instructions {
-            println!("{}", instruction);
             match instruction {
                 Instruction::Jump(l) => self.buf.push(HLAInstruction::Jump(*l)),
                 Instruction::Label(l) => self.buf.push(HLAInstruction::Label(*l)),
-                Instruction::Set(addr, mem, _) => {
-                    // Get a valid register (Note, we need to protect mem if temp)
-                    let reg = self.first_available_register();
-                    match mem {
-                        // If we are setting from somewhere
-                        MemoryLocation::Address(input) => {
-                            let loc = self.variables.get(input).unwrap();
-                            self.buf.push(HLAInstruction::MovFromMem(*loc, reg));
+                Instruction::Set(addr, mem, _) => match mem {
+                    MemoryLocation::Address(a) => match a {
+                        Address::Orig(orig) => {
+                            self.copy_to_new_dest(*orig, *addr);
                         }
-                        // If we are just loading a constant
-                        MemoryLocation::Const(c) => match c {
-                            Const::Int(i) => self.buf.push(HLAInstruction::SetInt(reg, *i)),
-                            Const::Str(s) => self.buf.push(HLAInstruction::SetStr(reg, *s)),
-                        },
-                    }
-
-                    // Set that this variable will go to this register
-                    self.variables.insert(*addr, ValueLocation::Register(reg));
-                }
+                        Address::Temp(t) => self.rename(*t, *addr),
+                    },
+                    MemoryLocation::Const(c) => self.set_const(*addr, *c),
+                },
                 Instruction::ConditionalJump(mem, _, label, b) => {
                     match mem {
-                        // If we are doing it with a const, just optimize it
+                        // Optimize constants
                         MemoryLocation::Const(c) => match c {
                             Const::Int(i) => {
-                                if *i == 0 && *b || *i != 0 && !b {
-                                    self.buf.push(HLAInstruction::Jump(*label))
+                                if *b && *i != 0 || !b && *i == 0 {
+                                    self.buf.push(HLAInstruction::Jump(*label));
                                 }
                             }
-                            Const::Str(_) => panic!("Cannot cmp str"),
+                            Const::Str(_) => panic!("Invalid TAC"),
                         },
-                        // Else load from mem and then set comparision
                         MemoryLocation::Address(addr) => {
-                            let reg = self.load_to_register(*addr);
+                            let reg = self.load_into_register(*addr);
                             self.buf.push(HLAInstruction::SetComp(reg));
-                            self.buf.push(HLAInstruction::CondJump(*label, *b))
+                            self.buf.push(HLAInstruction::CondJump(*label, *b));
                         }
                     }
                 }
-                Instruction::Not(out, mem, _) => {
-                    let reg = match mem {
-                        MemoryLocation::Const(c) => match c {
-                            Const::Int(i) => {
-                                let free = self.first_available_register();
-                                self.buf.push(HLAInstruction::SetInt(free, *i));
-                                free
-                            }
-                            Const::Str(_) => panic!("Cannot negate str"),
-                        },
-                        MemoryLocation::Address(addr) => self.load_to_register(*addr),
-                    };
-
-                    let loc = ValueLocation::Register(reg);
-                    self.buf.push(HLAInstruction::Negate(loc));
-                    self.variables.insert(*out, loc);
-                }
+                Instruction::Not(out, mem, _) => {}
                 Instruction::Simple(instr) => {}
                 _ => panic!("Not implemented yet"),
             };
         }
     }
 
-    fn load_to_register(&mut self, addr: Address) -> Register {
-        // Find where the thing is stored
-        let curr_loc = *self.variables.get(&addr).unwrap();
-        match curr_loc {
-            // If it is already in a reg
-            ValueLocation::Register(r) => r,
-            // Else load to the first available one
-            ValueLocation::Stack(_) => {
-                let next = self.first_available_register();
-                self.buf.push(HLAInstruction::MovFromMem(curr_loc, next));
-                self.variables.insert(addr, ValueLocation::Register(next));
-                next
+    // Save an identifier
+    fn write_to_mem(&mut self, id: IdentId) {
+        let loc = *self.variables.get(&id).unwrap();
+        match loc {
+            ValueLocation::Stack(_) => {}
+            ValueLocation::Register(r) => {
+                self.free_registers.push(r);
+                let new_loc = ValueLocation::Stack(id);
+                self.variables.insert(id, new_loc);
+                self.buf.push(HLAInstruction::MovToMem(r, new_loc));
             }
         }
     }
 
-    fn first_available_register(&mut self) -> Register {
-        // If we have something, give it
+    // Take ownership of a temporary to put into a identifier
+    fn rename(&mut self, temp: usize, res: Address) {
+        let temp_reg = self.get_temp_register(temp);
+
+        match res {
+            Address::Orig(id) => {
+                self.variables.insert(id, ValueLocation::Register(temp_reg));
+            }
+            Address::Temp(t) => {
+                self.temps.insert(t, temp_reg);
+            }
+        }
+    }
+
+    fn copy_to_new_dest(&mut self, id: IdentId, dest: Address) -> Register {
+        let dest = self.init_address(dest);
+        let old_lco = self.variables.get(&id).unwrap();
+        self.buf.push(HLAInstruction::MovFromMem(*old_lco, dest));
+        dest
+    }
+
+    // Reading destructs the register
+    fn get_temp_register(&mut self, temp: usize) -> Register {
+        let register = *self.temps.get(&temp).unwrap();
+        self.temps.remove(&temp);
+        register
+    }
+
+    // Get a register initted to point to the address
+    fn init_address(&mut self, addr: Address) -> Register {
+        let r = self.next_available_register();
+        match addr {
+            Address::Orig(id) => {
+                self.variables.insert(id, ValueLocation::Register(r));
+            }
+            Address::Temp(t) => {
+                self.temps.insert(t, r);
+            }
+        };
+
+        r
+    }
+
+    fn set_const(&mut self, addr: Address, c: Const) {
+        let reg = self.init_address(addr);
+        self.buf.push(match c {
+            Const::Int(i) => HLAInstruction::SetInt(reg, i),
+            Const::Str(i) => HLAInstruction::SetStr(reg, i),
+        })
+    }
+
+    fn load_into_register(&mut self, addr: Address) -> Register {
+        match addr {
+            Address::Temp(i) => self.get_temp_register(i),
+            Address::Orig(i) => self.copy_to_new_dest(i, addr),
+        }
+    }
+
+    fn next_available_register(&mut self) -> Register {
         if !self.free_registers.is_empty() {
             return self.free_registers.pop().unwrap();
         }
 
-        // If we are here we need to free up some space
-        let mut vars = self.vars_in_register();
-        use std::cmp::Ordering;
-        vars.sort_by(|(f, _), (s, _)| match (f, s) {
-            (Address::Orig(_), Address::Temp(_)) => Ordering::Greater,
-            (Address::Temp(_), Address::Orig(_)) => Ordering::Less,
-            (Address::Temp(f), Address::Temp(s)) => f.cmp(&s),
-            (Address::Orig(f), Address::Orig(s)) => f.0.cmp(&s.0),
-        });
-
-        let one_to_evict = vars.get(0).unwrap();
-
-        match one_to_evict.0 {
-            // We can always safely remove temp variables
-            Address::Temp(_) => {
-                self.variables.remove(&one_to_evict.0);
-            }
-            Address::Orig(ident) => {
-                let loc = ValueLocation::Stack(ident);
-                // Store to mem
-                self.buf.push(HLAInstruction::MovToMem(one_to_evict.1, loc));
-                self.variables.insert(one_to_evict.0, loc);
-            }
-        }
-
-        one_to_evict.1
-    }
-
-    fn vars_in_register(&self) -> Vec<(Address, Register)> {
-        self.variables
+        let first_glob_in_reg = self
+            .variables
             .iter()
-            .flat_map(|(a, l)| match l {
-                ValueLocation::Register(r) => Some((*a, *r)),
+            .flat_map(|(i, loc)| match loc {
+                ValueLocation::Register(r) => Some((*i, *r)),
                 _ => None,
             })
-            .collect()
+            .next()
+            .expect("Could not solve allocation problem");
+
+        self.write_to_mem(first_glob_in_reg.0);
+
+        first_glob_in_reg.1
     }
 }

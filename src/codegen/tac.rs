@@ -224,11 +224,11 @@ impl fmt::Display for Instruction {
 /// An executable intstruction in TAC
 #[derive(Debug, Clone)]
 pub struct SimpleInstruction {
-    out: Address,
-    left: MemoryLocation,
-    right: MemoryLocation,
-    op: SimpleOp,
-    ty: VettedTy,
+    pub(super) out: Address,
+    pub(super) left: MemoryLocation,
+    pub(super) right: MemoryLocation,
+    pub(super) op: SimpleOp,
+    pub(super) ty: VettedTy,
 }
 
 impl fmt::Display for SimpleInstruction {
