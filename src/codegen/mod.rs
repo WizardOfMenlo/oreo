@@ -46,6 +46,7 @@ pub enum HLAInstruction<'a> {
     Negate(ValueLocation),
     OutputStr(ValueLocation),
     OutputInt(ValueLocation),
+    GetStr(ValueLocation),
     SetComp(Register),
     Label(Label),
     Jump(Label),
@@ -58,7 +59,6 @@ pub struct HLABuilder<'a> {
     variables: HashMap<IdentId, ValueLocation>,
     temps: HashMap<usize, Register>,
     free_registers: Vec<Register>,
-    const_reg: Vec<Register>,
 }
 
 impl<'a> HLABuilder<'a> {
@@ -68,7 +68,6 @@ impl<'a> HLABuilder<'a> {
             variables: HashMap::new(),
             temps: HashMap::new(),
             free_registers: vec![Register::EAX, Register::EBX, Register::ECX],
-            const_reg: Vec::new(),
         }
     }
 
@@ -128,21 +127,32 @@ impl<'a> HLABuilder<'a> {
                         .push(HLAInstruction::Negate(ValueLocation::Register(out)));
                 }
                 Instruction::Simple(instr) => {
-                    let left = self.next_available_register();
-                    let right = self.next_available_register();
-
-                    self.load_mem_to_register(instr.left, left);
-                    self.load_mem_to_register(instr.right, right);
+                    let right =
+                        self.load_memory_location(instr.out, MemoryLocation::Address(instr.right));
+                    let left = self.load_into_register(instr.left);
 
                     self.buf.push(HLAInstruction::Simple(SimpleHLAInstr {
                         right,
                         left: ValueLocation::Register(left),
                         op: instr.op,
                     }));
-
-                    self.mark_as_address(instr.out, right);
-
-                    self.free_consts();
+                }
+                Instruction::CallBuiltin(built, addr, ty) => {
+                    let location = self.get_location(*addr);
+                    match ty {
+                        VettedTy::Int => match built {
+                            Builtin::Get => panic!("Cant get int"),
+                            Builtin::Print | Builtin::Println => {
+                                self.buf.push(HLAInstruction::OutputInt(location))
+                            }
+                        },
+                        VettedTy::Str => match built {
+                            Builtin::Get => self.buf.push(HLAInstruction::GetStr(location)),
+                            Builtin::Print | Builtin::Println => {
+                                self.buf.push(HLAInstruction::OutputStr(location))
+                            }
+                        },
+                    }
                 }
                 _ => panic!("Not implemented yet"),
             };
@@ -218,6 +228,13 @@ impl<'a> HLABuilder<'a> {
         reg
     }
 
+    fn get_location(&mut self, addr: Address) -> ValueLocation {
+        match addr {
+            Address::Orig(id) => *self.variables.get(&id).unwrap(),
+            Address::Temp(i) => ValueLocation::Register(*self.temps.get(&i).unwrap()),
+        }
+    }
+
     fn load_into_register(&mut self, addr: Address) -> Register {
         match addr {
             Address::Temp(i) => self.get_temp_register(i),
@@ -235,47 +252,37 @@ impl<'a> HLABuilder<'a> {
         }
     }
 
-    fn load_mem_to_register(&mut self, mem: MemoryLocation, r: Register) {
-        match mem {
-            MemoryLocation::Const(c) => {
-                match c {
-                    Const::Int(i) => self.buf.push(HLAInstruction::SetInt(r, i)),
-                    Const::Str(i) => self.buf.push(HLAInstruction::SetStr(r, i)),
-                };
-                self.const_reg.push(r);
-            }
-            MemoryLocation::Address(a) => match a {
-                Address::Orig(id) => {
-                    let loc = self.variables.get(&id).unwrap();
-                    self.buf.push(HLAInstruction::MovFromMem(*loc, r));
-                }
-                Address::Temp(id) => {
-                    let loc = ValueLocation::Register(self.get_temp_register(id));
-                    self.buf.push(HLAInstruction::MovFromMem(loc, r));
-                }
-            },
-        }
-    }
-
-    fn mark_as_address(&mut self, addr: Address, r: Register) {
-        match addr {
-            Address::Orig(id) => {
-                self.variables.insert(id, ValueLocation::Register(r));
-            }
-            Address::Temp(id) => {
-                self.temps.insert(id, r);
-            }
+    fn free_return_register(&mut self) {
+        if self.free_registers.contains(&Register::EAX) {
+            return;
         }
 
-        if self.const_reg.contains(&r) {
-            self.const_reg
-                .remove(self.const_reg.iter().position(|e| *e == r).unwrap());
+        let temp = self
+            .temps
+            .iter()
+            .find(|(_, &r)| r == Register::EAX)
+            .map(|(t, _)| *t);
+        if let Some(temp) = temp {
+            let new_reg = self.next_available_register();
+            self.buf.push(HLAInstruction::MovFromMem(
+                ValueLocation::Register(Register::EAX),
+                new_reg,
+            ));
+            self.temps.insert(temp, new_reg);
         }
-    }
 
-    fn free_consts(&mut self) {
-        self.free_registers.extend(self.const_reg.iter().cloned());
-        self.const_reg = Vec::new();
+        let orig = self
+            .variables
+            .iter()
+            .find(|(_, loc)| match loc {
+                ValueLocation::Register(r) if *r == Register::EAX => true,
+                _ => false,
+            })
+            .map(|(i, _)| *i);
+
+        if let Some(id) = orig {
+            self.write_to_mem(id);
+        }
     }
 
     fn next_available_register(&mut self) -> Register {

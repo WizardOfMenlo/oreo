@@ -9,8 +9,7 @@ use oreo::parser::parse;
 fn main() {
     let input = r#"program x
         begin
-            var x := 1;
-            var y := x + 1;
+            print 1;
         end"#;
 
     // Note, no error handling here

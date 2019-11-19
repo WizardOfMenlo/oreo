@@ -225,8 +225,8 @@ impl fmt::Display for Instruction {
 #[derive(Debug, Clone)]
 pub struct SimpleInstruction {
     pub(super) out: Address,
-    pub(super) left: MemoryLocation,
-    pub(super) right: MemoryLocation,
+    pub(super) left: Address,
+    pub(super) right: Address,
     pub(super) op: SimpleOp,
     pub(super) ty: VettedTy,
 }
@@ -544,8 +544,8 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
         self.instructions
             .push(Instruction::Simple(SimpleInstruction {
                 out,
-                left: MemoryLocation::Address(lhs),
-                right: MemoryLocation::Address(rhs),
+                left: lhs,
+                right: rhs,
                 op: SimpleOp::Boolean(op),
                 ty: VettedTy::Int,
             }));
@@ -580,8 +580,8 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
         self.instructions
             .push(Instruction::Simple(SimpleInstruction {
                 out,
-                left: MemoryLocation::Address(lhs),
-                right: MemoryLocation::Address(rhs),
+                left: lhs,
+                right: rhs,
                 op: SimpleOp::Relational(op),
                 // Note that the two operands are ints
                 ty: VettedTy::Int,
@@ -617,8 +617,8 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
         self.instructions
             .push(Instruction::Simple(SimpleInstruction {
                 out,
-                left: MemoryLocation::Address(lhs),
-                right: MemoryLocation::Address(rhs),
+                left: lhs,
+                right: rhs,
                 op: SimpleOp::Additive(op),
                 ty: VettedTy::Int,
             }));
@@ -653,8 +653,8 @@ impl<'a, 'b> TACBuilder<'a, 'b> {
         self.instructions
             .push(Instruction::Simple(SimpleInstruction {
                 out,
-                left: MemoryLocation::Address(lhs),
-                right: MemoryLocation::Address(rhs),
+                left: lhs,
+                right: rhs,
                 op: SimpleOp::Multiplicative(op),
                 ty: VettedTy::Int,
             }));
