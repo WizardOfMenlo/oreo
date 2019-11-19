@@ -58,6 +58,7 @@ pub struct HLABuilder<'a> {
     variables: HashMap<IdentId, ValueLocation>,
     temps: HashMap<usize, Register>,
     free_registers: Vec<Register>,
+    const_reg: Vec<Register>,
 }
 
 impl<'a> HLABuilder<'a> {
@@ -67,6 +68,7 @@ impl<'a> HLABuilder<'a> {
             variables: HashMap::new(),
             temps: HashMap::new(),
             free_registers: vec![Register::EAX, Register::EBX, Register::ECX],
+            const_reg: Vec::new(),
         }
     }
 
@@ -122,9 +124,26 @@ impl<'a> HLABuilder<'a> {
                 }
                 Instruction::Not(out, mem, _) => {
                     let out = self.load_memory_location(*out, *mem);
-                    self.buf.push(HLAInstruction::Negate(ValueLocation::Register(out)));
+                    self.buf
+                        .push(HLAInstruction::Negate(ValueLocation::Register(out)));
                 }
-                Instruction::Simple(instr) => {}
+                Instruction::Simple(instr) => {
+                    let left = self.next_available_register();
+                    let right = self.next_available_register();
+
+                    self.load_mem_to_register(instr.left, left);
+                    self.load_mem_to_register(instr.right, right);
+
+                    self.buf.push(HLAInstruction::Simple(SimpleHLAInstr {
+                        right,
+                        left: ValueLocation::Register(left),
+                        op: instr.op,
+                    }));
+
+                    self.mark_as_address(instr.out, right);
+
+                    self.free_consts();
+                }
                 _ => panic!("Not implemented yet"),
             };
         }
@@ -209,13 +228,54 @@ impl<'a> HLABuilder<'a> {
     fn load_memory_location(&mut self, addr: Address, mem: MemoryLocation) -> Register {
         match mem {
             MemoryLocation::Address(a) => match a {
-                Address::Orig(orig) => {
-                    self.copy_to_new_dest(orig, addr)
-                }
+                Address::Orig(orig) => self.copy_to_new_dest(orig, addr),
                 Address::Temp(t) => self.rename(t, addr),
             },
             MemoryLocation::Const(c) => self.set_const(addr, c),
         }
+    }
+
+    fn load_mem_to_register(&mut self, mem: MemoryLocation, r: Register) {
+        match mem {
+            MemoryLocation::Const(c) => {
+                match c {
+                    Const::Int(i) => self.buf.push(HLAInstruction::SetInt(r, i)),
+                    Const::Str(i) => self.buf.push(HLAInstruction::SetStr(r, i)),
+                };
+                self.const_reg.push(r);
+            }
+            MemoryLocation::Address(a) => match a {
+                Address::Orig(id) => {
+                    let loc = self.variables.get(&id).unwrap();
+                    self.buf.push(HLAInstruction::MovFromMem(*loc, r));
+                }
+                Address::Temp(id) => {
+                    let loc = ValueLocation::Register(self.get_temp_register(id));
+                    self.buf.push(HLAInstruction::MovFromMem(loc, r));
+                }
+            },
+        }
+    }
+
+    fn mark_as_address(&mut self, addr: Address, r: Register) {
+        match addr {
+            Address::Orig(id) => {
+                self.variables.insert(id, ValueLocation::Register(r));
+            }
+            Address::Temp(id) => {
+                self.temps.insert(id, r);
+            }
+        }
+
+        if self.const_reg.contains(&r) {
+            self.const_reg
+                .remove(self.const_reg.iter().position(|e| *e == r).unwrap());
+        }
+    }
+
+    fn free_consts(&mut self) {
+        self.free_registers.extend(self.const_reg.iter().cloned());
+        self.const_reg = Vec::new();
     }
 
     fn next_available_register(&mut self) -> Register {
