@@ -51,6 +51,7 @@ pub enum HLAInstruction<'a> {
     Label(Label),
     Jump(Label),
     CondJump(Label, bool),
+    Call(IdentId),
 }
 
 #[derive(Debug)]
@@ -154,6 +155,11 @@ impl<'a> HLABuilder<'a> {
                         },
                     }
                 }
+                Instruction::Call(id, ret, _) => {
+                    self.free_register(Register::EAX);
+                    self.buf.push(HLAInstruction::Call(*id));
+                    self.point_addr_to_register(*ret, Register::EAX);
+                }
                 _ => panic!("Not implemented yet"),
             };
         }
@@ -252,20 +258,31 @@ impl<'a> HLABuilder<'a> {
         }
     }
 
-    fn free_return_register(&mut self) {
-        if self.free_registers.contains(&Register::EAX) {
+    fn point_addr_to_register(&mut self, addr: Address, r: Register) {
+        match addr {
+            Address::Orig(orig) => {
+                self.variables.insert(orig, ValueLocation::Register(r));
+            }
+            Address::Temp(i) => {
+                self.temps.insert(i, r);
+            }
+        };
+    }
+
+    fn free_register(&mut self, reg: Register) {
+        if self.free_registers.contains(&reg) {
             return;
         }
 
         let temp = self
             .temps
             .iter()
-            .find(|(_, &r)| r == Register::EAX)
+            .find(|(_, &r)| r == reg)
             .map(|(t, _)| *t);
         if let Some(temp) = temp {
             let new_reg = self.next_available_register();
             self.buf.push(HLAInstruction::MovFromMem(
-                ValueLocation::Register(Register::EAX),
+                ValueLocation::Register(reg),
                 new_reg,
             ));
             self.temps.insert(temp, new_reg);
@@ -275,7 +292,7 @@ impl<'a> HLABuilder<'a> {
             .variables
             .iter()
             .find(|(_, loc)| match loc {
-                ValueLocation::Register(r) if *r == Register::EAX => true,
+                ValueLocation::Register(r) if *r == reg => true,
                 _ => false,
             })
             .map(|(i, _)| *i);

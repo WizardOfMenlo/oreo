@@ -9,7 +9,6 @@ use oreo::parser::parse;
 fn main() {
     let input = r#"program x
         begin
-            print 1;
         end"#;
 
     // Note, no error handling here
