@@ -4,6 +4,8 @@ pub mod tac;
 use crate::ast::IdentId;
 use crate::ast::NodeId;
 use crate::ast::AST;
+use crate::common;
+use std::fmt;
 use tac::*;
 
 use std::collections::HashMap;
@@ -15,10 +17,29 @@ pub enum Register {
     EBX,
 }
 
+impl fmt::Display for Register {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Register::EAX => write!(f, "eax"),
+            Register::EBX => write!(f, "ebx"),
+            Register::ECX => write!(f, "ecx"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum ValueLocation {
     Register(Register),
     Stack(IdentId),
+}
+
+impl fmt::Display for ValueLocation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ValueLocation::Register(r) => write!(f, "{}", r),
+            ValueLocation::Stack(id) => write!(f, "o{}", id.0),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -33,11 +54,11 @@ pub enum HLAInstruction<'a> {
     Program(&'a str),
     BeginProgram(&'a str),
     EndProgram(&'a str),
-    Procedure(usize),
-    BeginProcedure(usize, Vec<(IdentId, VettedTy)>),
+    Procedure(usize, Vec<(IdentId, VettedTy)>),
+    BeginProcedure(usize),
     EndProcedure(usize),
-    DeclInt(ValueLocation),
-    DeclStr(ValueLocation),
+    DeclInt(IdentId),
+    DeclStr(IdentId),
     MovFromMem(ValueLocation, Register),
     MovToMem(Register, ValueLocation),
     SetInt(Register, isize),
@@ -52,6 +73,111 @@ pub enum HLAInstruction<'a> {
     Jump(Label),
     CondJump(Label, bool),
     Call(IdentId, Vec<ValueLocation>),
+    Return(Register),
+    Static,
+}
+
+fn write_decl_args(args: &[(IdentId, VettedTy)]) -> String {
+    let mut buf = String::new();
+    for (arg, ty) in args {
+        buf.push_str(&format!(
+            "o{} : {},",
+            arg.0,
+            match ty {
+                VettedTy::Int => "i32",
+                VettedTy::Str => "str",
+            }
+        ));
+    }
+
+    buf
+}
+
+fn write_call_args(args: &[ValueLocation]) -> String {
+    let mut buf = String::new();
+    for loc in args {
+        buf.push_str(&format!("{},", loc));
+    }
+
+    buf
+}
+
+impl<'a> fmt::Display for HLAInstruction<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            HLAInstruction::Program(p) => write!(f, "program {};", p),
+            HLAInstruction::BeginProgram(p) => write!(f, "begin {};", p),
+            HLAInstruction::EndProgram(p) => write!(f, "end {};", p),
+            HLAInstruction::Procedure(id, args) => write!(
+                f,
+                "procedure f{} ({}); @return(eax)",
+                id,
+                write_decl_args(args)
+            ),
+            HLAInstruction::BeginProcedure(id) => write!(f, "begin f{};", id),
+            HLAInstruction::EndProcedure(id) => write!(f, "end f{};", id),
+            HLAInstruction::Static => write!(f, "static:"),
+            HLAInstruction::DeclInt(id) => write!(f, "o{} : i32;", id.0),
+            HLAInstruction::DeclStr(id) => write!(f, "o{} : str;", id.0),
+            HLAInstruction::MovFromMem(mem, reg) => write!(f, "mov({}, {});", mem, reg),
+            HLAInstruction::MovToMem(reg, mem) => write!(f, "mov({}, {});", reg, mem),
+            HLAInstruction::SetInt(reg, i) => write!(f, "mov({}, {});", i, reg),
+            HLAInstruction::SetStr(reg, i) => write!(f, "mov(s{}, {});", i.0, reg),
+            HLAInstruction::Negate(loc) => write!(f, "not({});", loc),
+            HLAInstruction::OutputStr(loc) => write!(f, "stdout.puts({});", loc),
+            HLAInstruction::OutputInt(loc) => write!(f, "stdout.puti({});", loc),
+            HLAInstruction::GetStr(loc) => write!(f, "stdin.a_gets({});", loc),
+            HLAInstruction::SetComp(r) => write!(f, "set({});", r),
+            HLAInstruction::Label(l) => write!(f, "label {};", l),
+            HLAInstruction::Jump(l) => write!(f, "jmp {};", l),
+            HLAInstruction::CondJump(l, b) => {
+                if *b {
+                    write!(f, "je {};", l)
+                } else {
+                    write!(f, "jne {};", l)
+                }
+            }
+            HLAInstruction::Call(id, args) => write!(f, "f{}({});", id.0, write_call_args(args)),
+
+            HLAInstruction::Return(r) => write!(f, "@return ({});", r),
+            HLAInstruction::Simple(s) => {
+                let op = s.op;
+                match op {
+                    SimpleOp::Additive(add) => match add {
+                        common::AdditiveOp::Plus => write!(f, "add({}, {});", s.left, s.right),
+                        common::AdditiveOp::Minus => write!(f, "sub({}, {});", s.left, s.right),
+                    },
+                    SimpleOp::Multiplicative(mult) => match mult {
+                        common::MultiplicativeOp::Times => {
+                            write!(f, "mult({}, {});", s.left, s.right)
+                        }
+                        common::MultiplicativeOp::Divide => {
+                            write!(f, "div({}, {});", s.left, s.right)
+                        }
+                    },
+                    SimpleOp::Boolean(boo) => match boo {
+                        common::BooleanOp::And => write!(f, "and({}, {});", s.left, s.right),
+                        common::BooleanOp::Or => write!(f, "or({}, {});", s.left, s.right),
+                    },
+                    SimpleOp::Relational(boo) => match boo {
+                        common::RelationalOp::Equals => write!(f, "eq({}, {});", s.left, s.right),
+                        common::RelationalOp::LesserOrEquals => {
+                            write!(f, "leq({}, {});", s.left, s.right)
+                        }
+                        common::RelationalOp::LesserThan => {
+                            write!(f, "lt({}, {});", s.left, s.right)
+                        }
+                        common::RelationalOp::GreaterOrEquals => {
+                            write!(f, "geq({}, {});", s.left, s.right)
+                        }
+                        common::RelationalOp::GreaterThan => {
+                            write!(f, "gt({}, {});", s.left, s.right)
+                        }
+                    },
+                }
+            }
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -63,25 +189,33 @@ pub struct HLABuilder<'a> {
 }
 
 impl<'a> HLABuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(registers: Vec<Register>) -> Self {
         HLABuilder {
             buf: Vec::new(),
             variables: HashMap::new(),
             temps: HashMap::new(),
-            free_registers: vec![Register::EAX, Register::EBX, Register::ECX],
+            free_registers: registers,
         }
+    }
+
+    /// Get the default regs
+    pub fn default_regs() -> Vec<Register> {
+        vec![Register::EAX, Register::EBX, Register::ECX]
     }
 
     pub fn build(mut self, global: &'a GlobalTAC) -> Vec<HLAInstruction<'a>> {
         // TODO: String definition
         self.buf.push(HLAInstruction::Program(&global.program_name));
         for (f_id, (f_code, args)) in &global.functions {
-            self.buf.push(HLAInstruction::Procedure(f_id.0));
             self.buf
-                .push(HLAInstruction::BeginProcedure(f_id.0, args.clone()));
+                .push(HLAInstruction::Procedure(f_id.0, args.clone()));
+            self.add_variables(&f_code.stack);
+            self.buf.push(HLAInstruction::BeginProcedure(f_id.0));
             self.tac(f_code);
             self.buf.push(HLAInstruction::EndProcedure(f_id.0));
         }
+
+        self.add_variables(&global.global.stack);
         self.buf
             .push(HLAInstruction::BeginProgram(&global.program_name));
         self.tac(&global.global);
@@ -90,14 +224,18 @@ impl<'a> HLABuilder<'a> {
         self.buf
     }
 
-    fn tac(&mut self, tac: &TAC) {
-        for (var, ty) in &tac.stack {
+    // Add all the declaration variables
+    fn add_variables(&mut self, vars: &HashMap<IdentId, VettedTy>) {
+        self.buf.push(HLAInstruction::Static);
+        for (var, ty) in vars {
             self.buf.push(match ty {
-                VettedTy::Int => HLAInstruction::DeclInt(ValueLocation::Stack(*var)),
-                VettedTy::Str => HLAInstruction::DeclStr(ValueLocation::Stack(*var)),
+                VettedTy::Int => HLAInstruction::DeclInt(*var),
+                VettedTy::Str => HLAInstruction::DeclStr(*var),
             })
         }
+    }
 
+    fn tac(&mut self, tac: &TAC) {
         for instruction in &tac.instructions {
             match instruction {
                 Instruction::Jump(l) => self.buf.push(HLAInstruction::Jump(*l)),
@@ -162,7 +300,15 @@ impl<'a> HLABuilder<'a> {
                     self.buf.push(HLAInstruction::Call(*id, args));
                     self.point_addr_to_register(*ret, Register::EAX);
                 }
-                _ => panic!("Not implemented yet"),
+                Instruction::CallNoRet(id, args) => {
+                    let args = args.iter().map(|i| self.get_location(*i)).collect();
+                    self.buf.push(HLAInstruction::Call(*id, args));
+                }
+                Instruction::Return(mem, _) => {
+                    self.free_register(Register::EAX);
+                    self.set_mem_to_reg(*mem, Register::EAX);
+                    self.buf.push(HLAInstruction::Return(Register::EAX));
+                }
             };
         }
     }
@@ -257,6 +403,28 @@ impl<'a> HLABuilder<'a> {
                 Address::Temp(t) => self.rename(t, addr),
             },
             MemoryLocation::Const(c) => self.set_const(addr, c),
+        }
+    }
+
+    fn set_mem_to_reg(&mut self, mem: MemoryLocation, reg: Register) {
+        match mem {
+            MemoryLocation::Address(a) => match a {
+                Address::Orig(orig) => {
+                    let old_lco = self.variables.get(&orig).unwrap();
+                    self.buf.push(HLAInstruction::MovFromMem(*old_lco, reg));
+                }
+                Address::Temp(t) => {
+                    let old_reg = self.get_temp_register(t);
+                    self.buf.push(HLAInstruction::MovFromMem(
+                        ValueLocation::Register(old_reg),
+                        reg,
+                    ));
+                }
+            },
+            MemoryLocation::Const(c) => self.buf.push(match c {
+                Const::Int(i) => HLAInstruction::SetInt(reg, i),
+                Const::Str(i) => HLAInstruction::SetStr(reg, i),
+            }),
         }
     }
 
