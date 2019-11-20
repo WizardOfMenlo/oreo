@@ -124,7 +124,7 @@ impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
         errs: &mut Vec<ResolutionError<'a>>,
     ) {
         use super::untyped::NodeType;
-        /// Flatten the children, as we never have scopes in expressions
+        // Flatten the children, as we never have scopes in expressions
         for children in self.db.all_children(expr.get_id()) {
             if let NodeType::Identifier = self.db.get_node(children).expect("Invalid node id").ty()
             {

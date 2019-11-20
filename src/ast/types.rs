@@ -138,7 +138,7 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
             .cloned()
             .collect();
 
-        /// If we have not resolved stuff at this point, it is a mistake
+        // If we have not resolved stuff at this point, it is a mistake
         for u in unspecified {
             self.errors.push(TypeError::NotResolved(u));
         }
@@ -161,7 +161,7 @@ impl<'a, 'b, 'c, 'd> TypingsBuilder<'a, 'b, 'c, 'd> {
             UnitType::Str(_) => Type::Str,
             UnitType::BracketedExpr(e) => self.typed(e),
             UnitType::FunctionCall(f) => {
-                /// Resolve if not done already
+                // Resolve if not done already
                 self.resolve_func_call(f);
                 let f_id = self.resolver.get_id(f.id(self.db));
                 let f_ty = self.funcs.get(&f_id);
