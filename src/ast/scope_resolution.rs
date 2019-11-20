@@ -84,14 +84,19 @@ impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
         errs: &mut Vec<ResolutionError<'a>>,
     ) {
         use super::symbol::ScopeType;
+        // Get all the enclosing scopes
         let parents = self.symbols.parent_scopes(self.current_scope);
         let id_str = id.id(self.db, self.input);
 
+        // If we have found something we return
         let mut found = false;
+
+        // If we encounter a function scope, we need to only consider other funcs
         let mut in_function_scope = false;
         for scope in parents {
             let scope_ty = self.symbols.scope_ty(scope);
 
+            // Get stuff in scope
             if let Some(id_id) = self.symbols.get_id_scope(id_str, scope, in_function_scope) {
                 found = true;
                 map.insert(id, id_id);
@@ -119,6 +124,7 @@ impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
         errs: &mut Vec<ResolutionError<'a>>,
     ) {
         use super::untyped::NodeType;
+        /// Flatten the children, as we never have scopes in expressions
         for children in self.db.all_children(expr.get_id()) {
             if let NodeType::Identifier = self.db.get_node(children).expect("Invalid node id").ty()
             {
@@ -135,6 +141,8 @@ impl<'a, 'b, 'c> VariableResolverBuilder<'a, 'b, 'c> {
     ) {
         self.enter_scope();
 
+        // Recursively walk the tree, looking for expressions and keeping track of
+        // scope
         for statement in compound.statements(self.db) {
             match statement.downcast(self.db) {
                 StatementType::Decl(d) => {

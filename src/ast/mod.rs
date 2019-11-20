@@ -31,14 +31,17 @@ impl<'a> AST<'a> {
         let db = node_db::NodeDb::new(node);
         let program = syntax::Program::new(db.start_id());
         let symbols = symbol::SymbolTableBuilder::new(input, &db).build(program);
+        // Note that errors are returned here (not particularly well formatted)
         let variables = scope_resolution::VariableResolverBuilder::new(input, &symbols, &db)
             .build(program)
             .expect("Resolution error");
 
+        // Note that errors are returned here (not particularly well formatted)
         let types = types::TypingsBuilder::new(&variables, &symbols, &db)
             .build(program)
             .expect("Typings errors");
 
+        // Get all the strings in the source code
         let mut strings = HashMap::new();
         use untyped::NodeType;
         for id in db.all_children(db.start_id()) {
