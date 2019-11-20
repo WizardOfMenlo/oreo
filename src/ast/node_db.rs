@@ -30,6 +30,7 @@ pub struct NodeDb<'a> {
     id_nodes: HashMap<NodeId, IdNode>,
     nodes: HashMap<NodeId, NonNull<Node<'a>>>,
     start_node_id: NodeId,
+    // We use this to mark the struct as UnPin
     _phantom: PhantomPinned,
 }
 

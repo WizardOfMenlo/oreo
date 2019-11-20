@@ -3,18 +3,24 @@
 pub mod tac;
 use crate::ast::IdentId;
 use crate::ast::NodeId;
-use crate::ast::AST;
 use crate::common;
 use std::fmt;
 use tac::*;
 
 use std::collections::HashMap;
 
+/// All the allowed registers
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[allow(missing_docs)]
 pub enum Register {
     EAX,
     ECX,
     EBX,
+    EDX,
+    ESI,
+    EDI,
+    EBP,
+    ESP,
 }
 
 impl fmt::Display for Register {
@@ -23,13 +29,22 @@ impl fmt::Display for Register {
             Register::EAX => write!(f, "eax"),
             Register::EBX => write!(f, "ebx"),
             Register::ECX => write!(f, "ecx"),
+            Register::EDX => write!(f, "edx"),
+            Register::ESI => write!(f, "esi"),
+            Register::EDI => write!(f, "edi"),
+            Register::EBP => write!(f, "ebp"),
+            Register::ESP => write!(f, "esp"),
         }
     }
 }
 
+/// Where in memory we are
 #[derive(Debug, Clone, Copy)]
 pub enum ValueLocation {
+    /// A register
     Register(Register),
+
+    /// Somewhere on the stack
     Stack(IdentId),
 }
 
@@ -42,6 +57,8 @@ impl fmt::Display for ValueLocation {
     }
 }
 
+/// An instruction for an operation
+/// typically of the form add(v, eax)
 #[derive(Debug)]
 pub struct SimpleHLAInstr {
     left: ValueLocation,
@@ -49,31 +66,78 @@ pub struct SimpleHLAInstr {
     op: SimpleOp,
 }
 
+/// All the possible instructions in HLA
 #[derive(Debug)]
 pub enum HLAInstruction<'a> {
+    /// Start of a program
     Program(&'a str),
+    /// Begin program code
     BeginProgram(&'a str),
+
+    /// End program code
     EndProgram(&'a str),
+
+    /// Proc declaration, with parameter list
     Procedure(usize, Vec<(IdentId, VettedTy)>),
+
+    /// Start procedure code
     BeginProcedure(usize),
+
+    /// End procedure code
     EndProcedure(usize),
+
+    /// Decl a stack variable (int)
     DeclInt(IdentId),
+
+    /// Decl a stack variable (str)
     DeclStr(IdentId),
+
+    /// mov(x, eax)
     MovFromMem(ValueLocation, Register),
+
+    /// mov(eax, x)
     MovToMem(Register, ValueLocation),
+
+    /// mov(eax, 1)
     SetInt(Register, isize),
+
+    /// mov(eax, s1)
     SetStr(Register, NodeId),
+
+    /// A simple instruction like add
     Simple(SimpleHLAInstr),
+
+    /// not(eax)
     Negate(ValueLocation),
+
+    /// Call sysout.prints
     OutputStr(ValueLocation),
+
+    /// Call sysout.printi
     OutputInt(ValueLocation),
+
+    /// Load a string from env
     GetStr(ValueLocation),
+
+    /// Set the comparision register
     SetComp(Register),
+
+    /// A label
     Label(Label),
+
+    /// Unconditional jump
     Jump(Label),
+
+    /// Conditional jump
     CondJump(Label, bool),
+
+    /// Call with arguments
     Call(IdentId, Vec<ValueLocation>),
+
+    /// Return the value of register
     Return(Register),
+
+    /// Start static section
     Static,
 }
 
@@ -180,6 +244,7 @@ impl<'a> fmt::Display for HLAInstruction<'a> {
     }
 }
 
+/// Builds an HLA from TAC
 #[derive(Debug)]
 pub struct HLABuilder<'a> {
     buf: Vec<HLAInstruction<'a>>,
@@ -189,6 +254,7 @@ pub struct HLABuilder<'a> {
 }
 
 impl<'a> HLABuilder<'a> {
+    /// Initilize the builder
     pub fn new(registers: Vec<Register>) -> Self {
         HLABuilder {
             buf: Vec::new(),
@@ -200,9 +266,17 @@ impl<'a> HLABuilder<'a> {
 
     /// Get the default regs
     pub fn default_regs() -> Vec<Register> {
-        vec![Register::EAX, Register::EBX, Register::ECX]
+        vec![
+            Register::EAX,
+            Register::EBX,
+            Register::ECX,
+            Register::EDX,
+            Register::EDI,
+            Register::ESI,
+        ]
     }
 
+    /// Build from a tac
     pub fn build(mut self, global: &'a GlobalTAC) -> Vec<HLAInstruction<'a>> {
         // TODO: String definition
         self.buf.push(HLAInstruction::Program(&global.program_name));
